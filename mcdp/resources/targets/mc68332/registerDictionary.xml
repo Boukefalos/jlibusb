@@ -1,0 +1,402 @@
+<?xml version='1.0' encoding='utf-8'?>
+
+<!--  Register Definitions for the Motorola MC68332 Microcontroller  -->
+<!DOCTYPE registerDefinitions SYSTEM "registerDictionary.dtd">
+
+<registerDefinitions>
+	<registerGroup baseAddress="0xFFFFF000">
+		<!-- control registers -->
+		<register name="SIMCR" type="CtrlReg" offset="0x0A00"
+			size="2">
+			<description>sim module configuration register</description>
+		</register>
+		<register name="SYNCR" type="CtrlReg" offset="0x0A04"
+			size="2">
+			<description>clock synthesizer control</description>
+		</register>
+		<register name="SYPCR" type="CtrlReg" offset="0x0A20"
+			size="2">
+			<description>system protection control</description>
+		</register>
+		<register name="CSPAR0" type="CtrlReg" offset="0x0A44"
+			size="2">
+			<description>
+				chip select pin assignment register 0
+			</description>
+		</register>
+		<register name="CSPAR1" type="CtrlReg" offset="0x0A46"
+			size="2">
+			<description>
+				chip select pin assignment register 1
+			</description>
+		</register>
+		<register name="CSBARBT" type="CtrlReg" offset="0x0A48"
+			size="2">
+			<description>CSBOOT base address register</description>
+		</register>
+		<register name="CSORBT" type="CtrlReg" offset="0x0A4A"
+			size="2">
+			<description>CSBOOT option register</description>
+		</register>
+
+		<register name="CSBAR0" type="CtrlReg" offset="0x0A4C"
+			size="2">
+			<description>chip select 0 base address register</description>
+		</register>
+		<register name="CSOR0" type="CtrlReg" offset="0x0A4E"
+			size="2">
+			<description>chip select 0 option register</description>
+		</register>
+		<register name="CSBAR1" type="CtrlReg" offset="0x0A50"
+			size="2">
+			<description>chip select 1 base address register</description>
+		</register>
+		<register name="CSOR1" type="CtrlReg" offset="0x0A52"
+			size="2">
+			<description>chip select 1 option register</description>
+		</register>
+		<register name="CSBAR2" type="CtrlReg" offset="0x0A54"
+			size="2">
+			<description>chip select 2 base address register</description>
+		</register>
+		<register name="CSOR2" type="CtrlReg" offset="0x0A56"
+			size="2">
+			<description>chip select 2 option register</description>
+		</register>
+		<register name="CSBAR3" type="CtrlReg" offset="0x0A58"
+			size="2">
+			<description>chip select 3 base address register</description>
+		</register>
+		<register name="CSOR3" type="CtrlReg" offset="0x0A5A"
+			size="2">
+			<description>chip select 3 option register</description>
+		</register>
+		<register name="CSBAR4" type="CtrlReg" offset="0x0A5C"
+			size="2">
+			<description>chip select 4 base address register</description>
+		</register>
+		<register name="CSOR4" type="CtrlReg" offset="0x0A5E"
+			size="2">
+			<description>chip select 4 option register</description>
+		</register>
+		<register name="CSBAR5" type="CtrlReg" offset="0x0A60"
+			size="2">
+			<description>chip select 5 base address register</description>
+		</register>
+		<register name="CSOR5" type="CtrlReg" offset="0x0A62"
+			size="2">
+			<description>chip select 5 option register</description>
+		</register>
+		<register name="CSBAR6" type="CtrlReg" offset="0x0A64"
+			size="2">
+			<description>chip select 6 base address register</description>
+		</register>
+		<register name="CSOR6" type="CtrlReg" offset="0x0A66"
+			size="2">
+			<description>chip select 6 option register</description>
+		</register>
+		<register name="CSBAR7" type="CtrlReg" offset="0x0A68"
+			size="2">
+			<description>chip select 7 base address register</description>
+		</register>
+		<register name="CSOR7" type="CtrlReg" offset="0x0A6A"
+			size="2">
+			<description>chip select 7 option register</description>
+		</register>
+		<register name="CSBAR8" type="CtrlReg" offset="0x0A6C"
+			size="2">
+			<description>chip select 8 base address register</description>
+		</register>
+		<register name="CSOR8" type="CtrlReg" offset="0x0A6E"
+			size="2">
+			<description>chip select 8 option register</description>
+		</register>
+		<register name="CSBAR9" type="CtrlReg" offset="0x0A70"
+			size="2">
+			<description>chip select 9 base address register</description>
+		</register>
+		<register name="CSOR9" type="CtrlReg" offset="0x0A72"
+			size="2">
+			<description>chip select 9 option register</description>
+		</register>
+
+		<!-- TPU registers -->
+		<!-- adjust the setting of tpumcr to reflect modmap bit -->
+
+		<register name="TRAMMCR" type="CtrlReg" offset="0x0B00"
+			size="2">
+			<description>TPURAM module configuration register</description>
+		</register>
+		<register name="TRAMBAR" type="CtrlReg" offset="0x0B04"
+			size="2">
+			<description>TPURAM base address and status register</description>
+		</register>
+		
+		<register name="TPUMCR" type="CtrlReg" offset="0x0E00"
+			size="2">
+			<description>TPU module control register</description>
+		</register>
+		<register name="TPUCFG" type="CtrlReg" offset="0x0E02"
+			size="2">
+			<description>TPU configuration register</description>
+		</register>
+		<register name="DSCR" type="CtrlReg" offset="0x0E04"
+			size="2">
+			<description>development support control register</description>
+		</register>
+		<register name="DSSR" type="CtrlReg" offset="0x0E06"
+			size="2">
+			<description>development support status register</description>
+		</register>
+		<register name="TPUICR" type="CtrlReg" offset="0x0E08"
+			size="2">
+			<description>TPU interrupt configuration register</description>
+		</register>
+		<register name="TPUIER" type="CtrlReg" offset="0x0E0A"
+			size="2">
+			<description>TPU interrupt enable register</description>
+		</register>
+		<register name="CFSR0" type="CtrlReg" offset="0x0E0C"
+			size="2">
+			<description>channel function select register 0</description>
+		</register>
+		<register name="CFSR1" type="CtrlReg" offset="0x0E0E"
+			size="2">
+			<description>channel function select register 1</description>
+		</register>
+		<register name="CFSR2" type="CtrlReg" offset="0x0E10"
+			size="2">
+			<description>channel function select register 2</description>
+		</register>
+		<register name="CFSR3" type="CtrlReg" offset="0x0E12"
+			size="2">
+			<description>channel function select register 3</description>
+		</register>
+		<register name="HSR0" type="CtrlReg" offset="0x0E14"
+			size="2">
+			<description>host sequence register 0</description>
+		</register>
+		<register name="HSR1" type="CtrlReg" offset="0x0E16"
+			size="2">
+			<description>host sequence register 1</description>
+		</register>
+		<register name="HSRR0" type="CtrlReg" offset="0x0E18"
+			size="2">
+			<description>host service request register 0</description>
+		</register>
+		<register name="HSRR1" type="CtrlReg" offset="0x0E1A"
+			size="2">
+			<description>host service request register 1</description>
+		</register>
+		<register name="CPR0" type="CtrlReg" offset="0x0E1C"
+			size="2">
+			<description>channel priority register 0</description>
+		</register>
+		<register name="CPR1" type="CtrlReg" offset="0x0E1E"
+			size="2">
+			<description>channel priority register 1</description>
+		</register>
+		<register name="TPUISR" type="CtrlReg" offset="0x0E20"
+			size="2">
+			<description>TPU interrupt status register</description>
+		</register>
+		<register name="LINK" type="CtrlReg" offset="0x0E22"
+			size="2">
+			<description>???</description>
+		</register>
+		<register name="SGLR" type="CtrlReg" offset="0x0E24"
+			size="2">
+			<description>service grant latch register</description>
+		</register>
+		<register name="DCNR" type="CtrlReg" offset="0x0E26"
+			size="2">
+			<description>decoded channel number register</description>
+		</register>
+
+		<!-- Port E Registers -->
+
+		<register name="PORTE0" type="CtrlReg" offset="0x0A11"
+			size="1">
+			<description>Port E data register 0</description>
+		</register>
+		<register name="PORTE1" type="CtrlReg" offset="0x0A13"
+			size="1">
+			<description>Port E data register 1</description>
+		</register>
+		<register name="DDRE" type="CtrlReg" offset="0x0A15"
+			size="1">
+			<description>Port E data direction register</description>
+		</register>
+		<register name="PEPAR" type="CtrlReg" offset="0x0A17"
+			size="1">
+			<description>Port E pin assignment register</description>
+		</register>
+
+		<!-- Port F Registers -->
+
+		<register name="PORTF0" type="CtrlReg" offset="0x0A19"
+			size="1">
+			<description>Port F data register 0</description>
+		</register>
+		<register name="PORTF1" type="CtrlReg" offset="0x0A1B"
+			size="1">
+			<description>Port F data register 1</description>
+		</register>
+		<register name="DDRF" type="CtrlReg" offset="0x0A1D"
+			size="1">
+			<description>Port F data direction register</description>
+		</register>
+		<register name="PFPAR" type="CtrlReg" offset="0x0A1F"
+			size="1">
+			<description>Port F pin assignment register</description>
+		</register>
+
+		<!-- TPU parameter ram start addresses -->
+
+		<register name="CH0" type="CtrlReg" offset="0x0F00"
+			size="2">
+			<description>TPU parameter ram start address</description>
+		</register>
+		<register name="CH1" type="CtrlReg" offset="0x0F10"
+			size="2">
+			<description>TPU parameter ram start address</description>
+		</register>
+		<register name="CH2" type="CtrlReg" offset="0x0F20"
+			size="2">
+			<description>TPU parameter ram start address</description>
+		</register>
+		<register name="CH3" type="CtrlReg" offset="0x0F30"
+			size="2">
+			<description>TPU parameter ram start address</description>
+		</register>
+		<register name="CH4" type="CtrlReg" offset="0x0F40"
+			size="2">
+			<description>TPU parameter ram start address</description>
+		</register>
+		<register name="CH5" type="CtrlReg" offset="0x0F50"
+			size="2">
+			<description>TPU parameter ram start address</description>
+		</register>
+		<register name="CH6" type="CtrlReg" offset="0x0F60"
+			size="2">
+			<description>TPU parameter ram start address</description>
+		</register>
+		<register name="CH7" type="CtrlReg" offset="0x0F70"
+			size="2">
+			<description>TPU parameter ram start address</description>
+		</register>
+		<register name="CH8" type="CtrlReg" offset="0x0F80"
+			size="2">
+			<description>TPU parameter ram start address</description>
+		</register>
+		<register name="CH9" type="CtrlReg" offset="0x0F90"
+			size="2">
+			<description>TPU parameter ram start address</description>
+		</register>
+		<register name="CH10" type="CtrlReg" offset="0x0FA0"
+			size="2">
+			<description>TPU parameter ram start address</description>
+		</register>
+		<register name="CH11" type="CtrlReg" offset="0x0FB0"
+			size="2">
+			<description>TPU parameter ram start address</description>
+		</register>
+		<register name="CH12" type="CtrlReg" offset="0x0FC0"
+			size="2">
+			<description>TPU parameter ram start address</description>
+		</register>
+		<register name="CH13" type="CtrlReg" offset="0x0FD0"
+			size="2">
+			<description>TPU parameter ram start address</description>
+		</register>
+		<register name="CH14" type="CtrlReg" offset="0x0FE0"
+			size="2">
+			<description>TPU parameter ram start address</description>
+		</register>
+		<register name="CH15" type="CtrlReg" offset="0x0FF0"
+			size="2">
+			<description>TPU parameter ram start address</description>
+		</register>
+
+		<!-- queued serial module -->
+
+		<register name="QMCR" type="CtrlReg" offset="0x0C00"
+			size="2">
+			<description>QSM configuration register</description>
+		</register>
+		<register name="QTEST" type="CtrlReg" offset="0x0C02"
+			size="2">
+			<description>QSM test register</description>
+		</register>
+		<register name="QILR" type="CtrlReg" offset="0x0C04"
+			size="1">
+			<description>QSM interrupt level register</description>
+		</register>
+		<register name="QIVR" type="CtrlReg" offset="0x0C05"
+			size="1">
+			<description>QSM interrupt vector register</description>
+		</register>
+		<register name="SCCR0" type="CtrlReg" offset="0x0C08"
+			size="2">
+			<description>SCI control register 0</description>
+		</register>
+		<register name="SCCR1" type="CtrlReg" offset="0x0C0A"
+			size="2">
+			<description>SCI control register 1</description>
+		</register>
+		<register name="SCSR" type="CtrlReg" offset="0x0C0C"
+			size="2">
+			<description>SCI status register</description>
+		</register>
+		<register name="SCDR" type="CtrlReg" offset="0x0C0E"
+			size="2">
+			<description>SCI data register</description>
+		</register>
+
+		<register name="QPDR" type="CtrlReg" offset="0x0C15"
+			size="2">
+			<description>QSM port data register</description>
+		</register>
+		<register name="QPAR" type="CtrlReg" offset="0x0C16"
+			size="2">
+			<description>QSM pin assignment register</description>
+		</register>
+		<register name="QDDR" type="CtrlReg" offset="0x0C17"
+			size="2">
+			<description>QSM data direction register</description>
+		</register>
+		<register name="SPCR0" type="CtrlReg" offset="0x0C18"
+			size="2">
+			<description>QSPI control register 0</description>
+		</register>
+		<register name="SPCR1" type="CtrlReg" offset="0x0C1A"
+			size="2">
+			<description>QSPI control register 1</description>
+		</register>
+		<register name="SPCR2" type="CtrlReg" offset="0x0C1C"
+			size="2">
+			<description>QSPI control register 2</description>
+		</register>
+		<register name="SPCR3" type="CtrlReg" offset="0x0C1E"
+			size="1">
+			<description>QSPI control register 3</description>
+		</register>
+		<register name="SPSR" type="CtrlReg" offset="0x0C1F"
+			size="1">
+			<description>QSPI status register</description>
+		</register>
+
+		<register name="QRXD" type="CtrlReg" offset="0x0D00"
+			size="2">
+			<description>QSPI receive data</description>
+		</register>
+		<register name="QTXD" type="CtrlReg" offset="0x0D20"
+			size="2">
+			<description>QSPI transmit data</description>
+		</register>
+		<register name="QCMD" type="CtrlReg" offset="0x0D40"
+			size="2">
+			<description>QSPI command control</description>
+		</register>
+	</registerGroup>
+</registerDefinitions>

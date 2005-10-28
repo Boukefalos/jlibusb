@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='utf-8'?>
+
+<!-- DTD for a RegisterDictionary. -->
+
+<!ELEMENT registerDefinitions (registerGroup+)>
+<!ELEMENT registerGroup (register+)>
+<!ATTLIST registerGroup
+		baseAddress CDATA #REQUIRED>
+<!ELEMENT register (description?)>
+<!ATTLIST register
+		name CDATA #REQUIRED
+		type (CtrlReg|UserReg|SysReg) #REQUIRED
+		offset CDATA #REQUIRED
+		size (1|2|4) #REQUIRED>
+<!ELEMENT description (#PCDATA)>

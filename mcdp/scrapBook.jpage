@@ -1,0 +1,108 @@
+short i = (short) 0x8613;
+return i;(short) -31213
+++++++
+int i = -15;
+System.out.println(i & 0xFF);
+++++++
+int x;for (int i = -10000; i < 10000; i++) {
+	x = (i & 0xFF);
+	if (x < 0){
+		System.out.println(i & 0xFF);
+	}
+}
+++++++
+int b = -15;
+int c = (b & 0xFF);
+System.out.println(c);
+++++++
+byte b = (byte) 0x80;
+b |= 0x40;
+b |= 0x20;
+System.out.println(b);
+++++++
+int word = -1;	// 0x00010000;
+int shift = 27;
+byte b =  (byte) ((word >>> 21) & 0x0FF);
+int i = (word >>> shift);
+System.out.println(word + "\t" + shift);
+System.out.println(b);
+System.out.println(i);
+++++++
+int word = 0xFF3;
+byte b = (byte) ((word & 0x07) << 5);
+System.out.println(b);
+++++++
+System.out.println(64 >>> 1);
+++++++
+int word = 0xFF0F0F0F;boolean lengthBit = false, controlBit = true;
+byte b = (byte) 0x80;
+if (lengthBit) {
+	b |= 0x40;
+}
+if (controlBit) {
+	b |= 0x20;
+}b |= (byte) (word >>> 27); System.out.print(b + "\t");
+b = (byte) ((word >>> 19) & 0xFF); System.out.print(b + "\t");
+b = (byte) ((word >>> 11) & 0xFF); System.out.print(b + "\t");
+b = (byte) ((word >>> 3) & 0xFF); System.out.print(b + "\t");
+b = (byte) ((word & 0x07) << 5); System.out.println(b);
+++++++
+byte[] data = new byte[5];
+data[0] = 0x00;	data[1] = 0x00;	data[2] = 0x00;	data[3] = 0x29;	data[4] = (byte) 0x80;	
+int retValue = ((data[0] << 3) + ((data[1] & 0xFF) >>> 5)) << 24;
+System.out.println("0x" + Integer.toHexString(retValue));
+// second byte
+retValue += (((data[1] << 3) & 0xFF) + ((data[2] & 0xFF) >>> 5)) << 16;
+System.out.println("0x" + Integer.toHexString(retValue));
+// third byte
+retValue += (((data[2] << 3) & 0xFF) + ((data[3] & 0xFF) >>> 5)) << 8;
+System.out.println("0x" + Integer.toHexString(retValue));
+// fourth byte
+retValue += ((data[3] << 3) & 0xFF) + ((data[4] & 0xFF) >>> 5);
+System.out.println("0x" + Integer.toHexString(retValue));
+++++++
+byte b = 0x7D;
+System.out.println((b & 0x80));
+++++++
+int i1 = 0x12345678, i2 = 0x56789012;
+long l = ((long) i1 << 32) + i2;
+System.out.println(Long.toHexString(l));
+++++++
+int val = 5;
+for (int i = 0; i <= 7; i++) {
+	int cmd = 0xFC00010C + (7 - i) * 0x800000 + ((val >>> i*4) & 0xF)*0x1000;
+	System.out.println(i + "\t0x" + Integer.toHexString(cmd));
+}
+++++++
+System.out.println("0x" + Integer.toHexString((0x20 << 3) & 0xFF));
+++++++
+int data = 0x1111;
+byte b;
+b = (byte) ((data >>> 9) & 0xFF);
+System.out.println("0x" + Integer.toHexString(b));
+b = (byte) ((data >>> 1) & 0xFF);
+System.out.println("0x" + Integer.toHexString(b));
+b = (byte) ((data & 0x01) << 7);
+System.out.println("0x" + Integer.toHexString(b));
+++++++
+byte[] data = new byte[3];
+data[0] = (byte) 0xFF;	data[1] = 0x01;	data[2] = 0x00;
+byte b = 0;
+for (int bit = 0; bit <= 7; bit++) {
+	if ((data[1] & (1 << bit)) > 0) {
+		b += 1 << (7 - bit);
+	}
+}
+int retValue = (b & 0xFF) << 8;
+// turn LSB
+b = 0;
+for (int bit = 0; bit <= 7; bit++) {
+	if ((data[0] & (1 << bit)) > 0) {
+		b += 1 << (7 - bit);
+	}
+}
+retValue += (b & 0xFF);
+System.out.println("0x" + Integer.toHexString(retValue));
+++++++
+System.out.println(((512 - 6) / 2) & 0xFFFC);
+++++++
