@@ -13,18 +13,20 @@
 ; - compile and run
 
 [Setup]
-AppName=NTB MC-Interface
-AppVerName=NTB MC-Interface 0.0.1
+AppName=USB Programming and Debugging Interface
+AppVerName=USB Programming and Debugging Interface 0.0.2
 AppPublisher=NTB
 AppPublisherURL=http://inf.ntb.ch/
-AppVersion=0.0.1
-DefaultDirName={pf}\MC-Interface
-DefaultGroupName=MC-Interface
+AppVersion=0.0.2
+DefaultDirName={pf}\USB PD-Interface
+DefaultGroupName=USB PD-Interface
 Compression=lzma
 SolidCompression=yes
 ; WinMe or higher
 MinVersion=4.9,5
 PrivilegesRequired=admin
+WizardImageFile=setupUSBPDI_2.bmp
+WizardSmallImageFile=setupUSBPDI_2small.bmp
 
 [Files]
 ; copy the file to the App folder
@@ -37,10 +39,10 @@ Source: "*.inf"; DestDir: "{app}\driver"
 Source: "*.dll"; DestDir: "{win}\system32"; FLags: replacesameversion restartreplace uninsneveruninstall
 
 [Icons]
-Name: "{group}\Uninstall MC-Interface"; Filename: "{uninstallexe}"
+Name: "{group}\Uninstall USB PD-Interface"; Filename: "{uninstallexe}"
 
 [Run]
 ; invoke libusb's DLL to install the .inf file
-Filename: "rundll32"; Parameters: "libusb0.dll,usb_install_driver_np_rundll {app}\driver\MCInt.inf"; StatusMsg: "Installing NTB MC-Interface driver (this may take a few seconds) ..."
+Filename: "rundll32"; Parameters: "libusb0.dll,usb_install_driver_np_rundll {app}\driver\USBPDI.inf"; StatusMsg: "Installing Programming and Debugging Interface driver (this may take a few seconds) ..."
 
 
