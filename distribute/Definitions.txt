@@ -1,4 +1,4 @@
 Manufacturer string: NTB
-Product string: MC-Interface
+Product string: USB Programming and Debugging Interface
 VID: 0x8235
 PDI: 0x0100

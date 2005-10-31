@@ -2,7 +2,7 @@
 Signature = "$Chicago$"
 provider  = %manufacturer%
 DriverVer = 10/14/2005,0.1.10.2
-CatalogFile = MCInt.cat
+CatalogFile = USBPDI.cat
 
 Class = LibUsbDevices
 ClassGUID = {EB781AAF-9C70-4523-A5DF-642A87ECA567}
@@ -43,7 +43,7 @@ libusb0.sys
 [LIBUSB.Files.Dll]
 libusb0.dll
 
-[LIBUSB.Files.Dll2]
+[LIBUSB.Files.DllJNI]
 LibusbWin.dll
 
 ;--------------------------------------------------------------------------
@@ -51,11 +51,11 @@ LibusbWin.dll
 ;--------------------------------------------------------------------------
 
 [LIBUSB_DEV]
-CopyFiles = LIBUSB.Files.Sys, LIBUSB.Files.Dll, LIBUSB.Files.Dll2
+CopyFiles = LIBUSB.Files.Sys, LIBUSB.Files.Dll, LIBUSB.Files.DllJNI
 AddReg    = LIBUSB_DEV.AddReg
 
 [LIBUSB_DEV.NT]
-CopyFiles = LIBUSB.Files.Sys, LIBUSB.Files.Dll, LIBUSB.Files.Dll2
+CopyFiles = LIBUSB.Files.Sys, LIBUSB.Files.Dll, LIBUSB.Files.DllJNI
 
 [LIBUSB_DEV.HW]
 DelReg = LIBUSB_DEV.DelReg.HW
@@ -95,7 +95,7 @@ ServiceBinary  = %12%\libusb0.sys
 ;--------------------------------------------------------------------------
 
 [Devices]
-"NTB MC-Interface"=LIBUSB_DEV, USB\VID_8235&PID_0100
+"USB Programming and Debugging Interface"=LIBUSB_DEV, USB\VID_8235&PID_0100
 
 
 ;--------------------------------------------------------------------------
@@ -103,5 +103,4 @@ ServiceBinary  = %12%\libusb0.sys
 ;--------------------------------------------------------------------------
 
 [Strings]
-
 manufacturer = "NTB"
