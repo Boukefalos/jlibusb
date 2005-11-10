@@ -98,8 +98,9 @@ public class BDI555test {
 	}
 
 	private static void writeMem() {
+		final int BASE_ADDR = 0x800000;
 		try {
-			BDI555.writeMem(0x800000, 0x123456, 4);
+			BDI555.writeMem(BASE_ADDR, 0x123456, 4);
 		} catch (USBException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -113,13 +114,14 @@ public class BDI555test {
 	}
 
 	private static void readMem() {
+		final int BASE_ADDR = 0x800000;
 		try {
-			StringBuffer sb = new StringBuffer("0x"
-					+ Integer.toHexString(BDI555.readMem(0x800000, 4)) + "\n");
-			sb.append("0x" + Integer.toHexString(BDI555.readMem(0x800004, 4))
-					+ "\n");
-			sb.append("0x" + Integer.toHexString(BDI555.readMem(0x800008, 4))
-					+ "\n");
+			StringBuffer sb = new StringBuffer();
+			for (int i = 0; i < 10; i++) {
+				sb.append("0x"
+						+ Integer.toHexString(BDI555.readMem(BASE_ADDR + i*4, 4))
+						+ "\n");
+			}
 			System.out.println(sb.toString());
 		} catch (USBException e) {
 			// TODO Auto-generated catch block
@@ -134,12 +136,13 @@ public class BDI555test {
 	}
 
 	private static void fastDownload() {
+		final int BASE_ADDR = 0x800000;
 		int[] testData = new int[120];
 		for (int i = 0; i < testData.length; i++) {
 			testData[i] = i;
 		}
 		try {
-			BDI555.startFastDownload(0x800000);
+			BDI555.startFastDownload(BASE_ADDR);
 			BDI555.fastDownload(testData, BDI555.MAX_NOF_WORDS_FAST_DOWNLOAD);
 			BDI555.stopFastDownload();
 		} catch (USBException e) {
@@ -155,10 +158,10 @@ public class BDI555test {
 	}
 
 	private static void readMemSeq() {
-		int startAddr = 0x800000;
+		final int BASE_ADDR = 0x800000;
 		try {
 			StringBuffer sb = new StringBuffer(0 + "\tData: 0x"
-					+ Integer.toHexString(BDI555.readMem(startAddr, 4)) + "\n");
+					+ Integer.toHexString(BDI555.readMem(BASE_ADDR, 4)) + "\n");
 			for (int i = 1; i < 120; i++) {
 				sb.append(i + "\tData: 0x"
 						+ Integer.toHexString(BDI555.readMemSeq(4)) + "\n");

@@ -300,20 +300,124 @@ public class BDI332test {
 	}
 
 	public static void button13() {
-		System.out.println("readMem()");
-		readMem();
+		final int BASE_ADDR = 0x105624;
+		final int FIRST_VAL = 0xFF;
+		final boolean DEBUG_ON = true;
+
+		try {
+			System.out.println("initialize data");
+			BDI332.writeMem(BASE_ADDR, FIRST_VAL, 4);
+			int[] data = new int[BDI332.MAX_NOF_LONGS_FILL];
+			for (int i = 0; i < data.length; i++) {
+				data[i] = 5;
+			}
+			BDI332.fillMem(data, data.length);
+
+			System.out.println("write data");
+			BDI332.writeMem(BASE_ADDR, FIRST_VAL, 4);
+			data = new int[10];
+			for (int i = 0; i < data.length; i++) {
+				data[i] = i;
+			}
+			BDI332.fillMem(data, data.length);
+			System.out.println("Fill done");
+			System.out.println("read back data");
+			int firstResult = BDI332.readMem(BASE_ADDR, 4);
+			if (firstResult != FIRST_VAL) {
+				System.out.println("Error at 0: 0x"
+						+ Integer.toHexString(firstResult) + " instead of 0x"
+						+ Integer.toHexString(FIRST_VAL));
+			}
+			if (DEBUG_ON) {
+				System.out.println("Compare first 0x"
+						+ Integer.toHexString(firstResult) + " == 0x"
+						+ Integer.toHexString(FIRST_VAL));
+			}
+			int[] result = BDI332.dumpMem(BDI332.MAX_NOF_LONGS_FILL);
+			for (int i = 0; i < result.length; i++) {
+				if (DEBUG_ON) {
+					System.out.println("Compare " + i + ": 0x"
+							+ Integer.toHexString(result[i]));
+
+				}
+			}
+			System.out.println("Dump done");
+		} catch (USBException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (DispatchException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (BDIException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public static void button14() {
-		System.out.println("readMem()");
-		readMem();
+
+		final int BASE_ADDR = 0x105624;
+		final int FIRST_VAL = 0xFF;
+		final boolean DEBUG_ON = true;
+
+		System.out.println("write data");
+		try {
+			BDI332.writeMem(BASE_ADDR, FIRST_VAL, 4);
+			int[] data = new int[BDI332.MAX_NOF_LONGS_FILL];
+			for (int i = 0; i < data.length; i++) {
+				data[i] = i;
+			}
+			BDI332.fillMem(data, data.length);
+			System.out.println("Fill done");
+			System.out.println("read back data");
+			int firstResult = BDI332.readMem(BASE_ADDR, 4);
+			if (firstResult != FIRST_VAL) {
+				System.out.println("Error at 0: 0x"
+						+ Integer.toHexString(firstResult) + " instead of 0x"
+						+ Integer.toHexString(FIRST_VAL));
+			}
+			if (DEBUG_ON) {
+				System.out.println("Compare first 0x"
+						+ Integer.toHexString(firstResult) + " == 0x"
+						+ Integer.toHexString(FIRST_VAL));
+			}
+			int[] result = BDI332.dumpMem(BDI332.MAX_NOF_LONGS_FILL);
+			for (int i = 0; i < result.length; i++) {
+				if (data[i] != result[i]) {
+					System.out.println("Error at " + i + ": 0x"
+							+ Integer.toHexString(result[i]) + " instead of 0x"
+							+ Integer.toHexString(data[i]));
+				}
+				if (DEBUG_ON) {
+					System.out.println("Compare " + i + ": 0x"
+							+ Integer.toHexString(result[i]) + " == 0x"
+							+ Integer.toHexString(data[i]));
+
+				}
+			}
+			System.out.println("Dump done");
+		} catch (USBException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (DispatchException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (BDIException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public static void button15() {
 		System.out.println("resetUSB()");
 		try {
 			USBDevice.reset();
+			Thread.sleep(500);
+			USBDevice.open();
 		} catch (USBException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
