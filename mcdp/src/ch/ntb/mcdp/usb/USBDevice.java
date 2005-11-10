@@ -44,7 +44,7 @@ public class USBDevice {
 	}
 
 	public static void reset() throws USBException {
-		USB.resetUsbDevie();
+		USB.resetUsbDevice();
 	}
 
 	public static void write(byte[] data, int length) throws USBException {
