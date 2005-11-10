@@ -151,7 +151,7 @@ public class BDI555 {
 		DataPacket data = Dispatch.readBDI();
 		if (data.subtype == STYPE_BDI_UNKNOWN_STYPE) {
 			throw new BDIException("unknown subtype: " + data.subtype);
-		}else if (data.subtype == STYPE_BDI_ERROR_TIMEOUT) {
+		} else if (data.subtype == STYPE_BDI_ERROR_TIMEOUT) {
 			// receive invalid packet
 			Dispatch.readBDI();
 			throw new BDIException("timeout error (DSDO not low)");
@@ -380,32 +380,32 @@ public class BDI555 {
 	 * 
 	 * @param downloadData
 	 *            Data to be downloaded (32 bit wide)
-	 * @param nofWords
-	 *            Number of words
+	 * @param dataLength
+	 *            Length of the data to download (words)
 	 * @throws BDIException
 	 * @throws DispatchException
 	 * @throws USBException
 	 */
-	public static void fastDownload(int[] downloadData, int nofWords)
+	public static void fastDownload(int[] downloadData, int dataLength)
 			throws BDIException, USBException, DispatchException {
 
 		if (!fastDownloadStarted) {
 			throw new BDIException("start fast download first");
 		}
 		// check if data fits into USB-packet
-		if (nofWords > MAX_NOF_WORDS_FAST_DOWNLOAD) {
+		if (dataLength > MAX_NOF_WORDS_FAST_DOWNLOAD) {
 			throw new BDIException(
 					"data larger than MAX_NOF_WORDS_FAST_DOWNLOAD");
 		}
 		int currentIndex = 0;
-		initPacket(STYPE_BDI_35FD_DATA, nofWords * BDI_DATA35_LENGTH);
-		while (currentIndex < nofWords) {
+		initPacket(STYPE_BDI_35FD_DATA, dataLength * BDI_DATA35_LENGTH);
+		while (currentIndex < dataLength) {
 			fillPacket(false, true, downloadData[currentIndex], currentIndex
 					* BDI_DATA35_LENGTH);
 			currentIndex++;
 		}
 
-		DataPacket data = transmit(nofWords * BDI_DATA35_LENGTH);
+		DataPacket data = transmit(dataLength * BDI_DATA35_LENGTH);
 		if (data == null) {
 			throw new BDIException("no data from device");
 		}
@@ -429,7 +429,7 @@ public class BDI555 {
 
 		// stop fast download
 		int result = transferAndParse35(true, true, 0x86000000);
-		System.out.println("stopFastDownload:" + result);
+		System.out.println("stopFastDownload: result: 0x" + Integer.toHexString(result));
 		// if (result != 0x5F) {
 		// // TODO: change exception string
 		// throw new BDIException("result != 0x5F: " + result);
