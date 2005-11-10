@@ -505,8 +505,8 @@ public class BDI332 {
 				currentIndex++;
 			}
 			// send NOP to get result of last write
-			sendData[Dispatch.PACKET_DATA_OFFSET + currentIndex * 4] = 0;
-			sendData[Dispatch.PACKET_DATA_OFFSET + currentIndex * 4 + 1] = 0;
+			sendData[Dispatch.PACKET_DATA_OFFSET + currentIndex * 4] = NOP;
+			sendData[Dispatch.PACKET_DATA_OFFSET + currentIndex * 4 + 1] = NOP;
 			data = transmit(STYPE_BDI_17FILL_BYTE_WORD, dataLength * 4 + 2);
 			break;
 		case 2:
@@ -524,8 +524,8 @@ public class BDI332 {
 				currentIndex++;
 			}
 			// send NOP to get result of last write
-			sendData[Dispatch.PACKET_DATA_OFFSET + currentIndex * 4] = 0;
-			sendData[Dispatch.PACKET_DATA_OFFSET + currentIndex * 4 + 1] = 0;
+			sendData[Dispatch.PACKET_DATA_OFFSET + currentIndex * 4] = NOP;
+			sendData[Dispatch.PACKET_DATA_OFFSET + currentIndex * 4 + 1] = NOP;
 			data = transmit(STYPE_BDI_17FILL_BYTE_WORD, dataLength * 4 + 2);
 			break;
 		case 4:
@@ -546,9 +546,10 @@ public class BDI332 {
 				currentIndex++;
 			}
 			// send NOP to get result of last write
-			sendData[Dispatch.PACKET_DATA_OFFSET + currentIndex * 6] = 0;
-			sendData[Dispatch.PACKET_DATA_OFFSET + currentIndex * 6 + 1] = 0;
+			sendData[Dispatch.PACKET_DATA_OFFSET + currentIndex * 6] = NOP;
+			sendData[Dispatch.PACKET_DATA_OFFSET + currentIndex * 6 + 1] = NOP;
 			data = transmit(STYPE_BDI_17FILL_LONG, dataLength * 6 + 2);
+			System.out.println("FILL: Transmit: " + (dataLength * 6 + 2));
 			break;
 		default:
 			throw new BDIException("invalid writeMemSize: " + writeMemSize);
@@ -585,6 +586,7 @@ public class BDI332 {
 	public static int[] dumpMem(int nofData) throws USBException,
 			DispatchException, BDIException {
 
+		// TODO: adjust MAX_NOF_XX_DUMP
 		int dataSize;
 		switch (readMemSize) {
 		case 1:
