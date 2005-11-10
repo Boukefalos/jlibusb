@@ -11,7 +11,7 @@ public class USB {
 
 	private static final int TIMEOUT_ERROR_CODE = -116;
 
-	private static final boolean DEBUG_ON = false;
+	private static final boolean DEBUG_ON = true;
 
 	private static Usb_Bus bus;
 
@@ -84,8 +84,9 @@ public class USB {
 				bus = bus.next;
 			}
 			if (usb_dev_handle <= 0) {
-				throw new USBException("UsbDevice with idVendor " + IdVendor
-						+ " and idProduct " + IdProduct + " not found");
+				throw new USBException("UsbDevice with idVendor 0x"
+						+ Integer.toHexString(IdVendor & 0xFFFF) + " and idProduct 0x"
+						+ Integer.toHexString(IdProduct & 0xFFFF) + " not found");
 			}
 		}
 		claim_interface(usb_dev_handle, Configuration, Interface, Altinterface);
@@ -107,11 +108,12 @@ public class USB {
 		}
 	}
 
-	public static void resetUsbDevie() throws USBException {
+	public static void resetUsbDevice() throws USBException {
 		if (LibusbWin.usb_reset(usb_dev_handle) < 0) {
 			throw new USBException("LibusbWin.usb_reset: "
 					+ LibusbWin.usb_strerror());
 		}
+		usb_dev_handle = 0;
 
 		if (DEBUG_ON) {
 			System.out.println("resetUsbDevie done");
