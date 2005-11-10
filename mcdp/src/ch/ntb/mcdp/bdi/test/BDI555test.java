@@ -1,8 +1,7 @@
 package ch.ntb.mcdp.bdi.test;
 
-import ch.ntb.mcdp.bdi.BDI555;
 import ch.ntb.mcdp.bdi.BDIException;
-import ch.ntb.mcdp.usb.DataPacket;
+import ch.ntb.mcdp.bdi.MPC555;
 import ch.ntb.mcdp.usb.DispatchException;
 import ch.ntb.usb.USBException;
 
@@ -31,13 +30,13 @@ public class BDI555test {
 
 	private static void reset_target() {
 		try {
-			BDI555.reset_target();
+			MPC555.reset_target();
 			// assign pin to Freeze output
-			BDI555.writeMem(0x02FC000, 0x40000, 4);
+			MPC555.writeMem(0x02FC000, 0x40000, 4);
 			// enable bus monitor, disable watchdog timer
-			BDI555.writeMem(0x02FC004, 0x0FFFFFF83, 4);
+			MPC555.writeMem(0x02FC004, 0x0FFFFFF83, 4);
 			// SCCR, switch off EECLK for download
-			BDI555.writeMem(0x02FC280, 0x08121C100, 4);
+			MPC555.writeMem(0x02FC280, 0x08121C100, 4);
 		} catch (USBException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -53,7 +52,7 @@ public class BDI555test {
 	private static void freeze() {
 		try {
 			System.out
-					.println("isFreezeAsserted: " + BDI555.isFreezeAsserted());
+					.println("isFreezeAsserted: " + MPC555.isFreezeAsserted());
 		} catch (USBException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -69,7 +68,7 @@ public class BDI555test {
 
 	private static void break_() {
 		try {
-			BDI555.break_();
+			MPC555.break_();
 		} catch (USBException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -84,7 +83,7 @@ public class BDI555test {
 
 	private static void go() {
 		try {
-			BDI555.go();
+			MPC555.go();
 		} catch (USBException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -100,7 +99,7 @@ public class BDI555test {
 	private static void writeMem() {
 		final int BASE_ADDR = 0x800000;
 		try {
-			BDI555.writeMem(BASE_ADDR, 0x123456, 4);
+			MPC555.writeMem(BASE_ADDR, 0x123456, 4);
 		} catch (USBException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -119,7 +118,7 @@ public class BDI555test {
 			StringBuffer sb = new StringBuffer();
 			for (int i = 0; i < 10; i++) {
 				sb.append("0x"
-						+ Integer.toHexString(BDI555.readMem(BASE_ADDR + i*4, 4))
+						+ Integer.toHexString(MPC555.readMem(BASE_ADDR + i*4, 4))
 						+ "\n");
 			}
 			System.out.println(sb.toString());
@@ -142,9 +141,9 @@ public class BDI555test {
 			testData[i] = i;
 		}
 		try {
-			BDI555.startFastDownload(BASE_ADDR);
-			BDI555.fastDownload(testData, BDI555.MAX_NOF_WORDS_FAST_DOWNLOAD);
-			BDI555.stopFastDownload();
+			MPC555.startFastDownload(BASE_ADDR);
+			MPC555.fastDownload(testData, MPC555.MAX_NOF_WORDS_FAST_DOWNLOAD);
+			MPC555.stopFastDownload();
 		} catch (USBException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -161,10 +160,10 @@ public class BDI555test {
 		final int BASE_ADDR = 0x800000;
 		try {
 			StringBuffer sb = new StringBuffer(0 + "\tData: 0x"
-					+ Integer.toHexString(BDI555.readMem(BASE_ADDR, 4)) + "\n");
+					+ Integer.toHexString(MPC555.readMem(BASE_ADDR, 4)) + "\n");
 			for (int i = 1; i < 120; i++) {
 				sb.append(i + "\tData: 0x"
-						+ Integer.toHexString(BDI555.readMemSeq(4)) + "\n");
+						+ Integer.toHexString(MPC555.readMemSeq(4)) + "\n");
 			}
 			System.out.println(sb.toString());
 		} catch (USBException e) {

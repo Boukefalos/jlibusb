@@ -1,7 +1,7 @@
 package ch.ntb.mcdp.bdi.test;
 
-import ch.ntb.mcdp.bdi.BDI332;
 import ch.ntb.mcdp.bdi.BDIException;
+import ch.ntb.mcdp.bdi.MC68332;
 import ch.ntb.mcdp.mc68332.IMCBTargetBoard;
 import ch.ntb.mcdp.usb.DataPacket;
 import ch.ntb.mcdp.usb.DispatchException;
@@ -14,7 +14,7 @@ public class BDI332test {
 		// test bdi transaction
 		DataPacket result = null;
 		try {
-			result = BDI332.transfer(0x0C00);
+			result = MC68332.transfer(0x0C00);
 		} catch (USBException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -32,7 +32,7 @@ public class BDI332test {
 
 	private static void reset_target() {
 		try {
-			BDI332.reset_target();
+			MC68332.reset_target();
 		} catch (USBException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -48,7 +48,7 @@ public class BDI332test {
 	private static void freeze() {
 		try {
 			System.out
-					.println("isFreezeAsserted: " + BDI332.isFreezeAsserted());
+					.println("isFreezeAsserted: " + MC68332.isFreezeAsserted());
 		} catch (USBException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -64,7 +64,7 @@ public class BDI332test {
 
 	private static void break_() {
 		try {
-			BDI332.break_();
+			MC68332.break_();
 		} catch (USBException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -79,7 +79,7 @@ public class BDI332test {
 
 	private static void go() {
 		try {
-			BDI332.go();
+			MC68332.go();
 		} catch (USBException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -95,9 +95,9 @@ public class BDI332test {
 	private static void writeMem() {
 		final int BASE_ADDR = 0x105624;
 		try {
-			BDI332.writeMem(BASE_ADDR, 0x123456, 4);
-			BDI332.writeMem(BASE_ADDR + 4, 0x123457, 4);
-			BDI332.writeMem(BASE_ADDR + 8, 0x123458, 4);
+			MC68332.writeMem(BASE_ADDR, 0x123456, 4);
+			MC68332.writeMem(BASE_ADDR + 4, 0x123457, 4);
+			MC68332.writeMem(BASE_ADDR + 8, 0x123458, 4);
 		} catch (USBException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -114,12 +114,12 @@ public class BDI332test {
 		final int BASE_ADDR = 0x105624;
 		try {
 			StringBuffer sb = new StringBuffer("0x"
-					+ Integer.toHexString(BDI332.readMem(BASE_ADDR, 4)) + "\n");
+					+ Integer.toHexString(MC68332.readMem(BASE_ADDR, 4)) + "\n");
 			sb.append("0x"
-					+ Integer.toHexString(BDI332.readMem(BASE_ADDR + 4, 4))
+					+ Integer.toHexString(MC68332.readMem(BASE_ADDR + 4, 4))
 					+ "\n");
 			sb.append("0x"
-					+ Integer.toHexString(BDI332.readMem(BASE_ADDR + 8, 4))
+					+ Integer.toHexString(MC68332.readMem(BASE_ADDR + 8, 4))
 					+ "\n");
 			System.out.println(sb.toString());
 		} catch (USBException e) {
@@ -220,8 +220,8 @@ public class BDI332test {
 		System.out.println("dump()");
 		try {
 			System.out.println("Data: 0x"
-					+ Integer.toHexString(BDI332.readMem(BASE_ADDR, 4)) + " ");
-			result = BDI332.dumpMem(BDI332.MAX_NOF_LONGS_FILL);
+					+ Integer.toHexString(MC68332.readMem(BASE_ADDR, 4)) + " ");
+			result = MC68332.dumpMem(MC68332.MAX_NOF_LONGS_FILL);
 			for (int i = 0; i < result.length; i++) {
 				System.out.print("0x" + Integer.toHexString(result[i]) + " ");
 			}
@@ -241,7 +241,7 @@ public class BDI332test {
 
 	public static void button9() {
 		try {
-			BDI332.nop();
+			MC68332.nop();
 		} catch (USBException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -260,12 +260,12 @@ public class BDI332test {
 
 		System.out.println("fill");
 		try {
-			BDI332.writeMem(BASE_ADDR, 0, 4);
-			int[] data = new int[BDI332.MAX_NOF_LONGS_FILL];
+			MC68332.writeMem(BASE_ADDR, 0, 4);
+			int[] data = new int[MC68332.MAX_NOF_LONGS_FILL];
 			for (int i = 0; i < data.length; i++) {
 				data[i] = i;
 			}
-			BDI332.fillMem(data, data.length);
+			MC68332.fillMem(data, data.length);
 		} catch (USBException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -306,23 +306,23 @@ public class BDI332test {
 
 		try {
 			System.out.println("initialize data");
-			BDI332.writeMem(BASE_ADDR, FIRST_VAL, 4);
-			int[] data = new int[BDI332.MAX_NOF_LONGS_FILL];
+			MC68332.writeMem(BASE_ADDR, FIRST_VAL, 4);
+			int[] data = new int[MC68332.MAX_NOF_LONGS_FILL];
 			for (int i = 0; i < data.length; i++) {
 				data[i] = 5;
 			}
-			BDI332.fillMem(data, data.length);
+			MC68332.fillMem(data, data.length);
 
 			System.out.println("write data");
-			BDI332.writeMem(BASE_ADDR, FIRST_VAL, 4);
+			MC68332.writeMem(BASE_ADDR, FIRST_VAL, 4);
 			data = new int[10];
 			for (int i = 0; i < data.length; i++) {
 				data[i] = i;
 			}
-			BDI332.fillMem(data, data.length);
+			MC68332.fillMem(data, data.length);
 			System.out.println("Fill done");
 			System.out.println("read back data");
-			int firstResult = BDI332.readMem(BASE_ADDR, 4);
+			int firstResult = MC68332.readMem(BASE_ADDR, 4);
 			if (firstResult != FIRST_VAL) {
 				System.out.println("Error at 0: 0x"
 						+ Integer.toHexString(firstResult) + " instead of 0x"
@@ -333,7 +333,7 @@ public class BDI332test {
 						+ Integer.toHexString(firstResult) + " == 0x"
 						+ Integer.toHexString(FIRST_VAL));
 			}
-			int[] result = BDI332.dumpMem(BDI332.MAX_NOF_LONGS_FILL);
+			int[] result = MC68332.dumpMem(MC68332.MAX_NOF_LONGS_FILL);
 			for (int i = 0; i < result.length; i++) {
 				if (DEBUG_ON) {
 					System.out.println("Compare " + i + ": 0x"
@@ -362,15 +362,15 @@ public class BDI332test {
 
 		System.out.println("write data");
 		try {
-			BDI332.writeMem(BASE_ADDR, FIRST_VAL, 4);
-			int[] data = new int[BDI332.MAX_NOF_LONGS_FILL];
+			MC68332.writeMem(BASE_ADDR, FIRST_VAL, 4);
+			int[] data = new int[MC68332.MAX_NOF_LONGS_FILL];
 			for (int i = 0; i < data.length; i++) {
 				data[i] = i;
 			}
-			BDI332.fillMem(data, data.length);
+			MC68332.fillMem(data, data.length);
 			System.out.println("Fill done");
 			System.out.println("read back data");
-			int firstResult = BDI332.readMem(BASE_ADDR, 4);
+			int firstResult = MC68332.readMem(BASE_ADDR, 4);
 			if (firstResult != FIRST_VAL) {
 				System.out.println("Error at 0: 0x"
 						+ Integer.toHexString(firstResult) + " instead of 0x"
@@ -381,7 +381,7 @@ public class BDI332test {
 						+ Integer.toHexString(firstResult) + " == 0x"
 						+ Integer.toHexString(FIRST_VAL));
 			}
-			int[] result = BDI332.dumpMem(BDI332.MAX_NOF_LONGS_FILL);
+			int[] result = MC68332.dumpMem(MC68332.MAX_NOF_LONGS_FILL);
 			for (int i = 0; i < result.length; i++) {
 				if (data[i] != result[i]) {
 					System.out.println("Error at " + i + ": 0x"

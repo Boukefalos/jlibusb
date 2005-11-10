@@ -7,7 +7,7 @@ import ch.ntb.mcdp.usb.USBDevice;
 import ch.ntb.usb.USB;
 import ch.ntb.usb.USBException;
 
-public class BDI555 {
+public class MPC555 {
 
 	// BDI subtypes
 	/**

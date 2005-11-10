@@ -1,7 +1,7 @@
 package ch.ntb.mcdp.mc68332;
 
-import ch.ntb.mcdp.bdi.BDI332;
 import ch.ntb.mcdp.bdi.BDIException;
+import ch.ntb.mcdp.bdi.MC68332;
 import ch.ntb.mcdp.usb.DispatchException;
 import ch.ntb.usb.USBException;
 
@@ -16,15 +16,15 @@ public class IMCBTargetBoard {
 		switch (r.type) {
 		case Register.CtrReg:
 			System.out.println("writeMem");
-			BDI332.writeMem(r.addr, value, r.size);
+			MC68332.writeMem(r.addr, value, r.size);
 			break;
 		case Register.SysReg:
 			System.out.println("writeSysReg");
-			BDI332.writeSysReg(r.addr, value);
+			MC68332.writeSysReg(r.addr, value);
 			break;
 		case Register.UserReg:
 			System.out.println("writeUserReg");
-			BDI332.writeUserReg(r.addr, value);
+			MC68332.writeUserReg(r.addr, value);
 			break;
 		}
 		System.out.println("0x" + Integer.toHexString(readRegister(name)));
@@ -37,13 +37,13 @@ public class IMCBTargetBoard {
 		switch (r.type) {
 		case Register.CtrReg:
 			System.out.println("\treadMem");
-			return BDI332.readMem(r.addr, r.size);
+			return MC68332.readMem(r.addr, r.size);
 		case Register.SysReg:
 			System.out.println("\treadSysReg");
-			return BDI332.readSysReg(r.addr);
+			return MC68332.readSysReg(r.addr);
 		case Register.UserReg:
 			System.out.println("\treadUserReg");
-			return BDI332.readUserReg(r.addr);
+			return MC68332.readUserReg(r.addr);
 		}
 		return -1;
 	}
@@ -51,7 +51,7 @@ public class IMCBTargetBoard {
 	public static void init() throws USBException, DispatchException,
 			BDIException {
 
-		BDI332.reset_target();
+		MC68332.reset_target();
 		
 		// RegisterDict.printRegisters();
 
