@@ -37,7 +37,7 @@ public class RegisterDict {
 
 	private static final String REGISTER = "register";
 
-	private static final String DESCRIPTON = "description";
+	private static final String DESCRIPTION = "description";
 
 	private static final String REG_ATTR_NAME = "name";
 
@@ -270,7 +270,7 @@ public class RegisterDict {
 		NodeList list = register.getChildNodes();
 		String description = "";
 		for (int i = 0; i < list.getLength(); i++) {
-			if (list.item(i).getNodeName().equals(DESCRIPTON)) {
+			if (list.item(i).getNodeName().equals(DESCRIPTION)) {
 				description = list.item(i).getTextContent();
 			}
 		}
