@@ -7,24 +7,23 @@ import ch.ntb.usb.USBException;
 
 public class IMCBTargetBoard {
 
+	static MC68332RegisterDict regDict = new MC68332RegisterDict();
+
 	private static void writeRegister(String name, int value)
 			throws USBException, DispatchException, BDIException {
 		System.out.println("0x" + Integer.toHexString(readRegister(name)));
 		System.out.println("writeRegister: " + name + ", value: 0x"
 				+ Integer.toHexString(value));
-		Register r = RegisterDict.getRegister(name);
+		MC68332Register r = (MC68332Register) regDict.getRegister(name);
 		switch (r.type) {
-		case Register.CtrReg:
-			System.out.println("writeMem");
-			MC68332.writeMem(r.addr, value, r.size);
+		case MC68332Register.CtrlReg:
+			MC68332.writeMem(r.value, value, r.size);
 			break;
-		case Register.SysReg:
-			System.out.println("writeSysReg");
-			MC68332.writeSysReg(r.addr, value);
+		case MC68332Register.SysReg:
+			MC68332.writeSysReg(r.value, value);
 			break;
-		case Register.UserReg:
-			System.out.println("writeUserReg");
-			MC68332.writeUserReg(r.addr, value);
+		case MC68332Register.UserReg:
+			MC68332.writeUserReg(r.value, value);
 			break;
 		}
 		System.out.println("0x" + Integer.toHexString(readRegister(name)));
@@ -33,17 +32,14 @@ public class IMCBTargetBoard {
 	private static int readRegister(String name) throws USBException,
 			DispatchException, BDIException {
 		System.out.print("readRegister: " + name);
-		Register r = RegisterDict.getRegister(name);
+		MC68332Register r = (MC68332Register) regDict.getRegister(name);
 		switch (r.type) {
-		case Register.CtrReg:
-			System.out.println("\treadMem");
-			return MC68332.readMem(r.addr, r.size);
-		case Register.SysReg:
-			System.out.println("\treadSysReg");
-			return MC68332.readSysReg(r.addr);
-		case Register.UserReg:
-			System.out.println("\treadUserReg");
-			return MC68332.readUserReg(r.addr);
+		case MC68332Register.CtrlReg:
+			return MC68332.readMem(r.value, r.size);
+		case MC68332Register.SysReg:
+			return MC68332.readSysReg(r.value);
+		case MC68332Register.UserReg:
+			return MC68332.readUserReg(r.value);
 		}
 		return -1;
 	}
@@ -52,8 +48,8 @@ public class IMCBTargetBoard {
 			BDIException {
 
 		MC68332.reset_target();
-		
-		// RegisterDict.printRegisters();
+
+		// regDict.printRegisters();
 
 		writeRegister("SR", 0x2700);
 		writeRegister("SFC", 0x05);
