@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 
-<!-- DTD for MC68332 RegisterDictionary.
-	Only the type values are MC68332 specific.
+<!-- DTD for MPC555 RegisterDictionary.
+	Only the type values are MPC555 specific.
 -->
 
 <!ELEMENT registerDefinitions ((registerGroup*, register*) | (register*, registerGroup*))>
@@ -11,7 +11,7 @@
 <!ELEMENT register (description?)>
 <!ATTLIST register
 		name CDATA #REQUIRED
-		type (CtrlReg|UserReg|SysReg) #REQUIRED
+		type (CtrlReg|GPR|FPR|SPR|MSR|CR|FPSCR) #REQUIRED
 		value CDATA #REQUIRED
 		size (1|2|4) #REQUIRED>
 <!ELEMENT description (#PCDATA)>
