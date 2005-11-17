@@ -21,16 +21,6 @@ public class MPC555 {
 	private static final byte STYPE_BDI_35OUT = 0x02;
 
 	/**
-	 * 10 Bit Packet to BDI
-	 */
-	private static final byte STYPE_BDI_10IN = 0x03;
-
-	/**
-	 * 10 Bit Packet from BDI
-	 */
-	private static final byte STYPE_BDI_10OUT = 0x04;
-
-	/**
 	 * Fast Download Data
 	 */
 	private static final byte STYPE_BDI_35FD_DATA = 0x05;
@@ -159,12 +149,12 @@ public class MPC555 {
 		return data;
 	}
 
-	private static void fillPacket(boolean lengthBit, boolean controlBit,
+	private static void fillPacket(boolean modeBit, boolean controlBit,
 			int data, int offset) {
 
-		// startBit = 1 | lengthBit | controlBit | 32 bits of data
+		// startBit = 1 | modeBit | controlBit | 32 bits of data
 		byte b = (byte) 0x80;
-		if (lengthBit) {
+		if (modeBit) {
 			b |= 0x40;
 		}
 		if (controlBit) {
@@ -178,12 +168,12 @@ public class MPC555 {
 		sendData[Dispatch.PACKET_DATA_OFFSET + offset + 4] = (byte) ((data & 0x07) << 5);
 	}
 
-	private static DataPacket transfer(boolean lengthBit, boolean controlBit,
+	private static DataPacket transfer(boolean modeBit, boolean controlBit,
 			int data) throws USBException, DispatchException, BDIException {
 
 		initPacket(STYPE_BDI_35IN, BDI_DATA35_LENGTH);
 
-		fillPacket(lengthBit, controlBit, data, 0);
+		fillPacket(modeBit, controlBit, data, 0);
 
 		return transmit(BDI_DATA35_LENGTH);
 	}
@@ -222,10 +212,10 @@ public class MPC555 {
 		}
 	}
 
-	private static int transferAndParse35(boolean lengthBit,
+	private static int transferAndParse35(boolean modeBit,
 			boolean controlBit, int data) throws USBException,
 			DispatchException, BDIException {
-		return parseResult35(transfer(lengthBit, controlBit, data));
+		return parseResult35(transfer(modeBit, controlBit, data));
 	}
 
 	private static void epilogue() throws USBException, DispatchException,
@@ -270,9 +260,9 @@ public class MPC555 {
 		// nop
 		gpr31 = transferAndParse35(false, false, NOP);
 
-		if ((ecr & EBRK_bit * 2) > 0) {
+		if ((ecr & (EBRK_bit * 2)) > 0) {
 			// TODO: change exception string
-			System.out.println("Exception Cause Register = " + "0x"
+			System.err.println("Exception Cause Register = " + "0x"
 					+ Integer.toHexString(ecr));
 		}
 	}
@@ -325,10 +315,12 @@ public class MPC555 {
 		transferAndParse35(false, false, 0x7FD69BA6);
 		// nop
 		ecr = transferAndParse35(false, false, NOP);
-		// if (ecr != 0x01) { // TODO: change exception string
-		// throw new BDIException("ecr != 0x01: ecr = "
-		// + Integer.toHexString(ecr));
-		// }
+		// check if entry into debug mode was because of DPI
+		if (ecr != 0x01) {
+			throw new BDIException(
+					"Wrong debug enable cause (not due to DPI): Exception Cause Register = 0x"
+							+ Integer.toHexString(ecr));
+		}
 	}
 
 	public static boolean isFreezeAsserted() throws USBException,
@@ -349,8 +341,7 @@ public class MPC555 {
 	}
 
 	/**
-	 * Called to start the fast download procedure. If a prior download
-	 * procedure is still running, a BDIException will be thrown.
+	 * Called to start the fast download procedure.
 	 * 
 	 * @param startAddr
 	 *            Address to which the data will be downloaded.
@@ -363,11 +354,11 @@ public class MPC555 {
 		if (!targetInDebugMode) {
 			throw new BDIException("target not in debug mode");
 		}
-
+		// put instr. mfspr GPR30, DPDR
 		transferAndParse35(false, false, 0x7FD69AA6);
-
+		// put adr into DPDR
 		transferAndParse35(false, true, startAddr - 4);
-
+		// start fast download
 		transferAndParse35(true, true, 0xC6000000);
 		fastDownloadStarted = true;
 	}
@@ -429,13 +420,16 @@ public class MPC555 {
 
 		// stop fast download
 		int result = transferAndParse35(true, true, 0x86000000);
-		System.out.println("stopFastDownload: result: 0x" + Integer.toHexString(result));
+		System.out.println("stopFastDownload: result: 0x"
+				+ Integer.toHexString(result));
 		// if (result != 0x5F) {
 		// // TODO: change exception string
 		// throw new BDIException("result != 0x5F: " + result);
 		// }
-		// terminate gracefully
-		transferAndParse35(false, true, 0);
+		// terminate gracefully (DATA transaction)
+		result = transferAndParse35(false, true, 0x0);
+		System.out.println("stopFastDownload: result 2: 0x"
+				+ Integer.toHexString(result));
 	}
 
 	public static void writeMem(int addr, int value, int size)
@@ -789,5 +783,21 @@ public class MPC555 {
 
 	public static boolean isTargetInDebugMode() {
 		return targetInDebugMode;
+	}
+
+	public static int getGpr30() {
+		return gpr30;
+	}
+
+	public static void setGpr30(int gpr30) {
+		MPC555.gpr30 = gpr30;
+	}
+
+	public static int getGpr31() {
+		return gpr31;
+	}
+
+	public static void setGpr31(int gpr31) {
+		MPC555.gpr31 = gpr31;
 	}
 }
