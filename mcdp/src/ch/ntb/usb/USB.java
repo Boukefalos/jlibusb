@@ -29,9 +29,13 @@ public class USB {
 
 	private static int Altinterface = -1;
 
-	private static int OUT_Endpoint = -1;
+	private static int OUT_Endpoint_1 = -1;
 
-	private static int IN_Endpoint = -1;
+	private static int IN_Endpoint_1 = -1;
+
+	private static int OUT_Endpoint_2 = -1;
+
+	private static int IN_Endpoint_2 = -1;
 
 	public static void reset() {
 		bus = null;
@@ -85,8 +89,10 @@ public class USB {
 			}
 			if (usb_dev_handle <= 0) {
 				throw new USBException("UsbDevice with idVendor 0x"
-						+ Integer.toHexString(IdVendor & 0xFFFF) + " and idProduct 0x"
-						+ Integer.toHexString(IdProduct & 0xFFFF) + " not found");
+						+ Integer.toHexString(IdVendor & 0xFFFF)
+						+ " and idProduct 0x"
+						+ Integer.toHexString(IdProduct & 0xFFFF)
+						+ " not found");
 			}
 		}
 		claim_interface(usb_dev_handle, Configuration, Interface, Altinterface);
@@ -120,26 +126,27 @@ public class USB {
 		}
 	}
 
-	public static void write(byte[] data, int length) throws USBException {
+	public static void write_EP1(byte[] data, int length) throws USBException {
 		if (data == null) {
 			throw new USBException("data must not be null");
 		}
 		if (length <= 0) {
 			throw new USBException("size must be > 0");
 		}
-		int lenWritten = LibusbWin.usb_bulk_write(usb_dev_handle, OUT_Endpoint,
-				data, length, Timeout);
+		int lenWritten = LibusbWin.usb_bulk_write(usb_dev_handle,
+				OUT_Endpoint_1, data, length, Timeout);
 		if (lenWritten < 0) {
 			if (lenWritten == TIMEOUT_ERROR_CODE) {
-				throw new USBTimeoutException("LibusbWin.usb_bulk_write: "
+				throw new USBTimeoutException("LibusbWin.usb_bulk_write EP1: "
 						+ LibusbWin.usb_strerror());
 			}
-			throw new USBException("LibusbWin.usb_bulk_write: "
+			throw new USBException("LibusbWin.usb_bulk_write EP1: "
 					+ LibusbWin.usb_strerror());
 		}
 
 		if (DEBUG_ON) {
-			System.out.print("write_bulkdata: " + lenWritten + " Bytes sent: ");
+			System.out.print("write_bulkdata EP1: " + lenWritten
+					+ " Bytes sent: ");
 			for (int i = 0; i < lenWritten; i++) {
 				System.out.print("0x" + String.format("%1$02X", data[i]) + " ");
 			}
@@ -147,26 +154,85 @@ public class USB {
 		}
 	}
 
-	public static int read(byte[] data, int size) throws USBException {
+	public static int read_EP1(byte[] data, int size) throws USBException {
 		if (data == null) {
 			throw new USBException("data must not be null");
 		}
 		if (size <= 0) {
 			throw new USBException("size must be > 0");
 		}
-		int lenRead = LibusbWin.usb_bulk_read(usb_dev_handle, IN_Endpoint,
+		int lenRead = LibusbWin.usb_bulk_read(usb_dev_handle, IN_Endpoint_1,
 				data, size, Timeout);
 		if (lenRead < 0) {
 			if (lenRead == TIMEOUT_ERROR_CODE) {
-				throw new USBTimeoutException("LibusbWin.usb_bulk_read: "
+				throw new USBTimeoutException("LibusbWin.usb_bulk_read EP1: "
 						+ LibusbWin.usb_strerror());
 			}
-			throw new USBException("LibusbWin.usb_bulk_read: "
+			throw new USBException("LibusbWin.usb_bulk_read EP1: "
 					+ LibusbWin.usb_strerror());
 		}
 
 		if (DEBUG_ON) {
-			System.out.print("read_bulkdata: " + lenRead + " Bytes received: ");
+			System.out.print("read_bulkdata EP1: " + lenRead
+					+ " Bytes received: ");
+			System.out.print("Data: ");
+			for (int i = 0; i < lenRead; i++) {
+				System.out.print("0x" + String.format("%1$02X", data[i]) + " ");
+			}
+			System.out.println();
+		}
+		return lenRead;
+	}
+
+	public static void write_EP2(byte[] data, int length) throws USBException {
+		if (data == null) {
+			throw new USBException("data must not be null");
+		}
+		if (length <= 0) {
+			throw new USBException("size must be > 0");
+		}
+		int lenWritten = LibusbWin.usb_bulk_write(usb_dev_handle,
+				OUT_Endpoint_2, data, length, Timeout);
+		if (lenWritten < 0) {
+			if (lenWritten == TIMEOUT_ERROR_CODE) {
+				throw new USBTimeoutException("LibusbWin.usb_bulk_write EP2: "
+						+ LibusbWin.usb_strerror());
+			}
+			throw new USBException("LibusbWin.usb_bulk_write EP2: "
+					+ LibusbWin.usb_strerror());
+		}
+
+		if (DEBUG_ON) {
+			System.out.print("write_bulkdata EP2: " + lenWritten
+					+ " Bytes sent: ");
+			for (int i = 0; i < lenWritten; i++) {
+				System.out.print("0x" + String.format("%1$02X", data[i]) + " ");
+			}
+			System.out.println();
+		}
+	}
+
+	public static int read_EP2(byte[] data, int size) throws USBException {
+		if (data == null) {
+			throw new USBException("data must not be null");
+		}
+		if (size <= 0) {
+			throw new USBException("size must be > 0");
+		}
+		int lenRead = LibusbWin.usb_bulk_read(usb_dev_handle, IN_Endpoint_2,
+				data, size, Timeout);
+		if (lenRead < 0) {
+			if (lenRead == TIMEOUT_ERROR_CODE) {
+				throw new USBTimeoutException("LibusbWin.usb_bulk_read EP2: "
+						+ LibusbWin.usb_strerror());
+			}
+			throw new USBException("LibusbWin.usb_bulk_read EP2: "
+					+ LibusbWin.usb_strerror());
+		}
+
+		if (DEBUG_ON) {
+			System.out.print("read_bulkdata EP2: " + lenRead
+					+ " Bytes received: ");
 			System.out.print("Data: ");
 			for (int i = 0; i < lenRead; i++) {
 				System.out.print("0x" + String.format("%1$02X", data[i]) + " ");
@@ -224,14 +290,6 @@ public class USB {
 		Configuration = configuration;
 	}
 
-	public static int getIN_Endpoint() {
-		return IN_Endpoint;
-	}
-
-	public static void setIN_Endpoint(int in_endpoint) {
-		IN_Endpoint = in_endpoint;
-	}
-
 	public static int getInterface() {
 		return Interface;
 	}
@@ -240,12 +298,36 @@ public class USB {
 		Interface = interface_;
 	}
 
-	public static int getOUT_Endpoint() {
-		return OUT_Endpoint;
+	public static int getIN_Endpoint_1() {
+		return IN_Endpoint_1;
 	}
 
-	public static void setOUT_Endpoint(int out_endpoint) {
-		OUT_Endpoint = out_endpoint;
+	public static void setIN_Endpoint_1(int in_endpoint_1) {
+		IN_Endpoint_1 = in_endpoint_1;
+	}
+
+	public static int getOUT_Endpoint_1() {
+		return OUT_Endpoint_1;
+	}
+
+	public static void setOUT_Endpoint_1(int out_endpoint_1) {
+		OUT_Endpoint_1 = out_endpoint_1;
+	}
+
+	public static int getIN_Endpoint_2() {
+		return IN_Endpoint_2;
+	}
+
+	public static void setIN_Endpoint_2(int in_endpoint_2) {
+		IN_Endpoint_2 = in_endpoint_2;
+	}
+
+	public static int getOUT_Endpoint_2() {
+		return OUT_Endpoint_2;
+	}
+
+	public static void setOUT_Endpoint_2(int out_endpoint_2) {
+		OUT_Endpoint_2 = out_endpoint_2;
 	}
 
 	public static int getTimeout() {
