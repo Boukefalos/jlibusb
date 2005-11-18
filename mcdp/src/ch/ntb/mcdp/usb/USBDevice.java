@@ -4,7 +4,7 @@ import ch.ntb.usb.USB;
 import ch.ntb.usb.USBException;
 
 public class USBDevice {
-	
+
 	private final static short IdVendor = (short) 0x8235;
 
 	private final static short IdProduct = 0x0100;
@@ -15,9 +15,13 @@ public class USBDevice {
 
 	private final static int Altinterface = 0;
 
-	private static final int OUT_Endpoint = 0x02;
+	private static final int OUT_Endpoint_BDI = 0x02;
 
-	private static final int IN_Endpoint = 0x86;
+	private static final int IN_Endpoint_BDI = 0x86;
+
+	private static final int OUT_Endpoint_UART = 0x04;
+
+	private static final int IN_Endpoint_UART = 0x88;
 
 	private static final int Timeout = 2000;
 
@@ -28,8 +32,10 @@ public class USBDevice {
 		USB.setConfiguration(Configuration);
 		USB.setInterface(Interface);
 		USB.setAltinterface(Altinterface);
-		USB.setOUT_Endpoint(OUT_Endpoint);
-		USB.setIN_Endpoint(IN_Endpoint);
+		USB.setOUT_Endpoint_1(OUT_Endpoint_BDI);
+		USB.setIN_Endpoint_1(IN_Endpoint_BDI);
+		USB.setOUT_Endpoint_2(OUT_Endpoint_UART);
+		USB.setIN_Endpoint_2(IN_Endpoint_UART);
 		USB.setTimeout(Timeout);
 		// reset USB
 		USB.reset();
@@ -47,11 +53,21 @@ public class USBDevice {
 		USB.resetUsbDevice();
 	}
 
-	public static void write(byte[] data, int length) throws USBException {
-		USB.write(data, length);
+	public static void write_BDI(byte[] data, int length) throws USBException {
+		USB.write_EP1(data, length);
 	}
 
-	public static synchronized int read(byte[] data, int size) throws USBException {
-		return USB.read(data, size);
+	public static synchronized int read_BDI(byte[] data, int size)
+			throws USBException {
+		return USB.read_EP1(data, size);
+	}
+
+	public static void write_UART(byte[] data, int length) throws USBException {
+		USB.write_EP2(data, length);
+	}
+
+	public static synchronized int read_UART(byte[] data, int size)
+			throws USBException {
+		return USB.read_EP2(data, size);
 	}
 }
