@@ -1,6 +1,16 @@
 package ch.ntb.mcdp.uart;
 
-public class Uart0 {
+import java.nio.ByteBuffer;
+import java.util.Arrays;
+import java.util.LinkedList;
+
+import ch.ntb.mcdp.usb.DataPacket;
+
+public class Uart0 extends Uart {
+	
+	Uart0(LinkedList<Uart> list) {
+		super(list);
+	}
 
 	// UART 0 Subtypes
 	/**
@@ -13,4 +23,13 @@ public class Uart0 {
 	 */
 	private static final byte STYPE_UART_0_OUT = 0x22;
 
+	@Override
+	byte getSTYPE_IN() {
+		return STYPE_UART_0_IN;
+	}
+
+	@Override
+	byte getSTYPE_OUT() {
+		return STYPE_UART_0_OUT;
+	}
 }
