@@ -234,15 +234,15 @@ public class MC68332 {
 	private static DataPacket transmit(byte STYPE, int dataLength)
 			throws USBException, DispatchException, BDIException {
 		// initialize packet
-		sendData[0] = Dispatch.PACKET_HEADER;
+		sendData[0] = DataPacket.PACKET_HEADER;
 		sendData[1] = Dispatch.MTYPE_BDI;
 		sendData[2] = STYPE;
 		sendData[3] = (byte) (dataLength / 0x100); // length
 		sendData[4] = (byte) (dataLength & 0xFF);
-		sendData[Dispatch.PACKET_DATA_OFFSET + dataLength] = Dispatch.PACKET_END;
+		sendData[DataPacket.PACKET_DATA_OFFSET + dataLength] = DataPacket.PACKET_END;
 
 		// write USB-command
-		USBDevice.write(sendData, dataLength + DataPacket.PACKET_MIN_LENGTH);
+		USBDevice.write_BDI(sendData, dataLength + DataPacket.PACKET_MIN_LENGTH);
 
 		// read result
 		DataPacket data = Dispatch.readBDI();
@@ -253,7 +253,7 @@ public class MC68332 {
 	}
 
 	/**
-	 * Inserts 17-bits of data (3 bytes) into the send buffer.
+	 * Inserts 17-bits of data (3 bytes) into the send bufferList.
 	 * 
 	 * @param data
 	 *            17 bits (3 bytes) of data
@@ -267,9 +267,9 @@ public class MC68332 {
 		// TODO check this:
 		// sendData[Dispatch.PACKET_DATA_OFFSET + offset] = (byte) (((data >>>
 		// 9) & 0x7F) | 0x80);
-		sendData[Dispatch.PACKET_DATA_OFFSET + offset] = (byte) ((data >>> 9) & 0x7F);
-		sendData[Dispatch.PACKET_DATA_OFFSET + offset + 1] = (byte) ((data >>> 1) & 0xFF);
-		sendData[Dispatch.PACKET_DATA_OFFSET + offset + 2] = (byte) ((data & 0x01) << 7);
+		sendData[DataPacket.PACKET_DATA_OFFSET + offset] = (byte) ((data >>> 9) & 0x7F);
+		sendData[DataPacket.PACKET_DATA_OFFSET + offset + 1] = (byte) ((data >>> 1) & 0xFF);
+		sendData[DataPacket.PACKET_DATA_OFFSET + offset + 2] = (byte) ((data & 0x01) << 7);
 	}
 
 	/**
@@ -497,16 +497,16 @@ public class MC68332 {
 			}
 			while (currentIndex < dataLength) {
 				// FILLB
-				sendData[Dispatch.PACKET_DATA_OFFSET + currentIndex * 4] = (byte) ((FILLB >>> 8) & 0xFF);
-				sendData[Dispatch.PACKET_DATA_OFFSET + currentIndex * 4 + 1] = (byte) (FILLB & 0xFF);
+				sendData[DataPacket.PACKET_DATA_OFFSET + currentIndex * 4] = (byte) ((FILLB >>> 8) & 0xFF);
+				sendData[DataPacket.PACKET_DATA_OFFSET + currentIndex * 4 + 1] = (byte) (FILLB & 0xFF);
 				// DATA (address)
-				sendData[Dispatch.PACKET_DATA_OFFSET + currentIndex * 4 + 2] = 0;
-				sendData[Dispatch.PACKET_DATA_OFFSET + currentIndex * 4 + 3] = (byte) (downloadData[currentIndex] & 0xFF);
+				sendData[DataPacket.PACKET_DATA_OFFSET + currentIndex * 4 + 2] = 0;
+				sendData[DataPacket.PACKET_DATA_OFFSET + currentIndex * 4 + 3] = (byte) (downloadData[currentIndex] & 0xFF);
 				currentIndex++;
 			}
 			// send NOP to get result of last write
-			sendData[Dispatch.PACKET_DATA_OFFSET + currentIndex * 4] = NOP;
-			sendData[Dispatch.PACKET_DATA_OFFSET + currentIndex * 4 + 1] = NOP;
+			sendData[DataPacket.PACKET_DATA_OFFSET + currentIndex * 4] = NOP;
+			sendData[DataPacket.PACKET_DATA_OFFSET + currentIndex * 4 + 1] = NOP;
 			data = transmit(STYPE_BDI_17FILL_BYTE_WORD, dataLength * 4 + 2);
 			break;
 		case 2:
@@ -516,16 +516,16 @@ public class MC68332 {
 			}
 			while (currentIndex < dataLength) {
 				// FILLW
-				sendData[Dispatch.PACKET_DATA_OFFSET + currentIndex * 4] = (byte) ((FILLW >>> 8) & 0xFF);
-				sendData[Dispatch.PACKET_DATA_OFFSET + currentIndex * 4 + 1] = (byte) (FILLW & 0xFF);
+				sendData[DataPacket.PACKET_DATA_OFFSET + currentIndex * 4] = (byte) ((FILLW >>> 8) & 0xFF);
+				sendData[DataPacket.PACKET_DATA_OFFSET + currentIndex * 4 + 1] = (byte) (FILLW & 0xFF);
 				// DATA (address)
-				sendData[Dispatch.PACKET_DATA_OFFSET + currentIndex * 4 + 2] = (byte) ((downloadData[currentIndex] >>> 8) & 0xFF);
-				sendData[Dispatch.PACKET_DATA_OFFSET + currentIndex * 4 + 3] = (byte) (downloadData[currentIndex] & 0xFF);
+				sendData[DataPacket.PACKET_DATA_OFFSET + currentIndex * 4 + 2] = (byte) ((downloadData[currentIndex] >>> 8) & 0xFF);
+				sendData[DataPacket.PACKET_DATA_OFFSET + currentIndex * 4 + 3] = (byte) (downloadData[currentIndex] & 0xFF);
 				currentIndex++;
 			}
 			// send NOP to get result of last write
-			sendData[Dispatch.PACKET_DATA_OFFSET + currentIndex * 4] = NOP;
-			sendData[Dispatch.PACKET_DATA_OFFSET + currentIndex * 4 + 1] = NOP;
+			sendData[DataPacket.PACKET_DATA_OFFSET + currentIndex * 4] = NOP;
+			sendData[DataPacket.PACKET_DATA_OFFSET + currentIndex * 4 + 1] = NOP;
 			data = transmit(STYPE_BDI_17FILL_BYTE_WORD, dataLength * 4 + 2);
 			break;
 		case 4:
@@ -535,19 +535,19 @@ public class MC68332 {
 			}
 			while (currentIndex < dataLength) {
 				// FILL
-				sendData[Dispatch.PACKET_DATA_OFFSET + currentIndex * 6] = (byte) ((FILLL >>> 8) & 0xFF);
-				sendData[Dispatch.PACKET_DATA_OFFSET + currentIndex * 6 + 1] = (byte) (FILLL & 0xFF);
+				sendData[DataPacket.PACKET_DATA_OFFSET + currentIndex * 6] = (byte) ((FILLL >>> 8) & 0xFF);
+				sendData[DataPacket.PACKET_DATA_OFFSET + currentIndex * 6 + 1] = (byte) (FILLL & 0xFF);
 				// MS data
-				sendData[Dispatch.PACKET_DATA_OFFSET + currentIndex * 6 + 2] = (byte) ((downloadData[currentIndex] >>> 24) & 0xFF);
-				sendData[Dispatch.PACKET_DATA_OFFSET + currentIndex * 6 + 3] = (byte) ((downloadData[currentIndex] >>> 16) & 0xFF);
+				sendData[DataPacket.PACKET_DATA_OFFSET + currentIndex * 6 + 2] = (byte) ((downloadData[currentIndex] >>> 24) & 0xFF);
+				sendData[DataPacket.PACKET_DATA_OFFSET + currentIndex * 6 + 3] = (byte) ((downloadData[currentIndex] >>> 16) & 0xFF);
 				// LS data
-				sendData[Dispatch.PACKET_DATA_OFFSET + currentIndex * 6 + 4] = (byte) ((downloadData[currentIndex] >>> 8) & 0xFF);
-				sendData[Dispatch.PACKET_DATA_OFFSET + currentIndex * 6 + 5] = (byte) (downloadData[currentIndex] & 0xFF);
+				sendData[DataPacket.PACKET_DATA_OFFSET + currentIndex * 6 + 4] = (byte) ((downloadData[currentIndex] >>> 8) & 0xFF);
+				sendData[DataPacket.PACKET_DATA_OFFSET + currentIndex * 6 + 5] = (byte) (downloadData[currentIndex] & 0xFF);
 				currentIndex++;
 			}
 			// send NOP to get result of last write
-			sendData[Dispatch.PACKET_DATA_OFFSET + currentIndex * 6] = NOP;
-			sendData[Dispatch.PACKET_DATA_OFFSET + currentIndex * 6 + 1] = NOP;
+			sendData[DataPacket.PACKET_DATA_OFFSET + currentIndex * 6] = NOP;
+			sendData[DataPacket.PACKET_DATA_OFFSET + currentIndex * 6 + 1] = NOP;
 			data = transmit(STYPE_BDI_17FILL_LONG, dataLength * 6 + 2);
 			System.out.println("FILL: Transmit: " + (dataLength * 6 + 2));
 			break;
@@ -595,11 +595,11 @@ public class MC68332 {
 			// fill the packet with {DUMPB} + 1 NOP at the end
 			int i;
 			for (i = 0; i < nofData; i++) {
-				sendData[Dispatch.PACKET_DATA_OFFSET + i * 2] = (byte) ((DUMPB >>> 8) & 0xFF);
-				sendData[Dispatch.PACKET_DATA_OFFSET + i * 2 + 1] = (byte) (DUMPB & 0xFF);
+				sendData[DataPacket.PACKET_DATA_OFFSET + i * 2] = (byte) ((DUMPB >>> 8) & 0xFF);
+				sendData[DataPacket.PACKET_DATA_OFFSET + i * 2 + 1] = (byte) (DUMPB & 0xFF);
 			}
-			sendData[Dispatch.PACKET_DATA_OFFSET + i * 2] = (byte) ((NOP >>> 8) & 0xFF);
-			sendData[Dispatch.PACKET_DATA_OFFSET + i * 2 + 1] = (byte) (NOP & 0xFF);
+			sendData[DataPacket.PACKET_DATA_OFFSET + i * 2] = (byte) ((NOP >>> 8) & 0xFF);
+			sendData[DataPacket.PACKET_DATA_OFFSET + i * 2 + 1] = (byte) (NOP & 0xFF);
 			dataSize = i * 2 + 2;
 			break;
 		case 2:
@@ -607,11 +607,11 @@ public class MC68332 {
 				nofData = MAX_NOF_BYTES_WORDS_FILL;
 			// fill the packet with {DUMPW} + 1 NOP at the end
 			for (i = 0; i < nofData; i++) {
-				sendData[Dispatch.PACKET_DATA_OFFSET + i * 2] = (byte) ((DUMPW >>> 8) & 0xFF);
-				sendData[Dispatch.PACKET_DATA_OFFSET + i * 2 + 1] = (byte) (DUMPW & 0xFF);
+				sendData[DataPacket.PACKET_DATA_OFFSET + i * 2] = (byte) ((DUMPW >>> 8) & 0xFF);
+				sendData[DataPacket.PACKET_DATA_OFFSET + i * 2 + 1] = (byte) (DUMPW & 0xFF);
 			}
-			sendData[Dispatch.PACKET_DATA_OFFSET + i * 2] = (byte) ((NOP >>> 8) & 0xFF);
-			sendData[Dispatch.PACKET_DATA_OFFSET + i * 2 + 1] = (byte) (NOP & 0xFF);
+			sendData[DataPacket.PACKET_DATA_OFFSET + i * 2] = (byte) ((NOP >>> 8) & 0xFF);
+			sendData[DataPacket.PACKET_DATA_OFFSET + i * 2 + 1] = (byte) (NOP & 0xFF);
 			dataSize = i * 2 + 2;
 			break;
 		case 4:
@@ -619,13 +619,13 @@ public class MC68332 {
 				nofData = MAX_NOF_LONGS_FILL;
 			// fill the packet with {DUMPL + NOP} + 1 NOP at the end
 			for (i = 0; i < nofData; i++) {
-				sendData[Dispatch.PACKET_DATA_OFFSET + i * 4] = (byte) ((DUMPL >>> 8) & 0xFF);
-				sendData[Dispatch.PACKET_DATA_OFFSET + i * 4 + 1] = (byte) (DUMPL & 0xFF);
-				sendData[Dispatch.PACKET_DATA_OFFSET + i * 4 + 2] = (byte) ((NOP >>> 8) & 0xFF);
-				sendData[Dispatch.PACKET_DATA_OFFSET + i * 4 + 3] = (byte) (NOP & 0xFF);
+				sendData[DataPacket.PACKET_DATA_OFFSET + i * 4] = (byte) ((DUMPL >>> 8) & 0xFF);
+				sendData[DataPacket.PACKET_DATA_OFFSET + i * 4 + 1] = (byte) (DUMPL & 0xFF);
+				sendData[DataPacket.PACKET_DATA_OFFSET + i * 4 + 2] = (byte) ((NOP >>> 8) & 0xFF);
+				sendData[DataPacket.PACKET_DATA_OFFSET + i * 4 + 3] = (byte) (NOP & 0xFF);
 			}
-			sendData[Dispatch.PACKET_DATA_OFFSET + i * 4] = (byte) ((NOP >>> 8) & 0xFF);
-			sendData[Dispatch.PACKET_DATA_OFFSET + i * 4 + 1] = (byte) (NOP & 0xFF);
+			sendData[DataPacket.PACKET_DATA_OFFSET + i * 4] = (byte) ((NOP >>> 8) & 0xFF);
+			sendData[DataPacket.PACKET_DATA_OFFSET + i * 4 + 1] = (byte) (NOP & 0xFF);
 			dataSize = i * 4 + 2;
 			break;
 		default:

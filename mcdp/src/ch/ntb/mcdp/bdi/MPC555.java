@@ -124,18 +124,18 @@ public class MPC555 {
 	}
 
 	private static void initPacket(byte STYPE, int dataLength) {
-		sendData[0] = Dispatch.PACKET_HEADER;
+		sendData[0] = DataPacket.PACKET_HEADER;
 		sendData[1] = Dispatch.MTYPE_BDI;
 		sendData[2] = STYPE;
 		sendData[3] = (byte) (dataLength / 0x100); // length
 		sendData[4] = (byte) (dataLength & 0xFF);
-		sendData[Dispatch.PACKET_DATA_OFFSET + dataLength] = Dispatch.PACKET_END;
+		sendData[DataPacket.PACKET_DATA_OFFSET + dataLength] = DataPacket.PACKET_END;
 	}
 
 	private static DataPacket transmit(int dataLength) throws USBException,
 			DispatchException, BDIException {
 		// write USB-command
-		USBDevice.write(sendData, dataLength + DataPacket.PACKET_MIN_LENGTH);
+		USBDevice.write_BDI(sendData, dataLength + DataPacket.PACKET_MIN_LENGTH);
 
 		// read result
 		DataPacket data = Dispatch.readBDI();
@@ -161,11 +161,11 @@ public class MPC555 {
 			b |= 0x20;
 		}
 		b |= (byte) (data >>> 27);
-		sendData[Dispatch.PACKET_DATA_OFFSET + offset] = b;
-		sendData[Dispatch.PACKET_DATA_OFFSET + offset + 1] = (byte) ((data >>> 19) & 0xFF);
-		sendData[Dispatch.PACKET_DATA_OFFSET + offset + 2] = (byte) ((data >>> 11) & 0xFF);
-		sendData[Dispatch.PACKET_DATA_OFFSET + offset + 3] = (byte) ((data >>> 3) & 0xFF);
-		sendData[Dispatch.PACKET_DATA_OFFSET + offset + 4] = (byte) ((data & 0x07) << 5);
+		sendData[DataPacket.PACKET_DATA_OFFSET + offset] = b;
+		sendData[DataPacket.PACKET_DATA_OFFSET + offset + 1] = (byte) ((data >>> 19) & 0xFF);
+		sendData[DataPacket.PACKET_DATA_OFFSET + offset + 2] = (byte) ((data >>> 11) & 0xFF);
+		sendData[DataPacket.PACKET_DATA_OFFSET + offset + 3] = (byte) ((data >>> 3) & 0xFF);
+		sendData[DataPacket.PACKET_DATA_OFFSET + offset + 4] = (byte) ((data & 0x07) << 5);
 	}
 
 	private static DataPacket transfer(boolean modeBit, boolean controlBit,
