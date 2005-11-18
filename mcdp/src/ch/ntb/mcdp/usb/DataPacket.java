@@ -11,6 +11,22 @@ public class DataPacket {
 
 	public byte[] data;
 
+	/**
+	 * offset to the first byte of data
+	 */
+	public static final byte PACKET_DATA_OFFSET = 5;
+
+	/**
+	 * last byte of packet
+	 */
+	public static final byte PACKET_END = 0x1F;
+
+	// Packet Constants
+	/**
+	 * first byte of header
+	 */
+	public static final byte PACKET_HEADER = 0x5B;
+
 	DataPacket(int subtype, byte[] data) {
 		this.subtype = subtype;
 		this.data = data;

@@ -7,22 +7,6 @@ import ch.ntb.usb.USBException;
 
 public class Dispatch {
 
-	// Packet Constants
-	/**
-	 * first byte of header
-	 */
-	public static final byte PACKET_HEADER = 0x5B;
-
-	/**
-	 * last byte of packet
-	 */
-	public static final byte PACKET_END = 0x1F;
-
-	/**
-	 * offset to the first byte of data
-	 */
-	public static final byte PACKET_DATA_OFFSET = 5;
-
 	// Main Types
 	/**
 	 * general errors
@@ -30,14 +14,14 @@ public class Dispatch {
 	public static final byte MTYPE_ERROR = 0x01;
 
 	/**
-	 * BDI specific errors
+	 * BDI specific packets
 	 */
 	public static final byte MTYPE_BDI = 0x02;
 
 	/**
-	 * UART specific errors
+	 * UART specific packets
 	 */
-	public static final byte MTYPE_UART_0 = 0x03;
+	public static final byte MTYPE_UART = 0x03;
 
 	// Sub Types
 	// ERRORS
@@ -58,16 +42,16 @@ public class Dispatch {
 
 	private static byte[] usbData = new byte[USB.MAX_DATA_SIZE];
 
-	private static LinkedList<DataPacket> bdiData, uart0Data;
+	private static LinkedList<DataPacket> bdiData, uartData;
 
 	static {
 		bdiData = new LinkedList<DataPacket>();
-		uart0Data = new LinkedList<DataPacket>();
+		uartData = new LinkedList<DataPacket>();
 	}
 
 	public static void emptyBuffers() {
 		bdiData.clear();
-		uart0Data.clear();
+		uartData.clear();
 	}
 
 	private static void dispatch(byte[] data, int size)
@@ -75,14 +59,14 @@ public class Dispatch {
 		int index = 0, mainType, subtype;
 		byte[] packetData;
 		while (index < size) {
-			if (data[index++] != PACKET_HEADER) {
+			if (data[index++] != DataPacket.PACKET_HEADER) {
 				throw new DispatchException("PACKET_HEADER wrong: "
 						+ data[index - 1]);
 			}
 			mainType = data[index++];
 			subtype = data[index++];
 			int dataLen = data[index++] * 0x100 + data[index++];
-			if (data[index + dataLen] != PACKET_END) {
+			if (data[index + dataLen] != DataPacket.PACKET_END) {
 				throw new DispatchException("PACKET_END or packetLen ("
 						+ dataLen + " bytes) wrong");
 			}
@@ -111,13 +95,13 @@ public class Dispatch {
 				}
 				bdiData.add(new DataPacket(subtype, packetData));
 				break;
-			case MTYPE_UART_0:
+			case MTYPE_UART:
 				packetData = new byte[dataLen];
 				// copy data to uartData
 				for (int i = 0; i < dataLen; i++) {
 					packetData[i] = data[index + i];
 				}
-				uart0Data.add(new DataPacket(subtype, packetData));
+				uartData.add(new DataPacket(subtype, packetData));
 				break;
 			default:
 				throw new DispatchException("Unknown MTYPE: " + mainType);
@@ -130,17 +114,17 @@ public class Dispatch {
 		if (!bdiData.isEmpty()) {
 			return bdiData.poll();
 		}
-		int dataLength = USBDevice.read(usbData, USB.MAX_DATA_SIZE);
+		int dataLength = USBDevice.read_BDI(usbData, USB.MAX_DATA_SIZE);
 		dispatch(usbData, dataLength);
 		return bdiData.poll();
 	}
 
-	public static DataPacket readUART0() throws USBException, DispatchException {
-		if (!uart0Data.isEmpty()) {
-			return uart0Data.poll();
+	public static DataPacket readUART() throws USBException, DispatchException {
+		if (!uartData.isEmpty()) {
+			return uartData.poll();
 		}
-		int dataLength = USBDevice.read(usbData, USB.MAX_DATA_SIZE);
+		int dataLength = USBDevice.read_UART(usbData, USB.MAX_DATA_SIZE);
 		dispatch(usbData, dataLength);
-		return uart0Data.poll();
+		return uartData.poll();
 	}
 }
