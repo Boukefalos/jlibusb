@@ -1,10 +1,6 @@
 package ch.ntb.mcdp.uart;
 
-import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.LinkedList;
-
-import ch.ntb.mcdp.usb.DataPacket;
 
 public class Uart0 extends Uart {
 	

@@ -5,8 +5,10 @@ import ch.ntb.mcdp.dict.Register;
 public class MPC555Register extends Register {
 
 	// Register Types
-	static final String[] types = new String[] { "GPR", "FPR", "SPR", "MSR",
-			"CR", "FPSCR", "CtrlReg" };
+	static {
+		types = new String[] { "GPR", "FPR", "SPR", "MSR", "CR", "FPSCR",
+				"CtrlReg" };
+	}
 
 	static final int GPR = 0;
 
@@ -22,7 +24,7 @@ public class MPC555Register extends Register {
 
 	static final int CtrlReg = 6;
 
-	protected MPC555Register(String name, int type, int value, int size,
+	public MPC555Register(String name, int type, int value, int size,
 			String description) {
 		super(name, type, value, size, description);
 	}

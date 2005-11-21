@@ -3,7 +3,7 @@ package ch.ntb.mcdp.dict;
 public class Register {
 
 	// Register Types
-	public static String[] types = null;
+	protected static String[] types = null;
 
 	public Register(String name, int type, int value, int size,
 			String description) {
@@ -28,5 +28,9 @@ public class Register {
 	public String toString() {
 		return new String(name + "\t" + types[type] + "\t0x"
 				+ Integer.toHexString(value) + "\t" + size + "\t" + description);
+	}
+	
+	public String[] getTypes(){
+		return types;		
 	}
 }
