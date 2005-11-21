@@ -1,0 +1,24 @@
+<?xml version='1.0' encoding='utf-8'?>
+
+<!-- DTD for MPC555 memoryMap. -->
+
+<!ELEMENT memorymap (device+)>
+<!ELEMENT device (attributes, segment+)>
+<!ATTLIST device
+		type CDATA #REQUIRED
+		width (1|2|4) #REQUIRED>
+<!ELEMENT segment (attributes?, base, size, subsegment*)>
+<!ATTLIST segment
+		name CDATA #REQUIRED>
+<!ELEMENT subsegment (attributes?, base?, size?, subsegment*)>
+<!ATTLIST subsegment
+		name CDATA #REQUIRED>
+<!ELEMENT attributes (read?, write?, const?, code?, var?, sysconst?, heap?, stack?)>
+<!ELEMENT read EMPTY>
+<!ELEMENT write EMPTY>
+<!ELEMENT const EMPTY>
+<!ELEMENT code EMPTY>
+<!ELEMENT var EMPTY>
+<!ELEMENT sysconst EMPTY>
+<!ELEMENT heap EMPTY>
+<!ELEMENT stack EMPTY>

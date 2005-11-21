@@ -1,332 +1,463 @@
 <?xml version='1.0' encoding='utf-8'?>
 
-<!--  Register Definitions for the Motorola MC68332 Microcontroller  -->
+<!--  Register Definitions for the Motorola MPC555 Microcontroller  -->
 <!DOCTYPE registerDefinitions SYSTEM "registerDictionary.dtd">
 
 <registerDefinitions>
-	<register name="R0" type="GPR" value="0" size="4">
-		<description></description>
+	<!-- General Purpose Registers -->
+	<register name="GPR0" type="GPR" value="0" size="4">
+		<description>General Purpose Register 0</description>
 	</register>
-	<register name="R1" type="GPR" value="1" size="4">
-		<description></description>
+	<register name="GPR1" type="GPR" value="1" size="4">
+		<description>General Purpose Register 1</description>
 	</register>
-	<register name="R2" type="GPR" value="2" size="4">
-		<description></description>
+	<register name="GPR2" type="GPR" value="2" size="4">
+		<description>General Purpose Register 2</description>
 	</register>
-	<register name="R3" type="GPR" value="3" size="4">
-		<description></description>
+	<register name="GPR3" type="GPR" value="3" size="4">
+		<description>General Purpose Register 3</description>
 	</register>
-	<register name="R4" type="GPR" value="4" size="4">
-		<description></description>
+	<register name="GPR4" type="GPR" value="4" size="4">
+		<description>General Purpose Register 4</description>
 	</register>
-	<register name="R5" type="GPR" value="5" size="4">
-		<description></description>
+	<register name="GPR5" type="GPR" value="5" size="4">
+		<description>General Purpose Register 5</description>
 	</register>
-	<register name="R6" type="GPR" value="6" size="4">
-		<description></description>
+	<register name="GPR6" type="GPR" value="6" size="4">
+		<description>General Purpose Register 6</description>
 	</register>
-	<register name="R7" type="GPR" value="7" size="4">
-		<description></description>
+	<register name="GPR7" type="GPR" value="7" size="4">
+		<description>General Purpose Register 7</description>
 	</register>
-	<register name="R8" type="GPR" value="8" size="4">
-		<description></description>
+	<register name="GPR8" type="GPR" value="8" size="4">
+		<description>General Purpose Register 8</description>
 	</register>
-	<register name="R9" type="GPR" value="9" size="4">
-		<description></description>
+	<register name="GPR9" type="GPR" value="9" size="4">
+		<description>General Purpose Register 9</description>
 	</register>
-	<register name="R10" type="GPR" value="10" size="4">
-		<description></description>
+	<register name="GPR10" type="GPR" value="10" size="4">
+		<description>General Purpose Register 10</description>
 	</register>
-	<register name="R11" type="GPR" value="11" size="4">
-		<description></description>
+	<register name="GPR11" type="GPR" value="11" size="4">
+		<description>General Purpose Register 11</description>
 	</register>
-	<register name="R12" type="GPR" value="12" size="4">
-		<description></description>
+	<register name="GPR12" type="GPR" value="12" size="4">
+		<description>General Purpose Register 12</description>
 	</register>
-	<register name="R13" type="GPR" value="13" size="4">
-		<description></description>
+	<register name="GPR13" type="GPR" value="13" size="4">
+		<description>General Purpose Register 13</description>
 	</register>
-	<register name="R14" type="GPR" value="14" size="4">
-		<description></description>
+	<register name="GPR14" type="GPR" value="14" size="4">
+		<description>General Purpose Register 14</description>
 	</register>
-	<register name="R15" type="GPR" value="15" size="4">
-		<description></description>
+	<register name="GPR15" type="GPR" value="15" size="4">
+		<description>General Purpose Register 15</description>
 	</register>
-	<register name="R16" type="GPR" value="16" size="4">
-		<description></description>
+	<register name="GPR16" type="GPR" value="16" size="4">
+		<description>General Purpose Register 16</description>
 	</register>
-	<register name="R17" type="GPR" value="17" size="4">
-		<description></description>
+	<register name="GPR17" type="GPR" value="17" size="4">
+		<description>General Purpose Register 17</description>
 	</register>
-	<register name="R18" type="GPR" value="18" size="4">
-		<description></description>
+	<register name="GPR18" type="GPR" value="18" size="4">
+		<description>General Purpose Register 18</description>
 	</register>
-	<register name="R19" type="GPR" value="19" size="4">
-		<description></description>
+	<register name="GPR19" type="GPR" value="19" size="4">
+		<description>General Purpose Register 19</description>
 	</register>
-	<register name="R20" type="GPR" value="20" size="4">
-		<description></description>
+	<register name="GPR20" type="GPR" value="20" size="4">
+		<description>General Purpose Register 20</description>
 	</register>
-	<register name="R21" type="GPR" value="21" size="4">
-		<description></description>
+	<register name="GPR21" type="GPR" value="21" size="4">
+		<description>General Purpose Register 21</description>
 	</register>
-	<register name="R22" type="GPR" value="22" size="4">
-		<description></description>
+	<register name="GPR22" type="GPR" value="22" size="4">
+		<description>General Purpose Register 22</description>
 	</register>
-	<register name="R23" type="GPR" value="23" size="4">
-		<description></description>
+	<register name="GPR23" type="GPR" value="23" size="4">
+		<description>General Purpose Register 23</description>
 	</register>
-	<register name="R24" type="GPR" value="24" size="4">
-		<description></description>
+	<register name="GPR24" type="GPR" value="24" size="4">
+		<description>General Purpose Register 24</description>
 	</register>
-	<register name="R25" type="GPR" value="25" size="4">
-		<description></description>
+	<register name="GPR25" type="GPR" value="25" size="4">
+		<description>General Purpose Register 25</description>
 	</register>
-	<register name="R26" type="GPR" value="26" size="4">
-		<description></description>
+	<register name="GPR26" type="GPR" value="26" size="4">
+		<description>General Purpose Register 26</description>
 	</register>
-	<register name="R27" type="GPR" value="27" size="4">
-		<description></description>
+	<register name="GPR27" type="GPR" value="27" size="4">
+		<description>General Purpose Register 27</description>
 	</register>
-	<register name="R28" type="GPR" value="28" size="4">
-		<description></description>
+	<register name="GPR28" type="GPR" value="28" size="4">
+		<description>General Purpose Register 28</description>
 	</register>
-	<register name="R29" type="GPR" value="29" size="4">
-		<description></description>
+	<register name="GPR29" type="GPR" value="29" size="4">
+		<description>General Purpose Register 29</description>
 	</register>
-	<register name="R30" type="GPR" value="30" size="4">
-		<description></description>
+	<register name="GPR30" type="GPR" value="30" size="4">
+		<description>General Purpose Register 30</description>
 	</register>
-	<register name="R31" type="GPR" value="31" size="4">
-		<description></description>
+	<register name="GPR31" type="GPR" value="31" size="4">
+		<description>General Purpose Register 31</description>
 	</register>
+
+	<!-- Floating-Point Registers -->
 	<register name="FPR0" type="FPR" value="0" size="4">
-		<description></description>
+		<description>Floating-Point Register 0</description>
 	</register>
 	<register name="FPR1" type="FPR" value="1" size="4">
-		<description></description>
+		<description>Floating-Point Register 1</description>
 	</register>
 	<register name="FPR2" type="FPR" value="2" size="4">
-		<description></description>
+		<description>Floating-Point Register 2</description>
 	</register>
 	<register name="FPR3" type="FPR" value="3" size="4">
-		<description></description>
+		<description>Floating-Point Register 3</description>
 	</register>
 	<register name="FPR4" type="FPR" value="4" size="4">
-		<description></description>
+		<description>Floating-Point Register 4</description>
 	</register>
 	<register name="FPR5" type="FPR" value="5" size="4">
-		<description></description>
+		<description>Floating-Point Register 5</description>
 	</register>
 	<register name="FPR6" type="FPR" value="6" size="4">
-		<description></description>
+		<description>Floating-Point Register 6</description>
 	</register>
 	<register name="FPR7" type="FPR" value="7" size="4">
-		<description></description>
+		<description>Floating-Point Register 7</description>
 	</register>
 	<register name="FPR8" type="FPR" value="8" size="4">
-		<description></description>
+		<description>Floating-Point Register 8</description>
 	</register>
 	<register name="FPR9" type="FPR" value="9" size="4">
-		<description></description>
+		<description>Floating-Point Register 9</description>
 	</register>
 	<register name="FPR10" type="FPR" value="10" size="4">
-		<description></description>
+		<description>Floating-Point Register 10</description>
 	</register>
 	<register name="FPR11" type="FPR" value="11" size="4">
-		<description></description>
+		<description>Floating-Point Register 11</description>
 	</register>
 	<register name="FPR12" type="FPR" value="12" size="4">
-		<description></description>
+		<description>Floating-Point Register 12</description>
 	</register>
 	<register name="FPR13" type="FPR" value="13" size="4">
-		<description></description>
+		<description>Floating-Point Register 13</description>
 	</register>
 	<register name="FPR14" type="FPR" value="14" size="4">
-		<description></description>
+		<description>Floating-Point Register 14</description>
 	</register>
 	<register name="FPR15" type="FPR" value="15" size="4">
-		<description></description>
+		<description>Floating-Point Register 15</description>
 	</register>
 	<register name="FPR16" type="FPR" value="16" size="4">
-		<description></description>
+		<description>Floating-Point Register 16</description>
 	</register>
 	<register name="FPR17" type="FPR" value="17" size="4">
-		<description></description>
+		<description>Floating-Point Register 17</description>
 	</register>
 	<register name="FPR18" type="FPR" value="18" size="4">
-		<description></description>
+		<description>Floating-Point Register 18</description>
 	</register>
 	<register name="FPR19" type="FPR" value="19" size="4">
-		<description></description>
+		<description>Floating-Point Register 19</description>
 	</register>
 	<register name="FPR20" type="FPR" value="20" size="4">
-		<description></description>
+		<description>Floating-Point Register 20</description>
 	</register>
 	<register name="FPR21" type="FPR" value="21" size="4">
-		<description></description>
+		<description>Floating-Point Register 21</description>
 	</register>
 	<register name="FPR22" type="FPR" value="22" size="4">
-		<description></description>
+		<description>Floating-Point Register 22</description>
 	</register>
 	<register name="FPR23" type="FPR" value="23" size="4">
-		<description></description>
+		<description>Floating-Point Register 23</description>
 	</register>
 	<register name="FPR24" type="FPR" value="24" size="4">
-		<description></description>
+		<description>Floating-Point Register 24</description>
 	</register>
 	<register name="FPR25" type="FPR" value="25" size="4">
-		<description></description>
+		<description>Floating-Point Register 25</description>
 	</register>
 	<register name="FPR26" type="FPR" value="26" size="4">
-		<description></description>
+		<description>Floating-Point Register 26</description>
 	</register>
 	<register name="FPR27" type="FPR" value="27" size="4">
-		<description></description>
+		<description>Floating-Point Register 27</description>
 	</register>
 	<register name="FPR28" type="FPR" value="28" size="4">
-		<description></description>
+		<description>Floating-Point Register 28</description>
 	</register>
 	<register name="FPR29" type="FPR" value="29" size="4">
-		<description></description>
+		<description>Floating-Point Register 29</description>
 	</register>
 	<register name="FPR30" type="FPR" value="30" size="4">
-		<description></description>
+		<description>Floating-Point Register 30</description>
 	</register>
 	<register name="FPR31" type="FPR" value="31" size="4">
-		<description></description>
+		<description>Floating-Point Register 31</description>
 	</register>
+
+	<!-- User-Level SPRs -->
 	<register name="SPR1" type="SPR" value="1" size="4">
-		<description></description>
+		<description>Integer Exception Register (XER)</description>
 	</register>
 	<register name="XER" type="SPR" value="1" size="4">
-		<description></description>
+		<description>Integer Exception Register</description>
 	</register>
 	<register name="SPR8" type="SPR" value="8" size="4">
-		<description></description>
+		<description>Link Register (LR)</description>
 	</register>
 	<register name="LR" type="SPR" value="8" size="4">
-		<description></description>
+		<description>Link Register</description>
 	</register>
 	<register name="SPR9" type="SPR" value="9" size="4">
-		<description></description>
+		<description>Count Register (CTR)</description>
 	</register>
 	<register name="CTR" type="SPR" value="9" size="4">
-		<description></description>
+		<description>Count Register</description>
 	</register>
+	
+	<!-- Supervisor-Level SPRs -->
 	<register name="SPR18" type="SPR" value="18" size="4">
-		<description></description>
+		<description>DAE/ Source Instruction Service Register (DSISR)</description>
 	</register>
 	<register name="DSISR" type="SPR" value="18" size="4">
-		<description></description>
+		<description>DAE/ Source Instruction Service Register</description>
 	</register>
 	<register name="SPR19" type="SPR" value="19" size="4">
-		<description></description>
+		<description>Data Address Register (DAR)</description>
 	</register>
 	<register name="DAR" type="SPR" value="19" size="4">
-		<description></description>
+		<description>Data Address Register</description>
 	</register>
 	<register name="SPR22" type="SPR" value="22" size="4">
-		<description></description>
+		<description>Decrement Register (DEC)</description>
 	</register>
 	<register name="DEC" type="SPR" value="22" size="4">
-		<description></description>
+		<description>Decrement Register</description>
 	</register>
 	<register name="SPR26" type="SPR" value="26" size="4">
-		<description></description>
+		<description>Save and Restore Register 0 (SRR0)</description>
 	</register>
 	<register name="SRR0" type="SPR" value="26" size="4">
-		<description></description>
+		<description>Save and Restore Register 0</description>
 	</register>
 	<register name="SPR27" type="SPR" value="27" size="4">
-		<description></description>
+		<description>Save and Restore Register 1 (SRR0)</description>
 	</register>
 	<register name="SRR1" type="SPR" value="27" size="4">
-		<description></description>
+		<description>Save and Restore Register 1</description>
 	</register>
-	<register name="SPR148" type="SPR" value="148" size="4">
-		<description></description>
+	<register name="SPR80" type="SPR" value="80" size="4">
+		<description>External Interrupt Enable (EIE)</description>
 	</register>
-	<register name="ECR" type="SPR" value="148" size="4">
-		<description></description>
+	<register name="EIE" type="SPR" value="80" size="4">
+		<description>External Interrupt Enable</description>
 	</register>
-	<register name="SPR149" type="SPR" value="149" size="4">
-		<description></description>
+	<register name="SPR81" type="SPR" value="81" size="4">
+		<description>External Interrupt Disable (EID)</description>
 	</register>
-	<register name="DER" type="SPR" value="149" size="4">
-		<description></description>
+	<register name="EID" type="SPR" value="81" size="4">
+		<description>External Interrupt Disable</description>
 	</register>
-	<register name="SPR156" type="SPR" value="156" size="4">
-		<description></description>
+	<register name="SPR82" type="SPR" value="82" size="4">
+		<description>Non-Recoverable Interrupt (NRI)</description>
 	</register>
-	<register name="LCTRL1" type="SPR" value="156" size="4">
-		<description></description>
-	</register>
-	<register name="SPR157" type="SPR" value="157" size="4">
-		<description></description>
-	</register>
-	<register name="LCTRL2" type="SPR" value="157" size="4">
-		<description></description>
-	</register>
-	<register name="SPR158" type="SPR" value="158" size="4">
-		<description></description>
-	</register>
-	<register name="ICTRL" type="SPR" value="158" size="4">
-		<description></description>
-	</register>
-	<register name="SPR268" type="SPR" value="268" size="4">
-		<description></description>
-	</register>
-	<register name="TBL" type="SPR" value="268" size="4">
-		<description></description>
-	</register>
-	<register name="SPR269" type="SPR" value="269" size="4">
-		<description></description>
-	</register>
-	<register name="TBU" type="SPR" value="269" size="4">
-		<description></description>
+	<register name="NRI" type="SPR" value="82" size="4">
+		<description>Non-Recoverable Interrupt</description>
 	</register>
 	<register name="SPR272" type="SPR" value="272" size="4">
-		<description></description>
+		<description>SPR General 0 (SPRG0)</description>
 	</register>
 	<register name="SPRG0" type="SPR" value="272" size="4">
-		<description></description>
+		<description>SPR General 0</description>
 	</register>
 	<register name="SPR273" type="SPR" value="273" size="4">
-		<description></description>
+		<description>SPR General 1 (SPRG1)</description>
 	</register>
 	<register name="SPRG1" type="SPR" value="273" size="4">
-		<description></description>
+		<description>SPR General 1</description>
 	</register>
 	<register name="SPR274" type="SPR" value="274" size="4">
-		<description></description>
+		<description>SPR General 2 (SPRG2)</description>
 	</register>
 	<register name="SPRG2" type="SPR" value="274" size="4">
-		<description></description>
+		<description>SPR General 2</description>
 	</register>
 	<register name="SPR275" type="SPR" value="275" size="4">
-		<description></description>
+		<description>SPR General 3 (SPRG3)</description>
 	</register>
 	<register name="SPRG3" type="SPR" value="275" size="4">
-		<description></description>
+		<description>SPR General 3</description>
 	</register>
 	<register name="SPR284" type="SPR" value="284" size="4">
-		<description></description>
+		<description>Time Base Lower - Write (TBL)</description>
 	</register>
 	<register name="TBL" type="SPR" value="284" size="4">
-		<description></description>
+		<description>Time Base Lower - Write</description>
 	</register>
 	<register name="SPR285" type="SPR" value="285" size="4">
-		<description></description>
+		<description>Time Base Upper - Write (TBU)</description>
 	</register>
 	<register name="TBU" type="SPR" value="285" size="4">
-		<description></description>
+		<description>Time Base Upper - Write</description>
 	</register>
 	<register name="SPR287" type="SPR" value="287" size="4">
-		<description></description>
+		<description>Processor Version Register (PVR)</description>
 	</register>
 	<register name="PVR" type="SPR" value="287" size="4">
-		<description></description>
+		<description>Processor Version Register</description>
+	</register>
+	<register name="SPR560" type="SPR" value="560" size="4">
+		<description>I-Cache Control and Status Register (ICCST)</description>
+	</register>
+	<register name="ICCST" type="SPR" value="560" size="4">
+		<description>I-Cache Control and Status Register</description>
+	</register>
+	<register name="SPR561" type="SPR" value="561" size="4">
+		<description>I-Cache Address Register (ICADR)</description>
+	</register>
+	<register name="ICADR" type="SPR" value="561" size="4">
+		<description>I-Cache Address Register</description>
+	</register>
+	<register name="SPR562" type="SPR" value="562" size="4">
+		<description>I-Cache Data Port (ICDAT)</description>
+	</register>
+	<register name="ICDAT" type="SPR" value="562" size="4">
+		<description>I-Cache Data Port</description>
+	</register>
+	<register name="SPR1022" type="SPR" value="1022" size="4">
+		<description>Floating-Point Exception Cause Register (FPECR)</description>
+	</register>
+	<register name="FPECR" type="SPR" value="1022" size="4">
+		<description>Floating-Point Exception Cause Register</description>
+	</register>
+
+	<!-- Development Support SPRs -->
+	<register name="SPR144" type="SPR" value="144" size="4">
+		<description>Comparator A Value Register (CMPA)</description>
+	</register>
+	<register name="CMPA" type="SPR" value="144" size="4">
+		<description>Comparator A Value Register</description>
+	</register>
+	<register name="SPR145" type="SPR" value="145" size="4">
+		<description>Comparator B Value Register (CMPB)</description>
+	</register>
+	<register name="CMPB" type="SPR" value="145" size="4">
+		<description>Comparator B Value Register</description>
+	</register>
+	<register name="SPR146" type="SPR" value="146" size="4">
+		<description>Comparator C Value Register (CMPC)</description>
+	</register>
+	<register name="CMPC" type="SPR" value="146" size="4">
+		<description>Comparator C Value Register</description>
+	</register>
+	<register name="SPR147" type="SPR" value="147" size="4">
+		<description>Comparator D Value Register (CMPD)</description>
+	</register>
+	<register name="CMPD" type="SPR" value="147" size="4">
+		<description>Comparator D Value Register</description>
+	</register>
+	<register name="SPR148" type="SPR" value="148" size="4">
+		<description>Exception Cause Register (ECR)</description>
+	</register>
+	<register name="ECR" type="SPR" value="148" size="4">
+		<description>Exception Cause Register</description>
+	</register>
+	<register name="SPR149" type="SPR" value="149" size="4">
+		<description>Debug Enable Register (DER)</description>
+	</register>
+	<register name="DER" type="SPR" value="149" size="4">
+		<description>Debug Enable Register</description>
+	</register>
+	<register name="SPR150" type="SPR" value="150" size="4">
+		<description>Breakpoint Counter A Value and Control (COUNTA)</description>
+	</register>
+	<register name="COUNTA" type="SPR" value="150" size="4">
+		<description>Breakpoint Counter A Value and Control</description>
+	</register>
+	<register name="SPR151" type="SPR" value="151" size="4">
+		<description>Breakpoint Counter B Value and Control (COUNTB)</description>
+	</register>
+	<register name="COUNTB" type="SPR" value="151" size="4">
+		<description>Breakpoint Counter B Value and Control</description>
+	</register>
+	<register name="SPR152" type="SPR" value="152" size="4">
+		<description>Comparator E Value Register (CMPE)</description>
+	</register>
+	<register name="CMPE" type="SPR" value="152" size="4">
+		<description>Comparator E Value Register</description>
+	</register>
+	<register name="SPR153" type="SPR" value="153" size="4">
+		<description>Comparator F Value Register (CMPF)</description>
+	</register>
+	<register name="CMPF" type="SPR" value="153" size="4">
+		<description>Comparator F Value Register</description>
+	</register>
+	<register name="SPR154" type="SPR" value="154" size="4">
+		<description>Comparator G Value Register (CMPG)</description>
+	</register>
+	<register name="CMPG" type="SPR" value="154" size="4">
+		<description>Comparator G Value Register</description>
+	</register>
+	<register name="SPR155" type="SPR" value="155" size="4">
+		<description>Comparator H Value Register (CMPH)</description>
+	</register>
+	<register name="CMPH" type="SPR" value="155" size="4">
+		<description>Comparator H Value Register</description>
+	</register>
+	<register name="SPR156" type="SPR" value="156" size="4">
+		<description>L-Bus Support Comparators Control (LCTRL1)</description>
+	</register>
+	<register name="LCTRL1" type="SPR" value="156" size="4">
+		<description>L-Bus Support Comparators Control</description>
+	</register>
+	<register name="SPR157" type="SPR" value="157" size="4">
+		<description>L-Bus Support Comparators Control (LCTRL2)</description>
+	</register>
+	<register name="LCTRL2" type="SPR" value="157" size="4">
+		<description>L-Bus Support Comparators Control</description>
+	</register>
+	<register name="SPR158" type="SPR" value="158" size="4">
+		<description>I-Bus Suupport Control Register (ICTRL)</description>
+	</register>
+	<register name="ICTRL" type="SPR" value="158" size="4">
+		<description>I-Bus Suupport Control Register</description>
+	</register>
+	<register name="SPR159" type="SPR" value="159" size="4">
+		<description>Breakpoint Address Register (BAR)</description>
+	</register>
+	<register name="BAR" type="SPR" value="159" size="4">
+		<description>Breakpoint Address Register</description>
+	</register>
+	<register name="SPR630" type="SPR" value="630" size="4">
+		<description>Development Port Data Register (DPDR)</description>
+	</register>
+	<register name="DPDR" type="SPR" value="630" size="4">
+		<description>Development Port Data Register</description>
+	</register>
+	
+	<!-- USIU Special-Purpose Register -->
+	<register name="SPR268" type="SPR" value="268" size="4">
+		<description>Time Base Lower - Read (TBL)</description>
+	</register>
+	<register name="TBL" type="SPR" value="268" size="4">
+		<description>Time Base Lower - Read</description>
+	</register>
+	<register name="SPR269" type="SPR" value="269" size="4">
+		<description>Time Base Upper - Read (TBU)</description>
+	</register>
+	<register name="TBU" type="SPR" value="269" size="4">
+		<description>Time Base Upper - Read</description>
+	</register>
+	<register name="SPR284" type="SPR" value="284" size="4">
+		<description>Time Base Lower - Write</description>
+	</register>
+	<register name="SPR285" type="SPR" value="285" size="4">
+		<description>Time Base Upper - Write</description>
 	</register>
 	<register name="SPR638" type="SPR" value="638" size="4">
 		<description></description>
@@ -334,37 +465,51 @@
 	<register name="IMMR" type="SPR" value="638" size="4">
 		<description></description>
 	</register>
+
+	<!-- Various Registers -->
 	<register name="MSR" type="MSR" value="1" size="4">
-		<description></description>
+		<description>Machine State Register</description>
 	</register>
 	<register name="CR" type="CR" value="1" size="4">
-		<description></description>
+		<description>Count Register</description>
 	</register>
 	<register name="FPSCR" type="FPSCR" value="1" size="4">
-		<description></description>
+		<description>Floating-Point Status and Control Register</description>
 	</register>
 	<register name="BR0" type="CtrlReg" value="0x2FC100" size="4">
-		<description></description>
+		<description>Memory Control Base Register 0</description>
 	</register>
 	<register name="OR0" type="CtrlReg" value="0x2FC104" size="4">
-		<description></description>
+		<description>Memory Control Option Register 0</description>
 	</register>
 	<register name="BR1" type="CtrlReg" value="0x2FC108" size="4">
-		<description></description>
+		<description>Memory Control Base Register 1</description>
 	</register>
 	<register name="OR1" type="CtrlReg" value="0x2FC10C" size="4">
-		<description></description>
+		<description>Memory Control Option Register 1</description>
+	</register>
+	<register name="BR2" type="CtrlReg" value="0x2FC110" size="4">
+		<description>Memory Control Base Register 2</description>
+	</register>
+	<register name="OR2" type="CtrlReg" value="0x2FC114" size="4">
+		<description>Memory Control Option Register 2</description>
+	</register>
+	<register name="BR3" type="CtrlReg" value="0x2FC118" size="4">
+		<description>Memory Control Base Register 3</description>
+	</register>
+	<register name="OR3" type="CtrlReg" value="0x2FC11C" size="4">
+		<description>Memory Control Option Register 3</description>
 	</register>
 	<register name="DMBR" type="CtrlReg" value="0x2FC140" size="4">
-		<description></description>
+		<description>Dual Mapping Base Register</description>
 	</register>
 	<register name="DMOR" type="CtrlReg" value="0x2FC144" size="4">
-		<description></description>
+		<description>Dual Mapping Option Register</description>
 	</register>
 	<register name="RSR" type="CtrlReg" value="0x2FC288" size="4">
-		<description></description>
+		<description>Reset Status Register</description>
 	</register>
 	<register name="SYPCR" type="CtrlReg" value="0x2FC004" size="4">
-		<description></description>
+		<description>System Protection Control Register</description>
 	</register>
 </registerDefinitions>

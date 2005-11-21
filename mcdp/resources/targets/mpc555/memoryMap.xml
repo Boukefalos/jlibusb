@@ -1,0 +1,414 @@
+<?xml version='1.0' encoding='utf-8'?>
+
+<!--  Memory Map for the Motorola MPC555 Microcontroller  -->
+<!DOCTYPE memorymap SYSTEM "memoryMap.dtd">
+
+<memorymap>
+	<device type="RAM" width="4">
+		<attributes>
+			<read></read>
+			<write></write>
+		</attributes>
+		<segment name="InternalFlashAblock0">
+			<attributes>
+				<read></read>
+				<write></write>
+				<code></code>
+			</attributes>
+			<base>0</base>
+			<size>0x2000</size>
+			<subsegment name="ExcCode">
+				<base>0</base>
+			</subsegment>
+		</segment>
+		<segment name="InternalRAM">
+			<attributes>
+				<read></read>
+				<write></write>
+				<const></const>
+				<code></code>
+				<var></var>
+				<sysconst></sysconst>
+				<heap></heap>
+				<stack></stack>
+			</attributes>
+			<base>ToppcKernel.CintRamBase</base>
+			<size>ToppcKernel.CintRamSize</size>
+			<subsegment name="SysTab">
+				<attributes>
+					<read></read>
+					<write></write>
+					<sysconst></sysconst>
+				</attributes>
+				<base>ToppcKernel.sysTabAdr</base>
+			</subsegment>
+			<subsegment name="SegConst">
+				<attributes>
+					<read></read>
+					<write></write>
+					<const></const>
+				</attributes>
+			</subsegment>
+			<subsegment name="SegCode">
+				<attributes>
+					<read></read>
+					<write></write>
+					<code></code>
+				</attributes>
+			</subsegment>
+			<subsegment name="SegVars">
+				<attributes>
+					<read></read>
+					<write></write>
+					<var></var>
+				</attributes>
+			</subsegment>
+			<subsegment name="Stack">
+				<attributes>
+					<read></read>
+					<write></write>
+					<stack></stack>
+				</attributes>
+				<size>ToppcKernel.stackSize</size>
+			</subsegment>
+		</segment>
+		<segment name="ExternalRAM">
+			<attributes>
+				<read></read>
+				<write></write>
+				<const></const>
+				<code></code>
+				<var></var>
+				<sysconst></sysconst>
+				<heap></heap>
+				<stack></stack>
+			</attributes>
+			<base>ToppcKernel.CextRamBase</base>
+			<size>ToppcKernel.CextRamSize</size>
+			<subsegment name="Heap">
+				<attributes>
+					<read></read>
+					<write></write>
+					<heap></heap>
+				</attributes>
+			</subsegment>
+		</segment>
+	</device>
+	<device type="Ppc555Flash" width="4">
+		<attributes>
+			<read></read>
+		</attributes>
+		<segment name="InternalFlashA">
+			<attributes>
+				<read></read>
+			</attributes>
+			<base>0x2000</base>
+			<size>0x3E000</size>
+		</segment>
+		<segment name="InternalFlashB">
+			<attributes>
+				<read></read>
+			</attributes>
+			<base>0x40000</base>
+			<size>0x30000</size>
+		</segment>
+	</device>
+	<device type="Am29LV160D" width="4">
+		<attributes>
+			<read></read>
+			<const></const>
+			<code></code>
+			<sysconst></sysconst>
+		</attributes>
+		<segment name="ExternalFlash">
+			<base>ToppcKernel.CextRomBase</base>
+			<size>ToppcKernel.CextRomSize</size>
+			<subsegment name="ExcCode">
+				<attributes>
+					<read></read>
+					<code></code>
+				</attributes>
+				<size>ToppcKernel.excpCodeSize</size>
+			</subsegment>
+			<subsegment name="SysTab">
+				<attributes>
+					<read></read>
+					<sysconst></sysconst>
+				</attributes>
+				<size>0x6000</size>
+			</subsegment>
+			<subsegment name="S1">
+				<attributes>
+					<read></read>
+					<const></const>
+					<code></code>
+				</attributes>
+				<size>0x4000</size>
+			</subsegment>
+			<subsegment name="S2">
+				<attributes>
+					<read></read>
+					<const></const>
+					<code></code>
+				</attributes>
+				<size>0x4000</size>
+			</subsegment>
+			<subsegment name="S3">
+				<attributes>
+					<read></read>
+					<const></const>
+					<code></code>
+				</attributes>
+				<size>0x10000</size>
+			</subsegment>
+			<subsegment name="S4">
+				<attributes>
+					<read></read>
+					<const></const>
+					<code></code>
+				</attributes>
+				<size>0x20000</size>
+			</subsegment>
+			<subsegment name="S5">
+				<attributes>
+					<read></read>
+					<const></const>
+					<code></code>
+				</attributes>
+				<size>0x20000</size>
+			</subsegment>
+			<subsegment name="S6">
+				<attributes>
+					<read></read>
+					<const></const>
+					<code></code>
+				</attributes>
+				<size>0x20000</size>
+			</subsegment>
+			<subsegment name="S7">
+				<attributes>
+					<read></read>
+					<const></const>
+					<code></code>
+				</attributes>
+				<size>0x20000</size>
+			</subsegment>
+			<subsegment name="S8">
+				<attributes>
+					<read></read>
+					<const></const>
+					<code></code>
+				</attributes>
+				<size>0x20000</size>
+			</subsegment>
+			<subsegment name="S9">
+				<attributes>
+					<read></read>
+					<const></const>
+					<code></code>
+				</attributes>
+				<size>0x20000</size>
+			</subsegment>
+			<subsegment name="S10">
+				<attributes>
+					<read></read>
+					<const></const>
+					<code></code>
+				</attributes>
+				<size>0x20000</size>
+			</subsegment>
+			<subsegment name="S11">
+				<attributes>
+					<read></read>
+					<const></const>
+					<code></code>
+				</attributes>
+				<size>0x20000</size>
+			</subsegment>
+			<subsegment name="S12">
+				<attributes>
+					<read></read>
+					<const></const>
+					<code></code>
+				</attributes>
+				<size>0x20000</size>
+			</subsegment>
+			<subsegment name="S13">
+				<attributes>
+					<read></read>
+					<const></const>
+					<code></code>
+				</attributes>
+				<size>0x20000</size>
+			</subsegment>
+			<subsegment name="S14">
+				<attributes>
+					<read></read>
+					<const></const>
+					<code></code>
+				</attributes>
+				<size>0x20000</size>
+			</subsegment>
+			<subsegment name="S15">
+				<attributes>
+					<read></read>
+					<const></const>
+					<code></code>
+				</attributes>
+				<size>0x20000</size>
+			</subsegment>
+			<subsegment name="S16">
+				<attributes>
+					<read></read>
+					<const></const>
+					<code></code>
+				</attributes>
+				<size>0x20000</size>
+			</subsegment>
+			<subsegment name="S17">
+				<attributes>
+					<read></read>
+					<const></const>
+					<code></code>
+				</attributes>
+				<size>0x20000</size>
+			</subsegment>
+			<subsegment name="S18">
+				<attributes>
+					<read></read>
+					<const></const>
+					<code></code>
+				</attributes>
+				<size>0x20000</size>
+			</subsegment>
+			<subsegment name="S19">
+				<attributes>
+					<read></read>
+					<const></const>
+					<code></code>
+				</attributes>
+				<size>0x20000</size>
+			</subsegment>
+			<subsegment name="S20">
+				<attributes>
+					<read></read>
+					<const></const>
+					<code></code>
+				</attributes>
+				<size>0x20000</size>
+			</subsegment>
+			<subsegment name="S21">
+				<attributes>
+					<read></read>
+					<const></const>
+					<code></code>
+				</attributes>
+				<size>0x20000</size>
+			</subsegment>
+			<subsegment name="S22">
+				<attributes>
+					<read></read>
+					<const></const>
+					<code></code>
+				</attributes>
+				<size>0x20000</size>
+			</subsegment>
+			<subsegment name="S23">
+				<attributes>
+					<read></read>
+					<const></const>
+					<code></code>
+				</attributes>
+				<size>0x20000</size>
+			</subsegment>
+			<subsegment name="S24">
+				<attributes>
+					<read></read>
+					<const></const>
+					<code></code>
+				</attributes>
+				<size>0x20000</size>
+			</subsegment>
+			<subsegment name="S25">
+				<attributes>
+					<read></read>
+					<const></const>
+					<code></code>
+				</attributes>
+				<size>0x20000</size>
+			</subsegment>
+			<subsegment name="S26">
+				<attributes>
+					<read></read>
+					<const></const>
+					<code></code>
+				</attributes>
+				<size>0x20000</size>
+			</subsegment>
+			<subsegment name="S27">
+				<attributes>
+					<read></read>
+					<const></const>
+					<code></code>
+				</attributes>
+				<size>0x20000</size>
+			</subsegment>
+			<subsegment name="S28">
+				<attributes>
+					<read></read>
+					<const></const>
+					<code></code>
+				</attributes>
+				<size>0x20000</size>
+			</subsegment>
+			<subsegment name="S29">
+				<attributes>
+					<read></read>
+					<const></const>
+					<code></code>
+				</attributes>
+				<size>0x20000</size>
+			</subsegment>
+			<subsegment name="S30">
+				<attributes>
+					<read></read>
+					<const></const>
+					<code></code>
+				</attributes>
+				<size>0x20000</size>
+			</subsegment>
+			<subsegment name="S31">
+				<attributes>
+					<read></read>
+					<const></const>
+					<code></code>
+				</attributes>
+				<size>0x20000</size>
+			</subsegment>
+			<subsegment name="S32">
+				<attributes>
+					<read></read>
+					<const></const>
+					<code></code>
+				</attributes>
+				<size>0x20000</size>
+			</subsegment>
+			<subsegment name="S33">
+				<attributes>
+					<read></read>
+					<const></const>
+					<code></code>
+				</attributes>
+				<size>0x20000</size>
+			</subsegment>
+			<subsegment name="S34">
+				<attributes>
+					<read></read>
+					<const></const>
+					<code></code>
+				</attributes>
+				<size>0x20000</size>
+			</subsegment>
+		</segment>
+	</device>
+</memorymap>
