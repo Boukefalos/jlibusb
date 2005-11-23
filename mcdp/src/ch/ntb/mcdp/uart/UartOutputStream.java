@@ -16,6 +16,7 @@ public class UartOutputStream extends OutputStream {
 	@Override
 	public void write(int b) throws IOException {
 		byte[] data = new byte[1];
+		data[0] = (byte) b;
 		try {
 			UartDispatch.write(packetSubType, data, 1);
 		} catch (USBException e) {
