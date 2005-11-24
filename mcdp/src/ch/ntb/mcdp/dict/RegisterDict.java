@@ -2,7 +2,7 @@ package ch.ntb.mcdp.dict;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.util.Iterator;
 import java.util.LinkedList;
 
@@ -18,11 +18,27 @@ import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
+/**
+ * Representation of a register dictionary. All registers are read from an
+ * xml-file specified by <code>registerDictionary.dtd</code>. Note that the
+ * type values are implementation specific. Therefore each <i>Register</i> has
+ * its own <i>registerDictionary.dtd</i> definition. For an example see
+ * <code>MPC555Register</code> and the corresponding
+ * <code>resources/targets/mpc555/registerDictionary.dtd</code> file.
+ * 
+ * @author schlaepfer
+ */
 public abstract class RegisterDict {
 
 	private LinkedList registers;
 
-	private Class regClass;
+	private Class<? extends Register> regClass;
+
+	private Method regClassGetTypesMethod;
+
+	private static final String GetTypes_METHOD_NAME = "getTypes";
+
+	private String[] types;
 
 	private static final long serialVersionUID = -582382284126896830L;
 
@@ -44,29 +60,58 @@ public abstract class RegisterDict {
 
 	private static final String REG_ATTR_SIZE = "size";
 
-	protected RegisterDict(String registerClass) {
+	/**
+	 * Default constructor which takes the Class object from a
+	 * <code>Register</code> subclass as argument. The registerDict will be of
+	 * this Register-type.<br>
+	 * An example:<br>
+	 * MPC555Register extends Register -> use MPC555Register.class as parameter.
+	 * 
+	 * @param registerClass
+	 *            subclass of Register
+	 */
+	protected RegisterDict(Class<? extends Register> registerClass) {
+		this.regClass = registerClass;
 		try {
-			this.regClass = Class.forName(registerClass);
-		} catch (ClassNotFoundException e) {
+			this.regClassGetTypesMethod = regClass.getMethod(
+					GetTypes_METHOD_NAME, (Class[]) null);
+			this.regClass.newInstance();
+			this.types = (String[]) regClassGetTypesMethod.invoke(
+					(Object[]) null, (Object[]) null);
+		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(1);
 		}
 		this.registers = new LinkedList();
 	}
 
+	/**
+	 * Add a new register to the registerDict.
+	 * 
+	 * @param name
+	 *            name of the register. Registers are identified by this value.
+	 * @param type
+	 *            register specific type
+	 * @param value
+	 *            address or a register specific value (e.g. BDI-identifier)
+	 * @param size
+	 *            size in bytes
+	 * @param description
+	 *            a string description of the register
+	 */
 	@SuppressWarnings("unchecked")
-	protected void add(String name, int type, int value, int size,
+	public void add(String name, int type, int value, int size,
 			String description) {
 		// remove before add for updates
 		for (Iterator i = registers.iterator(); i.hasNext();) {
-			if (((Register)i.next()).name.equals(name)) {
+			if (((Register) i.next()).name.equals(name)) {
 				i.remove();
 			}
 		}
-		Constructor[] regConstructors = regClass.getDeclaredConstructors();
 		Register reg = null;
 		try {
-			reg = (Register) regConstructors[0].newInstance(name, type, value, size, description);
+			reg = (Register) regClass.newInstance();
+			reg.init(name, type, value, size, description);
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(1);
@@ -74,7 +119,7 @@ public abstract class RegisterDict {
 		registers.add(reg);
 	}
 
-	protected int parseInt(String s) {
+	private int parseInt(String s) {
 		if (s == "")
 			return 0;
 		if (s.indexOf('x') > 0) {
@@ -94,6 +139,13 @@ public abstract class RegisterDict {
 		}
 	}
 
+	/**
+	 * Get a register by its name.
+	 * 
+	 * @param name
+	 *            the register name
+	 * @return register on null if no register is found
+	 */
 	public Register getRegister(String name) {
 		for (Iterator i = registers.iterator(); i.hasNext();) {
 			Register r = (Register) i.next();
@@ -104,6 +156,9 @@ public abstract class RegisterDict {
 		return null;
 	}
 
+	/**
+	 * Print a list of Registers to standard out.
+	 */
 	public void printRegisters() {
 		System.out
 				.println("******************** register dictionary *********************");
@@ -122,14 +177,21 @@ public abstract class RegisterDict {
 	 * Adds the registers from the specified xml-file to the register
 	 * dictionary. <br>
 	 * The xml-file must be structured according to
-	 * <code>registerDictionary.dtd</code>. Include
+	 * <code>registerDictionary.dtd</code>. The dtd-file must be adapted to
+	 * the type values specific to this register. Include
 	 * <code><!DOCTYPE registerDefinitions SYSTEM "registerDictionary.dtd"></code>
 	 * in your xml file.
 	 * 
 	 * @param xmlPathname
+	 *            path to the xml file
 	 * @throws IOException
+	 *             throws an IOException if the file is not found
 	 * @throws ParserConfigurationException
+	 *             throws an ParserConfigurationException if the SAX parser
+	 *             can't be configured
 	 * @throws SAXException
+	 *             throws an SAXException if the file could not be successfully
+	 *             parsed
 	 */
 	public void addRegistersFromFile(String xmlPathname) throws IOException,
 			ParserConfigurationException, SAXException {
@@ -189,8 +251,8 @@ public abstract class RegisterDict {
 	}
 
 	protected int convertType(String typeStr) throws SAXException {
-		for (int index = 0; index < Register.types.length; index++) {
-			if (typeStr.equals(Register.types[index])) {
+		for (int index = 0; index < types.length; index++) {
+			if (typeStr.equals(types[index])) {
 				return index;
 			}
 		}

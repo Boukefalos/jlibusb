@@ -24,8 +24,4 @@ public class MPC555Register extends Register {
 
 	static final int CtrlReg = 6;
 
-	public MPC555Register(String name, int type, int value, int size,
-			String description) {
-		super(name, type, value, size, description);
-	}
 }

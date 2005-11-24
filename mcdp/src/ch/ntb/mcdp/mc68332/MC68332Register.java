@@ -21,8 +21,4 @@ public class MC68332Register extends Register {
 
 	static final int CtrlReg = 2;
 
-	public MC68332Register(String name, int type, int value, int size,
-			String description) {
-		super(name, type, value, size, description);
-	}
 }
