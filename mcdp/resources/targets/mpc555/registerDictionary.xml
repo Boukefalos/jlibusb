@@ -219,13 +219,17 @@
 	<register name="CTR" type="SPR" value="9" size="4">
 		<description>Count Register</description>
 	</register>
-	
+
 	<!-- Supervisor-Level SPRs -->
 	<register name="SPR18" type="SPR" value="18" size="4">
-		<description>DAE/ Source Instruction Service Register (DSISR)</description>
+		<description>
+			DAE/ Source Instruction Service Register (DSISR)
+		</description>
 	</register>
 	<register name="DSISR" type="SPR" value="18" size="4">
-		<description>DAE/ Source Instruction Service Register</description>
+		<description>
+			DAE/ Source Instruction Service Register
+		</description>
 	</register>
 	<register name="SPR19" type="SPR" value="19" size="4">
 		<description>Data Address Register (DAR)</description>
@@ -312,7 +316,9 @@
 		<description>Processor Version Register</description>
 	</register>
 	<register name="SPR560" type="SPR" value="560" size="4">
-		<description>I-Cache Control and Status Register (ICCST)</description>
+		<description>
+			I-Cache Control and Status Register (ICCST)
+		</description>
 	</register>
 	<register name="ICCST" type="SPR" value="560" size="4">
 		<description>I-Cache Control and Status Register</description>
@@ -330,10 +336,14 @@
 		<description>I-Cache Data Port</description>
 	</register>
 	<register name="SPR1022" type="SPR" value="1022" size="4">
-		<description>Floating-Point Exception Cause Register (FPECR)</description>
+		<description>
+			Floating-Point Exception Cause Register (FPECR)
+		</description>
 	</register>
 	<register name="FPECR" type="SPR" value="1022" size="4">
-		<description>Floating-Point Exception Cause Register</description>
+		<description>
+			Floating-Point Exception Cause Register
+		</description>
 	</register>
 
 	<!-- Development Support SPRs -->
@@ -374,16 +384,24 @@
 		<description>Debug Enable Register</description>
 	</register>
 	<register name="SPR150" type="SPR" value="150" size="4">
-		<description>Breakpoint Counter A Value and Control (COUNTA)</description>
+		<description>
+			Breakpoint Counter A Value and Control (COUNTA)
+		</description>
 	</register>
 	<register name="COUNTA" type="SPR" value="150" size="4">
-		<description>Breakpoint Counter A Value and Control</description>
+		<description>
+			Breakpoint Counter A Value and Control
+		</description>
 	</register>
 	<register name="SPR151" type="SPR" value="151" size="4">
-		<description>Breakpoint Counter B Value and Control (COUNTB)</description>
+		<description>
+			Breakpoint Counter B Value and Control (COUNTB)
+		</description>
 	</register>
 	<register name="COUNTB" type="SPR" value="151" size="4">
-		<description>Breakpoint Counter B Value and Control</description>
+		<description>
+			Breakpoint Counter B Value and Control
+		</description>
 	</register>
 	<register name="SPR152" type="SPR" value="152" size="4">
 		<description>Comparator E Value Register (CMPE)</description>
@@ -410,19 +428,25 @@
 		<description>Comparator H Value Register</description>
 	</register>
 	<register name="SPR156" type="SPR" value="156" size="4">
-		<description>L-Bus Support Comparators Control (LCTRL1)</description>
+		<description>
+			L-Bus Support Comparators Control (LCTRL1)
+		</description>
 	</register>
 	<register name="LCTRL1" type="SPR" value="156" size="4">
 		<description>L-Bus Support Comparators Control</description>
 	</register>
 	<register name="SPR157" type="SPR" value="157" size="4">
-		<description>L-Bus Support Comparators Control (LCTRL2)</description>
+		<description>
+			L-Bus Support Comparators Control (LCTRL2)
+		</description>
 	</register>
 	<register name="LCTRL2" type="SPR" value="157" size="4">
 		<description>L-Bus Support Comparators Control</description>
 	</register>
 	<register name="SPR158" type="SPR" value="158" size="4">
-		<description>I-Bus Suupport Control Register (ICTRL)</description>
+		<description>
+			I-Bus Suupport Control Register (ICTRL)
+		</description>
 	</register>
 	<register name="ICTRL" type="SPR" value="158" size="4">
 		<description>I-Bus Suupport Control Register</description>
@@ -439,7 +463,7 @@
 	<register name="DPDR" type="SPR" value="630" size="4">
 		<description>Development Port Data Register</description>
 	</register>
-	
+
 	<!-- USIU Special-Purpose Register -->
 	<register name="SPR268" type="SPR" value="268" size="4">
 		<description>Time Base Lower - Read (TBL)</description>
@@ -474,7 +498,9 @@
 		<description>Count Register</description>
 	</register>
 	<register name="FPSCR" type="FPSCR" value="1" size="4">
-		<description>Floating-Point Status and Control Register</description>
+		<description>
+			Floating-Point Status and Control Register
+		</description>
 	</register>
 	<register name="BR0" type="CtrlReg" value="0x2FC100" size="4">
 		<description>Memory Control Base Register 0</description>

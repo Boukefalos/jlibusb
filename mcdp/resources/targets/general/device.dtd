@@ -1,0 +1,37 @@
+<?xml version='1.0' encoding='utf-8'?>
+
+<!-- DTD for memory devices. -->
+
+<!ELEMENT device (attributes, size?, segment+, init?)>
+<!ATTLIST device
+		type CDATA #REQUIRED
+		width (1|2|4) #REQUIRED>
+<!ELEMENT segment (attributes?, base, size, subsegment*, subsegmentList?)>
+<!ATTLIST segment
+		name CDATA #REQUIRED>
+<!ELEMENT subsegment  (attributes?, base?, size?, subsegment*)>
+<!ATTLIST subsegment
+		name CDATA #REQUIRED>
+<!ELEMENT subsegmentList (attributes?, size)>
+<!ATTLIST subsegmentList
+		name CDATA #REQUIRED
+		numberOfEntries CDATA #REQUIRED
+		startID CDATA #IMPLIED>
+<!ELEMENT size (#PCDATA)>
+<!ELEMENT base (#PCDATA)>
+<!ELEMENT attributes EMPTY>
+<!ATTLIST attributes
+		mode (replace | change) #IMPLIED
+		read (add | remove) #IMPLIED
+		write (add | remove) #IMPLIED
+		const (add | remove) #IMPLIED
+		code (add | remove) #IMPLIED
+		var (add | remove) #IMPLIED
+		sysconst (add | remove) #IMPLIED
+		heap (add | remove) #IMPLIED
+		stack (add | remove) #IMPLIED>
+<!ELEMENT init (assignment+)>
+<!ELEMENT assignment (#PCDATA)>
+<!ATTLIST assignment
+		 name CDATA #REQUIRED
+		 type (value | uri) #REQUIRED>

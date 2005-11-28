@@ -1,0 +1,38 @@
+<?xml version='1.0' encoding='utf-8'?>
+
+<!--  External Flash Description for the Motorola MPC555 Microcontroller  -->
+<!DOCTYPE device SYSTEM "../../general/device.dtd">
+
+<device type="Am29LV160D" width="2">
+	<attributes mode="change" read="add"></attributes>
+	<size>0x200000</size>
+	<segment name="ExternalFlash">
+		<base>ToppcKernel.CextRomBase</base>
+		<size>ToppcKernel.CextRomSize</size>
+		<subsegment name="ExcCode">
+			<attributes code="add"></attributes>
+			<size>ToppcKernel.excpCodeSize</size>
+		</subsegment>
+		<subsegment name="SysTab">
+			<attributes sysconst="add"></attributes>
+			<size>0x6000</size>
+		</subsegment>
+		<subsegment name="S1">
+			<attributes const="add" code="add"></attributes>
+			<size>0x4000</size>
+		</subsegment>
+		<subsegment name="S2">
+			<size>0x4000</size>
+		</subsegment>
+		<subsegment name="S3">
+			<size>0x10000</size>
+		</subsegment>
+		<subsegmentList name="S" numberOfEntries="30" startID="4">
+			<size>0x20000</size>
+		</subsegmentList>
+	</segment>
+	<init>
+		<assignment name="BR0" type="uri">ToppcKernel.pBR0</assignment>
+		<assignment name="OR0" type="uri">ToppcKernel.pOR0</assignment>
+	</init>
+</device>

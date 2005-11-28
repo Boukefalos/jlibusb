@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 
-<!--  Memory Map for the Motorola MPC555 Microcontroller  -->
+<!--  Memory Assignment for the Motorola MPC555 Microcontroller  -->
 <!DOCTYPE sysclasses SYSTEM "memoryAssignment.dtd">
 
 <sysclasses>

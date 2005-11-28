@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
+
+<!--  Internal Flash description for the Motorola MPC555 Microcontroller  -->
+<!DOCTYPE device SYSTEM "../../general/device.dtd">
+
+<device type="Ppc555Flash" width="4">
+	<attributes mode="replace" read="add"></attributes>
+	<segment name="InternalFlashA">
+		<base>0x2000</base>
+		<size>0x3E000</size>
+	</segment>
+	<segment name="InternalFlashB">
+		<base>0x40000</base>
+		<size>0x30000</size>
+	</segment>
+</device>
