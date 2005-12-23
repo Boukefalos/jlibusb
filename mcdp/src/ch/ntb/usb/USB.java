@@ -21,8 +21,6 @@ public class USB {
 
 	private static short IdProduct = -1;
 
-	private static int Timeout = 3000;
-
 	private static int Configuration = -1;
 
 	private static int Interface = -1;
@@ -126,7 +124,8 @@ public class USB {
 		}
 	}
 
-	public static void write_EP1(byte[] data, int length) throws USBException {
+	public static void write_EP1(byte[] data, int length, int timeout)
+			throws USBException {
 		if (data == null) {
 			throw new USBException("data must not be null");
 		}
@@ -134,7 +133,7 @@ public class USB {
 			throw new USBException("size must be > 0");
 		}
 		int lenWritten = LibusbWin.usb_bulk_write(usb_dev_handle,
-				OUT_Endpoint_1, data, length, Timeout);
+				OUT_Endpoint_1, data, length, timeout);
 		if (lenWritten < 0) {
 			if (lenWritten == TIMEOUT_ERROR_CODE) {
 				throw new USBTimeoutException("LibusbWin.usb_bulk_write EP1: "
@@ -154,7 +153,8 @@ public class USB {
 		}
 	}
 
-	public static int read_EP1(byte[] data, int size) throws USBException {
+	public static int read_EP1(byte[] data, int size, int timeout)
+			throws USBException {
 		if (data == null) {
 			throw new USBException("data must not be null");
 		}
@@ -162,7 +162,7 @@ public class USB {
 			throw new USBException("size must be > 0");
 		}
 		int lenRead = LibusbWin.usb_bulk_read(usb_dev_handle, IN_Endpoint_1,
-				data, size, Timeout);
+				data, size, timeout);
 		if (lenRead < 0) {
 			if (lenRead == TIMEOUT_ERROR_CODE) {
 				throw new USBTimeoutException("LibusbWin.usb_bulk_read EP1: "
@@ -184,7 +184,8 @@ public class USB {
 		return lenRead;
 	}
 
-	public static void write_EP2(byte[] data, int length) throws USBException {
+	public static void write_EP2(byte[] data, int length, int timeout)
+			throws USBException {
 		if (data == null) {
 			throw new USBException("data must not be null");
 		}
@@ -192,7 +193,7 @@ public class USB {
 			throw new USBException("size must be > 0");
 		}
 		int lenWritten = LibusbWin.usb_bulk_write(usb_dev_handle,
-				OUT_Endpoint_2, data, length, Timeout);
+				OUT_Endpoint_2, data, length, timeout);
 		if (lenWritten < 0) {
 			if (lenWritten == TIMEOUT_ERROR_CODE) {
 				throw new USBTimeoutException("LibusbWin.usb_bulk_write EP2: "
@@ -212,7 +213,8 @@ public class USB {
 		}
 	}
 
-	public static int read_EP2(byte[] data, int size) throws USBException {
+	public static int read_EP2(byte[] data, int size, int timeout)
+			throws USBException {
 		if (data == null) {
 			throw new USBException("data must not be null");
 		}
@@ -220,7 +222,7 @@ public class USB {
 			throw new USBException("size must be > 0");
 		}
 		int lenRead = LibusbWin.usb_bulk_read(usb_dev_handle, IN_Endpoint_2,
-				data, size, Timeout);
+				data, size, timeout);
 		if (lenRead < 0) {
 			if (lenRead == TIMEOUT_ERROR_CODE) {
 				throw new USBTimeoutException("LibusbWin.usb_bulk_read EP2: "
@@ -328,14 +330,6 @@ public class USB {
 
 	public static void setOUT_Endpoint_2(int out_endpoint_2) {
 		OUT_Endpoint_2 = out_endpoint_2;
-	}
-
-	public static int getTimeout() {
-		return Timeout;
-	}
-
-	public static void setTimeout(int timeout) {
-		Timeout = timeout;
 	}
 
 	public static int getAltinterface() {

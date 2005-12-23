@@ -23,7 +23,9 @@ public class USBDevice {
 
 	private static final int IN_Endpoint_UART = 0x88;
 
-	private static final int Timeout = 2000;
+	private static final int BDI_Timeout = 1000;
+
+	private static final int UART_Timeout = 50;
 
 	static {
 		// set data for our device
@@ -36,7 +38,6 @@ public class USBDevice {
 		USB.setIN_Endpoint_1(IN_Endpoint_BDI);
 		USB.setOUT_Endpoint_2(OUT_Endpoint_UART);
 		USB.setIN_Endpoint_2(IN_Endpoint_UART);
-		USB.setTimeout(Timeout);
 		// reset USB
 		USB.reset();
 	}
@@ -54,20 +55,20 @@ public class USBDevice {
 	}
 
 	public static void write_BDI(byte[] data, int length) throws USBException {
-		USB.write_EP1(data, length);
+		USB.write_EP1(data, length, BDI_Timeout);
 	}
 
 	public static synchronized int read_BDI(byte[] data, int size)
 			throws USBException {
-		return USB.read_EP1(data, size);
+		return USB.read_EP1(data, size, BDI_Timeout);
 	}
 
 	public static void write_UART(byte[] data, int length) throws USBException {
-		USB.write_EP2(data, length);
+		USB.write_EP2(data, length, UART_Timeout);
 	}
 
 	public static synchronized int read_UART(byte[] data, int size)
 			throws USBException {
-		return USB.read_EP2(data, size);
+		return USB.read_EP2(data, size, UART_Timeout);
 	}
 }
