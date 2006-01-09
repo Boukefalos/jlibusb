@@ -11,7 +11,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-public class TestApp {
+public class TestApp_old {
 
 	private static final int HEX_WIDTH = 5;
 	private Shell rootShell = null;  //  @jve:decl-index=0:visual-constraint="10,10"
@@ -98,10 +98,10 @@ public class TestApp {
 		vendorID = new Text(vendorIDGroup, SWT.BORDER | SWT.RIGHT);
 		vendorID.setBounds(new org.eclipse.swt.graphics.Rectangle(7,23,76,19));
 		vendorID.setText("0x8235");
-		TestAppUsb.IdVendor = (short) parseInt(vendorID.getText());
+		TestAppUsb_old.IdVendor = (short) parseInt(vendorID.getText());
 		vendorID.addModifyListener(new org.eclipse.swt.events.ModifyListener() {
 			public void modifyText(org.eclipse.swt.events.ModifyEvent e) {
-					TestAppUsb.IdVendor = (short) parseInt(vendorID.getText());			
+					TestAppUsb_old.IdVendor = (short) parseInt(vendorID.getText());			
 			}
 		});
 	}
@@ -116,10 +116,10 @@ public class TestApp {
 		productID = new Text(productIDGroup, SWT.BORDER | SWT.RIGHT);
 		productID.setBounds(new org.eclipse.swt.graphics.Rectangle(4,24,76,19));
 		productID.setText("0x0100");
-		TestAppUsb.IdProduct = (short) parseInt(productID.getText());			
+		TestAppUsb_old.IdProduct = (short) parseInt(productID.getText());			
 		productID.addModifyListener(new org.eclipse.swt.events.ModifyListener() {
 			public void modifyText(org.eclipse.swt.events.ModifyEvent e) {
-				TestAppUsb.IdProduct = (short) parseInt(productID.getText());			
+				TestAppUsb_old.IdProduct = (short) parseInt(productID.getText());			
 			}
 		});
 	}
@@ -136,7 +136,7 @@ public class TestApp {
 		configuration.setText("1");
 		configuration.addModifyListener(new org.eclipse.swt.events.ModifyListener() {
 			public void modifyText(org.eclipse.swt.events.ModifyEvent e) {
-				TestAppUsb.CONFIGURATION = parseInt(configuration.getText());			
+				TestAppUsb_old.CONFIGURATION = parseInt(configuration.getText());			
 			}
 		});
 	}
@@ -153,7 +153,7 @@ public class TestApp {
 		interface_.setText("0");
 		interface_.addModifyListener(new org.eclipse.swt.events.ModifyListener() {
 			public void modifyText(org.eclipse.swt.events.ModifyEvent e) {
-				TestAppUsb.INTERFACE = parseInt(interface_.getText());			
+				TestAppUsb_old.INTERFACE = parseInt(interface_.getText());			
 			}
 		});
 	}
@@ -170,7 +170,7 @@ public class TestApp {
 		altInt.setText("0");
 		altInt.addModifyListener(new org.eclipse.swt.events.ModifyListener() {
 			public void modifyText(org.eclipse.swt.events.ModifyEvent e) {
-				TestAppUsb.ALTINTERFACE = parseInt(altInt.getText());			
+				TestAppUsb_old.ALTINTERFACE = parseInt(altInt.getText());			
 			}
 		});
 	}
@@ -228,7 +228,7 @@ public class TestApp {
 		outEP.setText("0x02");
 		outEP.addModifyListener(new org.eclipse.swt.events.ModifyListener() {
 			public void modifyText(org.eclipse.swt.events.ModifyEvent e) {
-				TestAppUsb.OUT_ENDPOINT = parseInt(outEP.getText());			
+				TestAppUsb_old.OUT_ENDPOINT = parseInt(outEP.getText());			
 			}
 		});
 	}
@@ -245,7 +245,7 @@ public class TestApp {
 		inEP.setText("0x86");
 		inEP.addModifyListener(new org.eclipse.swt.events.ModifyListener() {
 			public void modifyText(org.eclipse.swt.events.ModifyEvent e) {
-				TestAppUsb.IN_ENDPOINT = parseInt(inEP.getText());			
+				TestAppUsb_old.IN_ENDPOINT = parseInt(inEP.getText());			
 			}
 		});
 	}
@@ -262,7 +262,7 @@ public class TestApp {
 		timeout.setText("2000");
 		timeout.addModifyListener(new org.eclipse.swt.events.ModifyListener() {
 			public void modifyText(org.eclipse.swt.events.ModifyEvent e) {
-				TestAppUsb.TIMEOUT = parseInt(timeout.getText());			
+				TestAppUsb_old.TIMEOUT = parseInt(timeout.getText());			
 			}
 		});
 	}
@@ -297,7 +297,7 @@ public class TestApp {
 		sendButton.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
 			public void widgetSelected(org.eclipse.swt.events.SelectionEvent e) {
 				byte[] b = parseByteArray(dataField.getText());
-				TestAppUsb.write(b, b.length);
+				TestAppUsb_old.write(b, b.length);
 			}
 		});
 		recButton = new Button(dataButtonComp, SWT.NONE);
@@ -305,7 +305,7 @@ public class TestApp {
 		recButton.setText("Receive");
 		recButton.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
 			public void widgetSelected(org.eclipse.swt.events.SelectionEvent e) {
-				TestAppUsb.read();
+				TestAppUsb_old.read();
 			}
 		});
 	}
@@ -339,7 +339,7 @@ public class TestApp {
 		devOpenButton
 				.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
 					public void widgetSelected(org.eclipse.swt.events.SelectionEvent e) {
-						TestAppUsb.openUsbDevice();
+						TestAppUsb_old.openUsbDevice();
 					}
 				});
 		devCloseButton = new Button(devButtonComp, SWT.NONE);
@@ -348,13 +348,13 @@ public class TestApp {
 		resetButton.setText("Reset");
 		resetButton.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
 			public void widgetSelected(org.eclipse.swt.events.SelectionEvent e) {
-				TestAppUsb.reset();
+				System.out.println("not implemented");
 			}
 		});
 		devCloseButton
 				.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
 					public void widgetSelected(org.eclipse.swt.events.SelectionEvent e) {
-						TestAppUsb.closeUsbDevice();
+						TestAppUsb_old.closeUsbDevice();
 					}
 				});
 	}
@@ -380,7 +380,7 @@ public class TestApp {
 	}
 	
 	public static void main(String[] args) {
-		TestApp app = new TestApp();
+		TestApp_old app = new TestApp_old();
 		app.createSShell();
 		app.rootShell.open();
 		

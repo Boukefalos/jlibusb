@@ -41,26 +41,4 @@ public class Utils {
 			bus = bus.next;
 		}
 	}
-
-	public static int openUsb_Device(Usb_Bus bus, short idVendor, short idProduct) {
-		int handle = -1;
-
-		while (bus != null) {
-			Usb_Device dev = bus.devices;
-			while (dev != null) {
-				// Usb_Device_Descriptor
-				Usb_Device_Descriptor defDesc = dev.descriptor;
-				if ((defDesc.idVendor == idVendor)
-						&& (defDesc.idProduct == idProduct)) {
-					System.out.println("Open device: " + dev.filename);
-					return LibusbWin.usb_open(dev);
-				}
-				dev = dev.next;
-			}
-			bus = bus.next;
-		}
-
-		return handle;
-	}
-
 }

@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import ch.ntb.usb.*;
 
-public class TestUsb {
+public class TestUsb_old {
 
 	static Usb_Bus bus;
 
@@ -26,39 +26,57 @@ public class TestUsb {
 
 	static final int MAX_BYTEARRAY_SIZE = 512;
 
-	static final int PACKET_HEADER_1 = 0x33;	// first byte of header
-	static final int PACKET_HEADER_2 = 0x5B;	// second byte of header
-	static final int PACKET_END = 0x1F;			// last byte of packet
-	static final int PACKET_DATA_OFFSET = 6;	// offset to the first byte of data
-	static final int PACKET_MIN_LENGTH = 7;		// minimal Length of a packet (no payload)
+	static final int PACKET_HEADER_1 = 0x33; // first byte of header
 
-	
-//	 Main Types
-	static final int MTYPE_ERROR = 0x01;			// Errors before dispatching data
+	static final int PACKET_HEADER_2 = 0x5B; // second byte of header
+
+	static final int PACKET_END = 0x1F; // last byte of packet
+
+	static final int PACKET_DATA_OFFSET = 6; // offset to the first byte of
+
+	// data
+
+	static final int PACKET_MIN_LENGTH = 7; // minimal Length of a packet (no
+
+	// payload)
+
+	// Main Types
+	static final int MTYPE_ERROR = 0x01; // Errors before dispatching data
+
 	static final int MTYPE_BDI = 0x02;
+
 	static final int MTYPE_UART_1 = 0x03;
 
-//	 Sub Types
-//	 ERRORS
-	static final int STYPE_ERROR_HEADER = 0x01;	// Header of packet wrong
-	static final int STYPE_ERROR_PACKET_END = 0x02;	// Packet end wrong
+	// Sub Types
+	// ERRORS
+	static final int STYPE_ERROR_HEADER = 0x01; // Header of packet wrong
 
-//	 BDI
-	static final int STYPE_BDI_35IN = 0x01;		// 35 Bit Packet to BDI
-	static final int STYPE_BDI_35OUT = 0x02;	// 35 Bit Packet from BDI
-	static final int STYPE_BDI_10IN = 0x03;		// 10 Bit Packet to BDI
-	static final int STYPE_BDI_10OUT = 0x04;	// 10 Bit Packet from BDI
-	static final int STYPE_BDI_FD_DATA = 0x05;	// Fast Download Data
-	static final int STYPE_BDI_ERROR_FD_LENGTH = 0x06;	// Error if length in FD packet too small
+	static final int STYPE_ERROR_PACKET_END = 0x02; // Packet end wrong
 
-//	 UART 1
-	static final int STYPE_UART_1_IN = 0x11;	// Data to UART 1
-	static final int STYPE_UART_1_OUT = 0x22;	// Data from UART 1
+	// BDI
+	static final int STYPE_BDI_35IN = 0x01; // 35 Bit Packet to BDI
+
+	static final int STYPE_BDI_35OUT = 0x02; // 35 Bit Packet from BDI
+
+	static final int STYPE_BDI_10IN = 0x03; // 10 Bit Packet to BDI
+
+	static final int STYPE_BDI_10OUT = 0x04; // 10 Bit Packet from BDI
+
+	static final int STYPE_BDI_FD_DATA = 0x05; // Fast Download Data
+
+	static final int STYPE_BDI_ERROR_FD_LENGTH = 0x06; // Error if length in FD
+
+	// packet too small
+
+	// UART 1
+	static final int STYPE_UART_1_IN = 0x11; // Data to UART 1
+
+	static final int STYPE_UART_1_OUT = 0x22; // Data from UART 1
 
 	private static void do_read(Usb_Bus bus, int dev_handle) {
 		byte[] data = new byte[MAX_BYTEARRAY_SIZE];
-		int res = read_bulkdata(dev_handle, CONFIGURATION, INTERFACE, ALTINTERFACE,
-				IN_ENDPOINT, data, MAX_BYTEARRAY_SIZE, TIMEOUT);
+		int res = read_bulkdata(dev_handle, CONFIGURATION, INTERFACE,
+				ALTINTERFACE, IN_ENDPOINT, data, MAX_BYTEARRAY_SIZE, TIMEOUT);
 		if (res <= 0) {
 			System.err.println("Error on read_bulkdata "
 					+ LibusbWin.usb_strerror());
@@ -106,7 +124,7 @@ public class TestUsb {
 	}
 
 	private static void openDevice(Usb_Bus bus) {
-		int handle = Utils.openUsb_Device(bus, EZ_USB_DevKit_idVendor,
+		int handle = openUsb_Device(bus, EZ_USB_DevKit_idVendor,
 				EZ_USB_DevKit_idProduct);
 		if (handle > 0) {
 			System.out.println("Usb_device_handle: " + handle);
@@ -170,23 +188,23 @@ public class TestUsb {
 	private static void do_write(Usb_Bus bus, int dev_handle) {
 		// byte[] data = new String("Data to send...").getBytes();
 		byte[] data = new byte[512];
-		data[0] = PACKET_HEADER_1;	// header
-		data[1] = (byte) PACKET_HEADER_2;	// header
-		data[2] = MTYPE_BDI;	// header
-		data[3] = STYPE_BDI_35IN;	// header
-		data[4] = 0x00;				// length of payload
+		data[0] = PACKET_HEADER_1; // header
+		data[1] = (byte) PACKET_HEADER_2; // header
+		data[2] = MTYPE_BDI; // header
+		data[3] = STYPE_BDI_35IN; // header
+		data[4] = 0x00; // length of payload
 		data[5] = 0x05;
-		data[6] = 0x01; 			// payload
+		data[6] = 0x01; // payload
 		data[7] = 0x03;
 		data[8] = 0x07;
 		data[9] = 0x0F;
 		data[10] = 0x7F;
-		data[11] = (byte) PACKET_END;		// packet end
+		data[11] = (byte) PACKET_END; // packet end
 		int length = 12;
 
-		int res = write_bulkdata(dev_handle, CONFIGURATION, INTERFACE, ALTINTERFACE,
-				OUT_ENDPOINT, data, length, TIMEOUT);
-		if ( res <= 0) {
+		int res = write_bulkdata(dev_handle, CONFIGURATION, INTERFACE,
+				ALTINTERFACE, OUT_ENDPOINT, data, length, TIMEOUT);
+		if (res <= 0) {
 			System.err.println("Error on write_bulkdata");
 			return;
 		}
@@ -209,7 +227,7 @@ public class TestUsb {
 	}
 
 	private static void do_write_read(Usb_Bus bus) {
-		int dev_handle = Utils.openUsb_Device(bus, EZ_USB_DevKit_idVendor,
+		int dev_handle = openUsb_Device(bus, EZ_USB_DevKit_idVendor,
 				EZ_USB_DevKit_idProduct);
 		if (dev_handle <= 0) {
 			System.err.println("Error on openUsb_Device: " + dev_handle);
@@ -217,7 +235,7 @@ public class TestUsb {
 		}
 		boolean run = true;
 		char c = 'a';
-		while(run){
+		while (run) {
 			try {
 				c = (char) System.in.read();
 			} catch (IOException e) {
@@ -241,6 +259,28 @@ public class TestUsb {
 		LibusbWin.usb_close(dev_handle);
 	}
 
+	public static int openUsb_Device(Usb_Bus bus, short idVendor,
+			short idProduct) {
+		int handle = -1;
+
+		while (bus != null) {
+			Usb_Device dev = bus.devices;
+			while (dev != null) {
+				// Usb_Device_Descriptor
+				Usb_Device_Descriptor defDesc = dev.descriptor;
+				if ((defDesc.idVendor == idVendor)
+						&& (defDesc.idProduct == idProduct)) {
+					System.out.println("Open device: " + dev.filename);
+					return LibusbWin.usb_open(dev);
+				}
+				dev = dev.next;
+			}
+			bus = bus.next;
+		}
+
+		return handle;
+	}
+
 	public static void main(String[] args) {
 		LibusbWin.usb_init();
 		LibusbWin.usb_find_busses();
@@ -259,4 +299,5 @@ public class TestUsb {
 
 		System.out.println("LibusbWin done");
 	}
+
 }

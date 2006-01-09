@@ -1,11 +1,11 @@
 package ch.ntb.usb.test;
 
 import ch.ntb.usb.LibusbWin;
+import ch.ntb.usb.USBException;
+import ch.ntb.usb.USB_old;
 import ch.ntb.usb.Usb_Bus;
-import ch.ntb.usb.Usb_Device;
-import ch.ntb.usb.Usb_Device_Descriptor;
 
-public class TestAppUsb {
+public class TestAppUsb_old {
 
 	static Usb_Bus bus;
 
@@ -31,97 +31,31 @@ public class TestAppUsb {
 
 	static boolean dev_opened = false;
 
-	static void reset() {
-		bus = null;
-		usb_dev_handle = 0;
-		dev_opened = false;
-		System.out.println("reset done");
-	}
-
 	static void openUsbDevice() {
-
-		int res;
-
-		// open bus
-		if (bus == null) {
-			LibusbWin.usb_init();
-			LibusbWin.usb_find_busses();
-			LibusbWin.usb_find_devices();
-
-			bus = LibusbWin.usb_get_busses();
-			if (bus == null) {
-				System.err.println("Error on LibusbWin.usb_get_busses(): "
-						+ LibusbWin.usb_strerror());
-				return;
-			}
+		try {
+			USB_old.openUsbDevice();
+		} catch (USBException e) {
+			e.printStackTrace();
 		}
-		// search for device
-		dev_opened = false;
-		if (usb_dev_handle <= 0) {
-
-			while (bus != null) {
-				Usb_Device dev = bus.devices;
-				while (dev != null) {
-					// Usb_Device_Descriptor
-					Usb_Device_Descriptor defDesc = dev.descriptor;
-					if ((defDesc.idVendor == IdVendor)
-							&& (defDesc.idProduct == IdProduct)) {
-						System.out.println("Open device: " + dev.filename);
-						res = LibusbWin.usb_open(dev);
-						if (res <= 0) {
-							System.err.println("Error on LibusbWin.usb_open: "
-									+ LibusbWin.usb_strerror());
-							return;
-						} else {
-							usb_dev_handle = res;
-						}
-					}
-					dev = dev.next;
-				}
-				bus = bus.next;
-			}
-			if (usb_dev_handle <= 0) {
-				System.out.println("UsbDevice with idVendor 0x"
-						+ Integer.toHexString(IdVendor) + " and idProduct 0x"
-						+ Integer.toHexString(IdProduct) + " not found");
-				return;
-			}
-		}
-		if (!claim_interface(usb_dev_handle, CONFIGURATION, INTERFACE,
-				ALTINTERFACE)) {
-			System.err.println("Error on claim_interface");
-			return;
-		}
-		dev_opened = true;
 		System.out.println("device opened, interface claimed");
 	}
 
 	static void closeUsbDevice() {
-		if (!release_interface(usb_dev_handle, INTERFACE)) {
-			System.err.println("Error on release_interface");
+		try {
+			USB_old.closeUsbDevice();
+		} catch (USBException e) {
+			e.printStackTrace();
 		}
-		int res = LibusbWin.usb_close(usb_dev_handle);
-		if (res < 0) {
-			System.err.println("Error on LibusbWin.usb_close: "
-					+ LibusbWin.usb_strerror());
-		}
-		dev_opened = false;
-		bus = null;
-		usb_dev_handle = -1;
 		System.out.println("device closed");
 	}
 
 	static void write(byte[] data, int length) {
-		if (!dev_opened) {
-			System.out.println("Open Device first");
-			return;
+		try {
+			USB_old.write_EP1(data, length, TIMEOUT);
+		} catch (USBException e) {
+			e.printStackTrace();
 		}
-		int res = LibusbWin.usb_bulk_write(usb_dev_handle, OUT_ENDPOINT, data,
-				length, TIMEOUT);
-		if (res < 0) {
-			System.err.println("Error on LibusbWin.usb_bulk_write: "
-					+ LibusbWin.usb_strerror());
-		}
+		int res = 0;
 		System.out.print("write_bulkdata: " + res + " Bytes sent: ");
 		for (int i = 0; i < res; i++) {
 			System.out.print("0x" + String.format("%1$02X", data[i]) + " ");

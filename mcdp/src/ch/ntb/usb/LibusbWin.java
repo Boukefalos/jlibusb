@@ -1,6 +1,8 @@
 package ch.ntb.usb;
 
 public class LibusbWin {
+	
+	private static final String sysDir = "C:/Windows";
 
 	// Core
 	/**
@@ -291,6 +293,6 @@ public class LibusbWin {
 	/*******************************************************************/
 
 	static {
-		System.loadLibrary("LibusbWin");
+		System.load(sysDir + "/system32/LibusbWin.dll");
 	}
 }
