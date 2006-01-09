@@ -1,5 +1,6 @@
 package ch.ntb.mcdp.usb;
 
+import ch.ntb.usb.Device;
 import ch.ntb.usb.USB;
 import ch.ntb.usb.USBException;
 
@@ -26,49 +27,41 @@ public class USBDevice {
 	private static final int BDI_Timeout = 1000;
 
 	private static final int UART_Timeout = 50;
+	
+	private static Device dev;
 
 	static {
 		// set data for our device
-		USB.setIdVendor(IdVendor);
-		USB.setIdProduct(IdProduct);
-		USB.setConfiguration(Configuration);
-		USB.setInterface(Interface);
-		USB.setAltinterface(Altinterface);
-		USB.setOUT_Endpoint_1(OUT_Endpoint_BDI);
-		USB.setIN_Endpoint_1(IN_Endpoint_BDI);
-		USB.setOUT_Endpoint_2(OUT_Endpoint_UART);
-		USB.setIN_Endpoint_2(IN_Endpoint_UART);
-		// reset USB
-		USB.reset();
+		dev = USB.getDevice(IdVendor, IdProduct);
 	}
 
 	public static void open() throws USBException {
-		USB.openUsbDevice();
+		dev.open(Configuration, Interface, Altinterface);
 	}
 
 	public static void close() throws USBException {
-		USB.closeUsbDevice();
+		dev.close();
 	}
 
 	public static void reset() throws USBException {
-		USB.resetUsbDevice();
+		dev.reset();
 	}
 
 	public static void write_BDI(byte[] data, int length) throws USBException {
-		USB.write_EP1(data, length, BDI_Timeout);
+		dev.bulkwrite(OUT_Endpoint_BDI, data, length, BDI_Timeout);
 	}
 
 	public static synchronized int read_BDI(byte[] data, int size)
 			throws USBException {
-		return USB.read_EP1(data, size, BDI_Timeout);
+		return dev.bulkread(IN_Endpoint_BDI, data, size, BDI_Timeout);
 	}
 
 	public static void write_UART(byte[] data, int length) throws USBException {
-		USB.write_EP2(data, length, UART_Timeout);
+		dev.bulkwrite(OUT_Endpoint_UART, data, length, UART_Timeout);
 	}
 
 	public static synchronized int read_UART(byte[] data, int size)
 			throws USBException {
-		return USB.read_EP2(data, size, UART_Timeout);
+		return dev.bulkread(IN_Endpoint_UART, data, size, UART_Timeout);
 	}
 }
