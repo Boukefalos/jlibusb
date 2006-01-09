@@ -36,7 +36,10 @@ public class UartTest {
 								System.out.print((char) buffer[i]);
 							}
 						}
+						Thread.sleep(50);
 					} catch (IOException e) {
+						e.printStackTrace();
+					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
 				}
