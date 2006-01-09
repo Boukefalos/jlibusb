@@ -43,6 +43,16 @@ public class BDI332App {
 
 	private Button button14 = null;
 
+	private Button button20 = null;
+
+	private Button button16 = null;
+
+	private Button button17 = null;
+
+	private Button button18 = null;
+
+	private Button button19 = null;
+
 	/**
 	 * This method initializes sShell
 	 */
@@ -50,7 +60,7 @@ public class BDI332App {
 		sShell = new Shell();
 		sShell.setText("Shell");
 		sShell.setLayout(new RowLayout());
-		sShell.setSize(new org.eclipse.swt.graphics.Point(312,110));
+		sShell.setSize(new org.eclipse.swt.graphics.Point(320, 134));
 		button1 = new Button(sShell, SWT.NONE);
 		button1.setText("testBdiTransaction");
 		button1
@@ -115,39 +125,94 @@ public class BDI332App {
 		button10.setText("fillMem");
 		button11 = new Button(sShell, SWT.NONE);
 		button11.setText("initTarget");
-		button11.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
-			public void widgetSelected(org.eclipse.swt.events.SelectionEvent e) {
-				BDI332test.button11();
-			}
-		});
+		button11
+				.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
+					public void widgetSelected(
+							org.eclipse.swt.events.SelectionEvent e) {
+						BDI332test.button11();
+					}
+				});
 		button12 = new Button(sShell, SWT.NONE);
-		button12.setText("-------");
-		button12.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
-			public void widgetSelected(org.eclipse.swt.events.SelectionEvent e) {
-				BDI332test.button12();
-			}
-		});
+		button12.setText("replaceA");
+		button12
+				.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
+					public void widgetSelected(
+							org.eclipse.swt.events.SelectionEvent e) {
+						BDI332test.button12();
+					}
+				});
 		button13 = new Button(sShell, SWT.NONE);
-		button13.setText("-------");
-		button13.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
-			public void widgetSelected(org.eclipse.swt.events.SelectionEvent e) {
-				BDI332test.button13();
-			}
-		});
+		button13.setText("compare1");
+		button13
+				.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
+					public void widgetSelected(
+							org.eclipse.swt.events.SelectionEvent e) {
+						BDI332test.button13();
+					}
+				});
 		button14 = new Button(sShell, SWT.NONE);
-		button14.setText("-------");
-		button14.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
-			public void widgetSelected(org.eclipse.swt.events.SelectionEvent e) {
-				BDI332test.button14();
-			}
-		});
+		button14.setText("compare2");
+		button14
+				.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
+					public void widgetSelected(
+							org.eclipse.swt.events.SelectionEvent e) {
+						BDI332test.button14();
+					}
+				});
 		button15 = new Button(sShell, SWT.NONE);
 		button15.setText("resetUSB");
-		button15.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
-			public void widgetSelected(org.eclipse.swt.events.SelectionEvent e) {
-				BDI332test.button15();
-			}
-		});
+		button16 = new Button(sShell, SWT.NONE);
+		button16.setText("replaceE");
+		button16
+				.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
+					public void widgetSelected(
+							org.eclipse.swt.events.SelectionEvent e) {
+						BDI332test.button16();
+					}
+				});
+		button17 = new Button(sShell, SWT.NONE);
+		button17.setText("-");
+		button17
+				.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
+					public void widgetSelected(
+							org.eclipse.swt.events.SelectionEvent e) {
+						BDI332test.button17();
+					}
+				});
+		button18 = new Button(sShell, SWT.NONE);
+		button18.setText("-");
+		button18
+				.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
+					public void widgetSelected(
+							org.eclipse.swt.events.SelectionEvent e) {
+						BDI332test.button18();
+					}
+				});
+		button19 = new Button(sShell, SWT.NONE);
+		button19.setText("-");
+		button19
+				.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
+					public void widgetSelected(
+							org.eclipse.swt.events.SelectionEvent e) {
+						BDI332test.button19();
+					}
+				});
+		button20 = new Button(sShell, SWT.NONE);
+		button20.setText("-");
+		button20
+				.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
+					public void widgetSelected(
+							org.eclipse.swt.events.SelectionEvent e) {
+						BDI332test.button20();
+					}
+				});
+		button15
+				.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
+					public void widgetSelected(
+							org.eclipse.swt.events.SelectionEvent e) {
+						BDI332test.button15();
+					}
+				});
 		button10
 				.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
 					public void widgetSelected(

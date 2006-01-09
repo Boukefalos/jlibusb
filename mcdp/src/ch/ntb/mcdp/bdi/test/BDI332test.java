@@ -6,9 +6,13 @@ import ch.ntb.mcdp.mc68332.IMCBTargetBoard;
 import ch.ntb.mcdp.usb.DataPacket;
 import ch.ntb.mcdp.usb.DispatchException;
 import ch.ntb.mcdp.usb.USBDevice;
+import ch.ntb.mcdp.utils.logger.LogUtil;
+import ch.ntb.mcdp.utils.logger.McdpLogger;
 import ch.ntb.usb.USBException;
 
 public class BDI332test {
+
+	private static McdpLogger logger = LogUtil.ch_ntb_mcdp_bdi_test;
 
 	private static void testBdiTransaction() {
 		// test bdi transaction
@@ -26,7 +30,7 @@ public class BDI332test {
 			e.printStackTrace();
 		}
 		if (result != null) {
-			result.toString();
+			logger.info(result.toString());
 		}
 	}
 
@@ -47,8 +51,7 @@ public class BDI332test {
 
 	private static void freeze() {
 		try {
-			System.out
-					.println("isFreezeAsserted: " + MC68332.isFreezeAsserted());
+			logger.info("isFreezeAsserted: " + MC68332.isFreezeAsserted());
 		} catch (USBException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -121,7 +124,7 @@ public class BDI332test {
 			sb.append("0x"
 					+ Integer.toHexString(MC68332.readMem(BASE_ADDR + 8, 4))
 					+ "\n");
-			System.out.println(sb.toString());
+			logger.info(sb.toString());
 		} catch (USBException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -178,37 +181,37 @@ public class BDI332test {
 	// }
 
 	public static void button1() {
-		System.out.println("testBdiTransaction()");
+		logger.info("testBdiTransaction()");
 		testBdiTransaction();
 	}
 
 	public static void button2() {
-		System.out.println("reset_target()");
+		logger.info("reset_target()");
 		reset_target();
 	}
 
 	public static void button3() {
-		System.out.println("go()");
+		logger.info("go()");
 		go();
 	}
 
 	public static void button4() {
-		System.out.println("break_()");
+		logger.info("break_()");
 		break_();
 	}
 
 	public static void button5() {
-		System.out.println("freeze()");
+		logger.info("freeze()");
 		freeze();
 	}
 
 	public static void button6() {
-		System.out.println("writeMem()");
+		logger.info("writeMem()");
 		writeMem();
 	}
 
 	public static void button7() {
-		System.out.println("readMem()");
+		logger.info("readMem()");
 		readMem();
 	}
 
@@ -217,15 +220,16 @@ public class BDI332test {
 		final int BASE_ADDR = 0x105624;
 		int[] result;
 
-		System.out.println("dump()");
+		logger.info("dump()");
 		try {
-			System.out.println("Data: 0x"
+			logger.info("Data: 0x"
 					+ Integer.toHexString(MC68332.readMem(BASE_ADDR, 4)) + " ");
 			result = MC68332.dumpMem(MC68332.MAX_NOF_LONGS_FILL);
+			StringBuffer sb = new StringBuffer();
 			for (int i = 0; i < result.length; i++) {
-				System.out.print("0x" + Integer.toHexString(result[i]) + " ");
+				sb.append("0x" + Integer.toHexString(result[i]) + " ");
 			}
-			System.out.println();
+			logger.info(sb.toString());
 
 		} catch (USBException e) {
 			// TODO Auto-generated catch block
@@ -258,7 +262,7 @@ public class BDI332test {
 
 		final int BASE_ADDR = 0x105624;
 
-		System.out.println("fill");
+		logger.info("fill");
 		try {
 			MC68332.writeMem(BASE_ADDR, 0, 4);
 			int[] data = new int[MC68332.MAX_NOF_LONGS_FILL];
@@ -279,7 +283,7 @@ public class BDI332test {
 	}
 
 	public static void button11() {
-		System.out.println("initTarget()");
+		logger.info("initTarget()");
 		try {
 			IMCBTargetBoard.init();
 		} catch (USBException e) {
@@ -295,17 +299,54 @@ public class BDI332test {
 	}
 
 	public static void button12() {
-		System.out.println("readMem()");
-		readMem();
+
+		final int BASE_ADDR = 0x105624;
+		final int DATA = 0x00ff00ff;
+		final int OFFSET = 0x06 * 4;
+		final int LENGTH = 0x04;
+
+		try {
+			logger.info("Fill (1 to data.length)");
+			MC68332.writeMem(BASE_ADDR, 0, 4);
+			int[] data = new int[MC68332.MAX_NOF_LONGS_FILL];
+			for (int i = 0; i < data.length; i++) {
+				data[i] = i + 1;
+			}
+			MC68332.fillMem(data, data.length);
+			logger.info("writing byte " + (OFFSET / 4) + " to "
+					+ ((OFFSET / 4) + LENGTH) + " with 0x"
+					+ Integer.toHexString(DATA));
+			MC68332.writeMem(BASE_ADDR + OFFSET, DATA, 4);
+			for (int i = 0; i < LENGTH; i++) {
+				data[i] = DATA;
+			}
+			MC68332.fillMem(data, LENGTH);
+			logger.info((LENGTH + 1) + " bytes written");
+			logger.info("dump data");
+			int firstInt = MC68332.readMem(BASE_ADDR, 4);
+			int[] result = MC68332.dumpMem(MC68332.MAX_NOF_LONGS_FILL);
+			StringBuffer sb = new StringBuffer();
+			for (int i = 0; i < result.length; i++) {
+				sb.append("0x" + Integer.toHexString(result[i]) + " ");
+			}
+			logger.info("Data: 0x" + Integer.toHexString(firstInt) + " "
+					+ sb.toString());
+			logger.info("Done");
+		} catch (BDIException e) {
+			e.printStackTrace();
+		} catch (USBException e) {
+			e.printStackTrace();
+		} catch (DispatchException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public static void button13() {
 		final int BASE_ADDR = 0x105624;
 		final int FIRST_VAL = 0xFF;
-		final boolean DEBUG_ON = true;
 
 		try {
-			System.out.println("initialize data");
+			logger.info("initialize data");
 			MC68332.writeMem(BASE_ADDR, FIRST_VAL, 4);
 			int[] data = new int[MC68332.MAX_NOF_LONGS_FILL];
 			for (int i = 0; i < data.length; i++) {
@@ -313,35 +354,29 @@ public class BDI332test {
 			}
 			MC68332.fillMem(data, data.length);
 
-			System.out.println("write data");
+			logger.info("write data");
 			MC68332.writeMem(BASE_ADDR, FIRST_VAL, 4);
 			data = new int[10];
 			for (int i = 0; i < data.length; i++) {
 				data[i] = i;
 			}
 			MC68332.fillMem(data, data.length);
-			System.out.println("Fill done");
-			System.out.println("read back data");
+			logger.info("Fill done");
+			logger.info("read back data");
 			int firstResult = MC68332.readMem(BASE_ADDR, 4);
 			if (firstResult != FIRST_VAL) {
-				System.out.println("Error at 0: 0x"
+				logger.warning("Error at 0: 0x"
 						+ Integer.toHexString(firstResult) + " instead of 0x"
 						+ Integer.toHexString(FIRST_VAL));
 			}
-			if (DEBUG_ON) {
-				System.out.println("Compare first 0x"
-						+ Integer.toHexString(firstResult) + " == 0x"
-						+ Integer.toHexString(FIRST_VAL));
-			}
+			logger.fine("Compare first 0x" + Integer.toHexString(firstResult)
+					+ " == 0x" + Integer.toHexString(FIRST_VAL));
 			int[] result = MC68332.dumpMem(MC68332.MAX_NOF_LONGS_FILL);
 			for (int i = 0; i < result.length; i++) {
-				if (DEBUG_ON) {
-					System.out.println("Compare " + i + ": 0x"
-							+ Integer.toHexString(result[i]));
-
-				}
+				logger.fine("Compare " + i + ": 0x"
+						+ Integer.toHexString(result[i]));
 			}
-			System.out.println("Dump done");
+			logger.info("Dump done");
 		} catch (USBException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -358,9 +393,8 @@ public class BDI332test {
 
 		final int BASE_ADDR = 0x105624;
 		final int FIRST_VAL = 0xFF;
-		final boolean DEBUG_ON = true;
 
-		System.out.println("write data");
+		logger.info("write data");
 		try {
 			MC68332.writeMem(BASE_ADDR, FIRST_VAL, 4);
 			int[] data = new int[MC68332.MAX_NOF_LONGS_FILL];
@@ -368,34 +402,29 @@ public class BDI332test {
 				data[i] = i;
 			}
 			MC68332.fillMem(data, data.length);
-			System.out.println("Fill done");
-			System.out.println("read back data");
+			logger.info("Fill done");
+			logger.info("read back data");
 			int firstResult = MC68332.readMem(BASE_ADDR, 4);
 			if (firstResult != FIRST_VAL) {
-				System.out.println("Error at 0: 0x"
+				logger.warning("Error at 0: 0x"
 						+ Integer.toHexString(firstResult) + " instead of 0x"
 						+ Integer.toHexString(FIRST_VAL));
 			}
-			if (DEBUG_ON) {
-				System.out.println("Compare first 0x"
-						+ Integer.toHexString(firstResult) + " == 0x"
-						+ Integer.toHexString(FIRST_VAL));
-			}
+			logger.fine("Compare first 0x" + Integer.toHexString(firstResult)
+					+ " == 0x" + Integer.toHexString(FIRST_VAL));
 			int[] result = MC68332.dumpMem(MC68332.MAX_NOF_LONGS_FILL);
 			for (int i = 0; i < result.length; i++) {
 				if (data[i] != result[i]) {
-					System.out.println("Error at " + i + ": 0x"
+					logger.warning("Error at " + i + ": 0x"
 							+ Integer.toHexString(result[i]) + " instead of 0x"
 							+ Integer.toHexString(data[i]));
 				}
-				if (DEBUG_ON) {
-					System.out.println("Compare " + i + ": 0x"
-							+ Integer.toHexString(result[i]) + " == 0x"
-							+ Integer.toHexString(data[i]));
+				logger.fine("Compare " + i + ": 0x"
+						+ Integer.toHexString(result[i]) + " == 0x"
+						+ Integer.toHexString(data[i]));
 
-				}
 			}
-			System.out.println("Dump done");
+			logger.info("Dump done");
 		} catch (USBException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -409,7 +438,7 @@ public class BDI332test {
 	}
 
 	public static void button15() {
-		System.out.println("resetUSB()");
+		logger.info("resetUSB()");
 		try {
 			USBDevice.reset();
 			Thread.sleep(500);
@@ -418,6 +447,105 @@ public class BDI332test {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	public static void button16() {
+		final int BASE_ADDR = 0x105624;
+		final int DATA = 0x00ff00ff;
+		final int OFFSET = (MC68332.MAX_NOF_LONGS_FILL - 2) * 4;
+		final int LENGTH = 0x04;
+		final int DUMP_BASE = BASE_ADDR + (MC68332.MAX_NOF_LONGS_FILL / 2) * 4;
+
+		try {
+			logger.info("REPLACE at the end");
+			logger.info("Fill first");
+			MC68332.writeMem(BASE_ADDR, 0, 4);
+			int[] data = new int[MC68332.MAX_NOF_LONGS_FILL];
+			for (int i = 0; i < data.length; i++) {
+				data[i] = i + 1;
+			}
+			MC68332.fillMem(data, data.length);
+			logger.info("Fill second");
+			MC68332.writeMem(BASE_ADDR + (MC68332.MAX_NOF_LONGS_FILL + 1) * 4,
+					0, 4);
+			for (int i = 0; i < data.length; i++) {
+				data[i] = MC68332.MAX_NOF_LONGS_FILL + i + 2;
+			}
+			MC68332.fillMem(data, data.length);
+			logger.info("Dump from base: 0x" + Integer.toHexString(DUMP_BASE));
+			int firstInt = MC68332.readMem(DUMP_BASE, 4);
+			int[] result = MC68332.dumpMem(MC68332.MAX_NOF_LONGS_FILL);
+			StringBuffer sb = new StringBuffer();
+			for (int i = 0; i < result.length; i++) {
+				sb.append("0x" + Integer.toHexString(result[i]) + " ");
+			}
+			logger.info("Data: 0x" + Integer.toHexString(firstInt) + " "
+					+ sb.toString());
+
+			logger.info("writing byte " + (OFFSET / 4) + " to "
+					+ ((OFFSET / 4) + LENGTH) + " with 0x"
+					+ Integer.toHexString(DATA));
+			MC68332.writeMem(BASE_ADDR + OFFSET, DATA, 4);
+			for (int i = 0; i < LENGTH; i++) {
+				data[i] = DATA;
+			}
+			MC68332.fillMem(data, LENGTH);
+			logger.info((LENGTH + 1) + " bytes written");
+			logger.info("dump data from base: 0x"
+					+ Integer.toHexString(DUMP_BASE));
+			firstInt = MC68332.readMem(DUMP_BASE, 4);
+			result = MC68332.dumpMem(MC68332.MAX_NOF_LONGS_FILL);
+			sb = new StringBuffer();
+			for (int i = 0; i < result.length; i++) {
+				sb.append("0x" + Integer.toHexString(result[i]) + " ");
+			}
+			logger.info("Data: 0x" + Integer.toHexString(firstInt) + " "
+					+ sb.toString());
+			logger.info("Done");
+		} catch (BDIException e) {
+			e.printStackTrace();
+		} catch (USBException e) {
+			e.printStackTrace();
+		} catch (DispatchException e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	public static void button17() {
+
+	}
+
+	public static void button18() {
+
+	}
+
+	public static void button19() {
+
+	}
+
+	public static void button20() {
+		final int BASE_ADDR = 0x01004E0;
+		try {
+			StringBuffer sb = new StringBuffer("0x"
+					+ Integer.toHexString(MC68332.readMem(BASE_ADDR, 4)) + "\n");
+			sb.append("0x"
+					+ Integer.toHexString(MC68332.readMem(BASE_ADDR + 4, 4))
+					+ "\n");
+			sb.append("0x"
+					+ Integer.toHexString(MC68332.readMem(BASE_ADDR + 8, 4))
+					+ "\n");
+			logger.info(sb.toString());
+		} catch (USBException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (DispatchException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (BDIException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
