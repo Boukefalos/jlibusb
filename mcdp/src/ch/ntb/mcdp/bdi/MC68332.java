@@ -4,10 +4,14 @@ import ch.ntb.mcdp.usb.DataPacket;
 import ch.ntb.mcdp.usb.Dispatch;
 import ch.ntb.mcdp.usb.DispatchException;
 import ch.ntb.mcdp.usb.USBDevice;
+import ch.ntb.mcdp.utils.logger.LogUtil;
+import ch.ntb.mcdp.utils.logger.McdpLogger;
 import ch.ntb.usb.USB;
 import ch.ntb.usb.USBException;
 
 public class MC68332 {
+
+	private static McdpLogger logger = LogUtil.ch_ntb_mcdp_bdi;
 
 	// BDI subtypes
 	/**
@@ -85,6 +89,9 @@ public class MC68332 {
 	 */
 	private static final byte STYPE_BDI_DUMP_ERROR = 0x74;
 
+	/**
+	 * data length in bytes
+	 */
 	private static final int BDI_DATA17_LENGTH = 3;
 
 	/**
@@ -212,7 +219,9 @@ public class MC68332 {
 
 	private static byte[] sendData;
 
-	private static int readMemSize = 0, writeMemSize = 0;;
+	private static int readMemSize = 0, writeMemSize = 0;
+
+	private static boolean ignoreResult = false;
 
 	static {
 		sendData = new byte[USB.MAX_DATA_SIZE];
@@ -242,7 +251,8 @@ public class MC68332 {
 		sendData[DataPacket.PACKET_DATA_OFFSET + dataLength] = DataPacket.PACKET_END;
 
 		// write USB-command
-		USBDevice.write_BDI(sendData, dataLength + DataPacket.PACKET_MIN_LENGTH);
+		USBDevice
+				.write_BDI(sendData, dataLength + DataPacket.PACKET_MIN_LENGTH);
 
 		// read result
 		DataPacket data = Dispatch.readBDI();
@@ -306,9 +316,12 @@ public class MC68332 {
 		if (data.subtype != STYPE_BDI_17OUT) {
 			throw new BDIException("wrong subtype: " + data.subtype);
 		}
-		// we receive the data LSBit first!
 		// 16 data bits
-		// last bit is status control bit
+		// fist bit is status control bit
+		if (ignoreResult) {
+			ignoreResult = false;
+			return 0xFFFF;
+		}
 
 		boolean statusControlBit = (data.data[0] & 0x80) > 0;
 		int retValue = (((data.data[0] << 1) & 0xFF) + ((data.data[1] & 0x80) >>> 7)) << 8;
@@ -383,6 +396,9 @@ public class MC68332 {
 	 */
 	public static void break_() throws USBException, DispatchException,
 			BDIException {
+		// TODO: this may be wrong, but works
+		// ignore the result of the first transaction
+		ignoreResult = true;
 		transferAndParse17(NOP);
 		if (transferAndParse17(NOP) != STATUS_OK) {
 			throw new BDIException("no STATUS_OK received");
@@ -488,7 +504,7 @@ public class MC68332 {
 		// check if data fits into USB-packet
 		int currentIndex = 0;
 		DataPacket data;
-		System.out.println(dataLength);
+		logger.debug("dataLength: " + dataLength);
 		switch (writeMemSize) {
 		case 1:
 			if (dataLength > MAX_NOF_BYTES_WORDS_FILL) {
@@ -549,7 +565,7 @@ public class MC68332 {
 			sendData[DataPacket.PACKET_DATA_OFFSET + currentIndex * 6] = NOP;
 			sendData[DataPacket.PACKET_DATA_OFFSET + currentIndex * 6 + 1] = NOP;
 			data = transmit(STYPE_BDI_17FILL_LONG, dataLength * 6 + 2);
-			System.out.println("FILL: Transmit: " + (dataLength * 6 + 2));
+			logger.info("FILL: Transmit: " + (dataLength * 6 + 2));
 			break;
 		default:
 			throw new BDIException("invalid writeMemSize: " + writeMemSize);
@@ -685,11 +701,10 @@ public class MC68332 {
 		if (!targetInDebugMode) {
 			throw new BDIException("target not in debug mode");
 		}
-
-		System.out.println("writeMem: 0x" + Integer.toHexString(addr >>> 16)
-				+ " 0x" + Integer.toHexString(addr & 0xFFFF));
-		System.out.println("writeMem: 0x" + Integer.toHexString(value >>> 16)
-				+ " 0x" + Integer.toHexString(value & 0xFFFF));
+		logger.info("writeMem: 0x" + Integer.toHexString(addr >>> 16) + " 0x"
+				+ Integer.toHexString(addr & 0xFFFF));
+		logger.info("writeMem: 0x" + Integer.toHexString(value >>> 16) + " 0x"
+				+ Integer.toHexString(value & 0xFFFF));
 
 		writeMemSize = size;
 		switch (size) {
@@ -743,7 +758,7 @@ public class MC68332 {
 			throw new BDIException("target not in debug mode");
 		}
 
-		System.out.println("readMem: 0x" + Integer.toHexString(addr >>> 16)
+		logger.info("readMem: 0x" + Integer.toHexString(addr >>> 16)
 				+ Integer.toHexString(addr & 0xFFFF));
 
 		readMemSize = size;
@@ -839,10 +854,10 @@ public class MC68332 {
 		if (!targetInDebugMode) {
 			throw new BDIException("target not in debug mode");
 		}
-		System.out.println("0x" + Integer.toHexString(reg) + " " + "0x"
+		logger.info("0x" + Integer.toHexString(reg) + " " + "0x"
 				+ Integer.toHexString(value));
-		System.out.println("0x" + Integer.toHexString(WSREG + (reg & 0xF))
-				+ " 0x" + Integer.toHexString(value >>> 16) + " 0x"
+		logger.info("0x" + Integer.toHexString(WSREG + (reg & 0xF)) + " 0x"
+				+ Integer.toHexString(value >>> 16) + " 0x"
 				+ Integer.toHexString(value));
 
 		// put instr.
@@ -860,7 +875,7 @@ public class MC68332 {
 	// TODO: remove
 	public static void nop() throws USBException, DispatchException,
 			BDIException {
-		System.out.println("0x" + Integer.toHexString(transferAndParse17(NOP)));
+		logger.info("0x" + Integer.toHexString(transferAndParse17(NOP)));
 	}
 
 	/**
