@@ -60,12 +60,7 @@ public class Uart0 {
 	public static byte[] read() {
 		DataPacket packet;
 		try {
-			System.out.print("Data: ");
 			packet = Dispatch.readUART();
-			for (int i = 0; i < packet.data.length; i++) {
-				System.out.print((char) packet.data[i] + ", ");
-			}
-			System.out.println();
 			return packet.data;
 		} catch (Exception e) {
 			return null;
