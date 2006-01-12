@@ -33,6 +33,8 @@ public class BDI555App {
 
 	private Button button10 = null;
 
+	private Button button11 = null;
+
 	/**
 	 * This method initializes sShell
 	 */
@@ -40,7 +42,7 @@ public class BDI555App {
 		sShell = new Shell();
 		sShell.setText("Shell");
 		sShell.setLayout(new RowLayout());
-		sShell.setSize(new org.eclipse.swt.graphics.Point(348,83));
+		sShell.setSize(new org.eclipse.swt.graphics.Point(348,108));
 		button1 = new Button(sShell, SWT.NONE);
 		button1.setText("testBdiTransaction");
 		button1
@@ -99,6 +101,13 @@ public class BDI555App {
 		button9.setText("Button9");
 		button10 = new Button(sShell, SWT.NONE);
 		button10.setText("fastDownload");
+		button11 = new Button(sShell, SWT.NONE);
+		button11.setText("read/write Registers");
+		button11.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
+			public void widgetSelected(org.eclipse.swt.events.SelectionEvent e) {
+				BDI555test.button11();
+			}
+		});
 		button10.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
 			public void widgetSelected(org.eclipse.swt.events.SelectionEvent e) {
 				BDI555test.button10();

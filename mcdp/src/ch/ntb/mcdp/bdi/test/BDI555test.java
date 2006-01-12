@@ -1,5 +1,7 @@
 package ch.ntb.mcdp.bdi.test;
 
+import java.util.logging.Level;
+
 import ch.ntb.mcdp.bdi.BDIException;
 import ch.ntb.mcdp.bdi.MPC555;
 import ch.ntb.mcdp.usb.DispatchException;
@@ -226,7 +228,31 @@ public class BDI555test {
 	}
 
 	public static void button9() {
-		logger.info("not implemented!");
+		final int SPR = 158;
+		final int VALUE = 0x12345;
+		try {
+			int result = MPC555.readSPR(SPR);
+			logger.info("readSPR(" + SPR + ") = 0x"
+					+ Integer.toHexString(result));
+			MPC555.writeSPR(SPR, VALUE);
+			logger.info("writeSPR(" + SPR + ", 0x" + Integer.toHexString(VALUE)
+					+ ")");
+			result = MPC555.readSPR(SPR);
+			logger.info("readSPR(" + SPR + ") = 0x"
+					+ Integer.toHexString(result));
+		} catch (USBException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (DispatchException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (BDIException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		// logger.info("not implemented!");
+
 		// logger.info("hard_reset()");
 		// try {
 		// MPC555.hard_reset();
@@ -243,22 +269,87 @@ public class BDI555test {
 		fastDownload();
 	}
 
-	// public static void main(String[] args) {
-	// boolean testRunning = true;
-	//
-	// while (testRunning) {
-	// // testBdiTransaction();
-	// // reset_target();
-	// // freeze();
-	// // go();
-	// // System.out.println();
-	//
-	// try {
-	// Thread.sleep(5000);
-	// } catch (InterruptedException e) {
-	// e.printStackTrace();
-	// }
-	// }
-	//
-	// }
+	public static void button11() {
+		Level oldLevel = LogUtil.ch_ntb_mcdp_bdi.getLevel();
+		LogUtil.setLevel(LogUtil.ch_ntb_mcdp_bdi, Level.ALL);
+		try {
+			logger.info("test SPR");
+
+			// valid spr registers:
+			// CMPA–CMPD SPR 144 – SPR 147
+			// CMPE–CMPF SPR 152, 153
+			// CMPG–CMPH SPR 154, 155
+			// ICTRL SPR 158
+			// LCTRL1 SPR 156
+			// LCTRL2 SPR 157
+			// COUNTA SPR 150
+			// COUNTB SPR 151
+			// ECR SPR 148
+			// DER SPR 149
+
+			int REG = 152;
+			int VALUE = 0x12345;
+			MPC555.writeSPR(REG, VALUE);
+			int result = MPC555.readSPR(REG);
+			checkResult(VALUE, result);
+
+			logger.info("test GPR");
+			REG = 5;
+			MPC555.writeGPR(REG, VALUE);
+			result = MPC555.readGPR(REG);
+			checkResult(VALUE, result);
+
+			logger.info("test FPR");
+			int TMP_MEM_ADDR = 0x800000;
+			long LONG_VAL = 0x12345012345L;
+			MPC555.writeFPR(REG, TMP_MEM_ADDR, LONG_VAL);
+			long fprResult = MPC555.readFPR(REG, TMP_MEM_ADDR);
+			if (fprResult != LONG_VAL) {
+				logger.severe("value: 0x" + Long.toHexString(LONG_VAL)
+						+ ", result: 0x" + Long.toHexString(fprResult));
+			} else {
+				logger
+						.info("test ok: result: 0x"
+								+ Long.toHexString(fprResult));
+			}
+
+			logger.info("test MSR");
+			MPC555.writeMSR(VALUE);
+			result = MPC555.readMSR();
+			checkResult(VALUE, result);
+
+			logger.info("test CR");
+			MPC555.writeCR(VALUE);
+			result = MPC555.readCR();
+			checkResult(VALUE, result);
+
+			logger.info("test CtrlReg");
+			int MEM_ADDR = 0x2FC100;
+			MPC555.writeMem(MEM_ADDR, VALUE, 4);
+			result = MPC555.readMem(MEM_ADDR, 4);
+			checkResult(VALUE, result);
+
+		} catch (USBException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (DispatchException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (BDIException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		LogUtil.setLevel(LogUtil.ch_ntb_mcdp_bdi, oldLevel);
+	}
+
+	private static void checkResult(int value, int result) {
+		if (value != result) {
+			logger.severe("value: 0x" + Integer.toHexString(value)
+					+ ", result: 0x" + Integer.toHexString(result));
+		} else {
+			logger.info("test ok: result: 0x" + Integer.toHexString(result));
+		}
+	}
+
 }
