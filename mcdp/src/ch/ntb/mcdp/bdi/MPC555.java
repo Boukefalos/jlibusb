@@ -225,22 +225,23 @@ public class MPC555 {
 	private static void epilogue() throws USBException, DispatchException,
 			BDIException {
 
-		logger.finer("epilogue()");
+		logger.fine("epilogue()");
 
 		// restore GPR30
 		// put instr mfspr: GPR30, DPDR
 		transferAndParse35(false, false, 0x7FF69AA6);
 		// put GPR30 in DPDR
-		logger.info("write gpr30: 0x" + Integer.toHexString(gpr30));
+		logger.finer("write gpr30: 0x" + Integer.toHexString(gpr30));
 		transferAndParse35(false, true, gpr30);
 
 		// restore GPR31
 		// put instr. mfspr: GPR31, DPDR
 		transferAndParse35(false, false, 0x7FF69AA6);
 		// put GPR31 in DPDR
-		logger.info("write gpr31: 0x" + Integer.toHexString(gpr31));
+		logger.finer("write gpr31: 0x" + Integer.toHexString(gpr31));
 		transferAndParse35(false, true, gpr31);
 
+		// 21.4.1.6 Exiting Debug Mode
 		// return from interrupt - normal execution follows
 		// put instr. rfi
 		transferAndParse35(false, false, RFI);
@@ -250,7 +251,7 @@ public class MPC555 {
 			BDIException {
 		final int EBRK_bit = 1;
 
-		logger.finer("prologue()");
+		logger.fine("prologue()");
 
 		// save GPR30
 		// put instr. mtspr DPDR, GPR30
@@ -259,7 +260,7 @@ public class MPC555 {
 		// read ECR for exception cause
 		// put instr. mfspr GPR30, ECR
 		gpr30 = transferAndParse35(false, false, 0x7FD422A6);
-		logger.info("save gpr30: 0x" + Integer.toHexString(gpr30));
+		logger.finer("save gpr30: 0x" + Integer.toHexString(gpr30));
 		// put instr. mtspr DPDR, GPR30
 		transferAndParse35(false, false, 0x7FD69BA6);
 
@@ -268,7 +269,7 @@ public class MPC555 {
 		ecr = transferAndParse35(false, false, 0x7FF69BA6);
 		// nop
 		gpr31 = transferAndParse35(false, false, NOP);
-		logger.info("save gpr31: 0x" + Integer.toHexString(gpr31));
+		logger.finer("save gpr31: 0x" + Integer.toHexString(gpr31));
 
 		// throw an exception if EBRK (External breakpoint exception) bit is not
 		// set
@@ -276,6 +277,9 @@ public class MPC555 {
 			// TODO: change exception string
 			logger
 					.warning("Wrong debug enable cause (not due to EBRK): Exception Cause Register = "
+							+ "0x" + Integer.toHexString(ecr));
+			System.err
+					.println("Wrong debug enable cause (not due to EBRK): Exception Cause Register = "
 							+ "0x" + Integer.toHexString(ecr));
 		}
 	}
@@ -378,6 +382,7 @@ public class MPC555 {
 		transferAndParse35(false, true, startAddr - 4);
 		// start fast download
 		int result = transferAndParse35(true, true, 0xC6000000);
+		logger.finer("result: " + result);
 		// TODO:
 		// result == -1!!!!
 		// if (result != 0x7F) {
@@ -443,6 +448,7 @@ public class MPC555 {
 		logger.fine("stopFastDownload()");
 		// stop fast download
 		int result = transferAndParse35(true, true, 0x86000000);
+		logger.finer("result: " + result);
 		// result == -1 !!!
 		// if (result != 0x5F) {
 		// // TODO: change exception string
@@ -454,7 +460,8 @@ public class MPC555 {
 
 	public static void writeMem(int addr, int value, int size)
 			throws USBException, DispatchException, BDIException {
-		logger.finer("writeMem(int, int, int)");
+		logger.finer("writeMem(0x" + Integer.toHexString(addr) + ", 0x"
+				+ Integer.toHexString(value) + ", " + size + ")");
 		if (!targetInDebugMode) {
 			throw new BDIException("target not in debug mode");
 		}
@@ -488,7 +495,8 @@ public class MPC555 {
 
 	public static int readMem(int addr, int size) throws USBException,
 			DispatchException, BDIException {
-		logger.finer("readMem(int, int)");
+		logger.finer("readMem(0x" + Integer.toHexString(addr) + ", " + size
+				+ ")");
 		if (!targetInDebugMode) {
 			throw new BDIException("target not in debug mode");
 		}
@@ -582,7 +590,7 @@ public class MPC555 {
 
 	public static int readGPR(int gpr) throws USBException, DispatchException,
 			BDIException {
-		logger.finer("readGPR(int)");
+		logger.finer("readGPR(" + gpr + ")");
 		if (!targetInDebugMode) {
 			throw new BDIException("target not in debug mode");
 		}
@@ -602,7 +610,8 @@ public class MPC555 {
 
 	public static void writeGPR(int gpr, int value) throws USBException,
 			DispatchException, BDIException {
-		logger.finer("writeGPR(int, int)");
+		logger.finer("writeGPR(" + gpr + ", 0x" + Integer.toHexString(value)
+				+ ")");
 		if (!targetInDebugMode) {
 			throw new BDIException("target not in debug mode");
 		}
@@ -624,12 +633,12 @@ public class MPC555 {
 
 	public static int readSPR(int spr) throws USBException, DispatchException,
 			BDIException {
-		logger.finer("readSPR(int)");
+		logger.finer("readSPR(" + spr + ")");
 		if (!targetInDebugMode) {
 			throw new BDIException("target not in debug mode");
 		}
 
-		int cmd = ((spr & 0xFF) * 0x20 + (spr >>> 6)) * 0x800;
+		int cmd = ((spr & 0x1F) * 0x20 + (spr >>> 5)) * 0x800;
 		if ((spr == 268) || (spr == 269)) {
 			cmd += MTBRTR30;
 		} else {
@@ -646,11 +655,12 @@ public class MPC555 {
 
 	public static void writeSPR(int spr, int value) throws USBException,
 			DispatchException, BDIException {
-		logger.finer("writeSPR(int, int)");
+		logger.finer("writeSPR(" + spr + ", 0x" + Integer.toHexString(value)
+				+ ")");
 		if (!targetInDebugMode) {
 			throw new BDIException("target not in debug mode");
 		}
-		int cmd = MR30TSPR + ((spr & 0xFF) * 0x20 + (spr >>> 6)) * 0x800;
+		int cmd = MR30TSPR + ((spr & 0x1F) * 0x20 + (spr >>> 5)) * 0x800;
 
 		// put instr. mfspr GPR30, DPDR
 		transferAndParse35(false, false, 0x7FD69AA6);
@@ -677,7 +687,7 @@ public class MPC555 {
 
 	public static void writeMSR(int value) throws USBException,
 			DispatchException, BDIException {
-		logger.finer("writeMSR(int)");
+		logger.finer("writeMSR(0x" + Integer.toHexString(value) + ")");
 		if (!targetInDebugMode) {
 			throw new BDIException("target not in debug mode");
 		}
@@ -691,7 +701,8 @@ public class MPC555 {
 
 	public static long readFPR(int fpr, int tmpMemAddr) throws USBException,
 			DispatchException, BDIException {
-		logger.finer("readFPR(int, int)");
+		logger.finer("readFPR(" + fpr + ", 0x"
+				+ Integer.toHexString(tmpMemAddr) + ")");
 		if (!targetInDebugMode) {
 			throw new BDIException("target not in debug mode");
 		}
@@ -702,7 +713,7 @@ public class MPC555 {
 		// put instr. mfspr r30, DPDR
 		transferAndParse35(false, false, MDPDRTR + (30 * 0x200000));
 		// put tmpMemAddr
-		transferAndParse35(false, false, tmpMemAddr);
+		transferAndParse35(false, true, tmpMemAddr);
 
 		// put instr. stfd frS, 0(r30)
 		transferAndParse35(false, false, 0x0D81E0000 + fpr * 0x200000);
@@ -713,7 +724,9 @@ public class MPC555 {
 
 	public static void writeFPR(int fpr, int tmpMemAddr, long value)
 			throws USBException, DispatchException, BDIException {
-		logger.finer("writeFPR(int, int, long)");
+		logger.finer("writeFPR(" + fpr + ", 0x"
+				+ Integer.toHexString(tmpMemAddr) + ", 0x"
+				+ Long.toHexString(value) + ")");
 		if (!targetInDebugMode) {
 			throw new BDIException("target not in debug mode");
 		}
@@ -722,7 +735,7 @@ public class MPC555 {
 
 		// write data to tmpMemAddr
 		writeMem(tmpMemAddr, (int) (value >>> 32), 4);
-		writeMem(tmpMemAddr, (int) value, 4);
+		writeMem(tmpMemAddr + 4, (int) value, 4);
 
 		// set r30 to tmpMemAddr
 		// put instr. mfspr r30, DPDR
@@ -753,7 +766,7 @@ public class MPC555 {
 
 	public static void writeCR(int value) throws USBException,
 			DispatchException, BDIException {
-		logger.finer("writeCR(int)");
+		logger.finer("writeCR(0x" + Integer.toHexString(value) + ")");
 		if (!targetInDebugMode) {
 			throw new BDIException("target not in debug mode");
 		}
@@ -799,7 +812,7 @@ public class MPC555 {
 
 	public static void writeFPSCR(int value) throws USBException,
 			DispatchException, BDIException {
-		logger.finer("writeFPSCR(int)");
+		logger.finer("writeFPSCR(0x" + Integer.toHexString(value) + ")");
 		if (!targetInDebugMode) {
 			throw new BDIException("target not in debug mode");
 		}
@@ -822,6 +835,7 @@ public class MPC555 {
 	}
 
 	public static void setGpr30(int gpr30) {
+		logger.finer("gpr30: 0x" + Integer.toHexString(gpr30));
 		MPC555.gpr30 = gpr30;
 	}
 
@@ -830,6 +844,7 @@ public class MPC555 {
 	}
 
 	public static void setGpr31(int gpr31) {
+		logger.finer("gpr31: 0x" + Integer.toHexString(gpr31));
 		MPC555.gpr31 = gpr31;
 	}
 }
