@@ -9,16 +9,14 @@ CC=gcc
 RM=rm
 
 dll: $(DLL)
-$(DLL): $(DLLSRC)
 	$(CC) -Wall -D_JNI_IMPLEMENTATION_ -Wl,--kill-at, \
 	-I$(JAVAPATH)/include -I$(JAVAPATH)/include/win32 \
 	-shared $(DLLSRC) -o $(DLL) $(DEF) $(JVMLIBA)
 
-#dll_def: $(DLL)
-#$(DLL): $(DLLSRC)
-#	$(CC) -Wall -D_JNI_IMPLEMENTATION_ -Wl,--output-def,$(DEF),--kill-at, \
-#	-I$(JAVAPATH)/include -I$(JAVAPATH)/include/win32 \
-#	-shared $(DLLSRC) -o $(DLL) $(JVMLIBA)
+dll_def: $(DLL)
+	$(CC) -Wall -D_JNI_IMPLEMENTATION_ -Wl,--output-def,$(DEF),--kill-at, \
+	-I$(JAVAPATH)/include -I$(JAVAPATH)/include/win32 \
+	-shared $(DLLSRC) -o $(DLL) $(JVMLIBA)
 
 clean:
 	$(RM) $(DLL)
