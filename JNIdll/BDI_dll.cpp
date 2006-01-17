@@ -196,7 +196,29 @@ EXPORT int createJVM(char *classpath)
 	    }
 	    jvm_created = TRUE;
 	} else {
-		fprintf_flush(stdout, "JVM already created -> creating class pointers\n");
+		fprintf_flush(stdout, "JVM already created -> trying to redirect ouput streams\n");
+	}
+
+    if (!jvm_redirection_done) {
+	    cls_Redirect = env->FindClass(Redirect_Class);
+	    if (cls_Redirect == 0) {
+	        fprintf_flush(stderr, "Can't find %s class\n", Redirect_Class);
+	        return FALSE;
+	    }
+
+	   	// Redirect Class
+	    mid_Redirect_redirect = env->GetStaticMethodID(cls_Redirect, "redirect", "()V");
+	    if (mid_Redirect_redirect == 0) {
+	        fprintf_flush(stderr, "Can't find Redirect.redirect\n");
+	        return FALSE;
+	    }
+
+	    // Call redirect
+	    env->CallStaticVoidMethod(cls_Redirect, mid_Redirect_redirect);
+
+	    jvm_redirection_done = TRUE;
+    } else {
+		fprintf_flush(stdout, "Redirection already done -> creating class pointers\n");
 	}
     
     if (!jvm_classPtrs_done) {	
@@ -216,12 +238,6 @@ EXPORT int createJVM(char *classpath)
 	    cls_BDI332 = env->FindClass(BDI332_Class);
 	    if (cls_BDI332 == 0) {
 	        fprintf_flush(stderr, "Can't find %s class\n", BDI332_Class);
-	        return FALSE;
-	    }
-	
-	    cls_Redirect = env->FindClass(Redirect_Class);
-	    if (cls_Redirect == 0) {
-	        fprintf_flush(stderr, "Can't find %s class\n", Redirect_Class);
 	        return FALSE;
 	    }
 	
@@ -464,13 +480,6 @@ EXPORT int createJVM(char *classpath)
 	        return FALSE;
 	    }
     
-	   	// Redirect Class
-	    mid_Redirect_redirect = env->GetStaticMethodID(cls_Redirect, "redirect", "()V");
-	    if (mid_Redirect_redirect == 0) {
-	        fprintf_flush(stderr, "Can't find Redirect.redirect\n");
-	        return FALSE;
-	    }
-
 	   	// Uart0 Class
 	    mid_Uart0_write = env->GetStaticMethodID(cls_Uart0, "write", "([BI)Z");
 	    if (mid_Uart0_write == 0) {
@@ -485,16 +494,7 @@ EXPORT int createJVM(char *classpath)
 	    
 	    jvm_mIDs_done = TRUE;
 	} else {
-		fprintf_flush(stdout, "Method IDs already created -> trying to redirect ouput streams\n");
-	}
-    
-    if (!jvm_redirection_done) {
-	    // Call redirect
-	    env->CallStaticVoidMethod(cls_Redirect, mid_Redirect_redirect);
-
-	    jvm_redirection_done = TRUE;
-    } else {
-		fprintf_flush(stdout, "Redirection already done -> everything successfully set up!\n");
+		fprintf_flush(stdout, "Method IDs already created -> everything successfully set up!\n");
 	}
 	
 	return TRUE;
@@ -517,7 +517,7 @@ EXPORT int checkForExceptions() {
 
 /* USB_Device methods
  * 
- * For documentatione see the java doc.
+ * For documentation see the java doc.
  */
 EXPORT void USB_Device_open()
 {
@@ -536,7 +536,7 @@ EXPORT void USB_Device_reset()
 
 /* BDI 555 methods
  * 
- * For documentatione see the java doc.
+ * For documentation see the java doc.
  */
 EXPORT void BDI555_break_()
 {
@@ -684,7 +684,7 @@ EXPORT void BDI555_setGpr31(int gpr31)
 
 /* BDI 332 methods
  * 
- * For documentatione see the java doc.
+ * For documentation see the java doc.
  */
 EXPORT void BDI332_nopsToLegalCmd()
 {
@@ -797,7 +797,7 @@ EXPORT BOOL BDI332_isTargetInDebugMode()
 /*
  * UART functions
  * 
- * For documentatione see the java doc.
+ * For documentation see the java doc.
  */
 EXPORT int UART0_read(char result[])
 {
@@ -830,9 +830,6 @@ EXPORT int UART0_write(char data[], int dataLength)
 		env->ThrowNew(excCls, "UART0_write: not enough memory");
 		return FALSE;
 	}
-//	for (int i = 0; i < dataLength; ++i) {
-//		fprintf_flush(stdout, ("data %d: %x\n", i, data[i]);
-//	}
 
 	env->SetByteArrayRegion(jdata, 0, dataLength, (jbyte*) data);
 	result = env->CallStaticBooleanMethod(cls_Uart0, mid_Uart0_write, jdata, dataLength);
