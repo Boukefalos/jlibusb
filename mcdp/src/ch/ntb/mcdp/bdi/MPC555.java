@@ -128,6 +128,8 @@ public class MPC555 {
 	}
 
 	private static void initPacket(byte STYPE, int dataLength) {
+		logger.finest("initPacket(0x" + Integer.toHexString(STYPE) + ", "
+				+ dataLength + ")");
 		sendData[0] = DataPacket.PACKET_HEADER;
 		sendData[1] = Dispatch.MTYPE_BDI;
 		sendData[2] = STYPE;
@@ -284,6 +286,13 @@ public class MPC555 {
 		}
 	}
 
+	/**
+	 * Signals a breakpoint and enters debug mode.
+	 * 
+	 * @throws USBException
+	 * @throws DispatchException
+	 * @throws BDIException
+	 */
 	public static void break_() throws USBException, DispatchException,
 			BDIException {
 		logger.fine("break_()");
@@ -297,6 +306,13 @@ public class MPC555 {
 		targetInDebugMode = isFreezeAsserted();
 	}
 
+	/**
+	 * Resume from debug mode.
+	 * 
+	 * @throws USBException
+	 * @throws DispatchException
+	 * @throws BDIException
+	 */
 	public static void go() throws USBException, DispatchException,
 			BDIException {
 		logger.fine("go()");
@@ -308,6 +324,14 @@ public class MPC555 {
 		targetInDebugMode = isFreezeAsserted();
 	}
 
+	/**
+	 * Send a command to reset the microcontroller.<br>
+	 * The reset is done electrically by the USB-controller.
+	 * 
+	 * @throws USBException
+	 * @throws DispatchException
+	 * @throws BDIException
+	 */
 	private static void hard_reset() throws USBException, DispatchException,
 			BDIException {
 		initPacket(STYPE_BDI_HARD_RESET_555, 0);
@@ -321,6 +345,13 @@ public class MPC555 {
 		fastDownloadStarted = false;
 	}
 
+	/**
+	 * Reset the target and put it into debug mode.
+	 * 
+	 * @throws USBException
+	 * @throws DispatchException
+	 * @throws BDIException
+	 */
 	public static void reset_target() throws USBException, DispatchException,
 			BDIException {
 		logger.fine("reset_target()");
@@ -343,6 +374,15 @@ public class MPC555 {
 		targetInDebugMode = true;
 	}
 
+	/**
+	 * Check if the freeze signal is asserted.<br>
+	 * The freeze siganl is asserted if the target is in debug mode.
+	 * 
+	 * @return
+	 * @throws USBException
+	 * @throws DispatchException
+	 * @throws BDIException
+	 */
 	public static boolean isFreezeAsserted() throws USBException,
 			DispatchException, BDIException {
 		initPacket(STYPE_BDI_GET_FREEZE, 0);
@@ -372,7 +412,7 @@ public class MPC555 {
 	 */
 	public static void startFastDownload(int startAddr) throws USBException,
 			DispatchException, BDIException {
-		logger.fine("startFastDownload(int)");
+		logger.fine("startFastDownload(" + startAddr + ")");
 		if (!targetInDebugMode) {
 			throw new BDIException("target not in debug mode");
 		}
@@ -407,7 +447,7 @@ public class MPC555 {
 	 */
 	public static void fastDownload(int[] downloadData, int dataLength)
 			throws BDIException, USBException, DispatchException {
-		logger.finer("fastDownload(int[], int)");
+		logger.fine("fastDownload(int[], " + dataLength + ")");
 		if (!fastDownloadStarted) {
 			throw new BDIException("start fast download first");
 		}
@@ -442,6 +482,15 @@ public class MPC555 {
 		}
 	}
 
+	/**
+	 * Stop the fast download procedure.<br>
+	 * Use this command after <code>startFastDownload(...)</code> and
+	 * <code>fastDownload(...)</code>.
+	 * 
+	 * @throws USBException
+	 * @throws DispatchException
+	 * @throws BDIException
+	 */
 	public static void stopFastDownload() throws USBException,
 			DispatchException, BDIException {
 		fastDownloadStarted = false;
@@ -460,7 +509,7 @@ public class MPC555 {
 
 	public static void writeMem(int addr, int value, int size)
 			throws USBException, DispatchException, BDIException {
-		logger.finer("writeMem(0x" + Integer.toHexString(addr) + ", 0x"
+		logger.fine("writeMem(0x" + Integer.toHexString(addr) + ", 0x"
 				+ Integer.toHexString(value) + ", " + size + ")");
 		if (!targetInDebugMode) {
 			throw new BDIException("target not in debug mode");
@@ -495,7 +544,7 @@ public class MPC555 {
 
 	public static int readMem(int addr, int size) throws USBException,
 			DispatchException, BDIException {
-		logger.finer("readMem(0x" + Integer.toHexString(addr) + ", " + size
+		logger.fine("readMem(0x" + Integer.toHexString(addr) + ", " + size
 				+ ")");
 		if (!targetInDebugMode) {
 			throw new BDIException("target not in debug mode");
@@ -530,7 +579,7 @@ public class MPC555 {
 
 	public static void writeMemSeq(int value, int size) throws USBException,
 			DispatchException, BDIException {
-		logger.finer("writeMemSeq(int, int)");
+		logger.fine("writeMemSeq(int, int)");
 		if (!targetInDebugMode) {
 			throw new BDIException("target not in debug mode");
 		}
@@ -560,7 +609,7 @@ public class MPC555 {
 
 	public static int readMemSeq(int size) throws USBException,
 			DispatchException, BDIException {
-		logger.finer("readMemSeq(int)");
+		logger.fine("readMemSeq(int)");
 		if (!targetInDebugMode) {
 			throw new BDIException("target not in debug mode");
 		}
@@ -590,7 +639,7 @@ public class MPC555 {
 
 	public static int readGPR(int gpr) throws USBException, DispatchException,
 			BDIException {
-		logger.finer("readGPR(" + gpr + ")");
+		logger.fine("readGPR(" + gpr + ")");
 		if (!targetInDebugMode) {
 			throw new BDIException("target not in debug mode");
 		}
@@ -610,7 +659,7 @@ public class MPC555 {
 
 	public static void writeGPR(int gpr, int value) throws USBException,
 			DispatchException, BDIException {
-		logger.finer("writeGPR(" + gpr + ", 0x" + Integer.toHexString(value)
+		logger.fine("writeGPR(" + gpr + ", 0x" + Integer.toHexString(value)
 				+ ")");
 		if (!targetInDebugMode) {
 			throw new BDIException("target not in debug mode");
@@ -633,7 +682,7 @@ public class MPC555 {
 
 	public static int readSPR(int spr) throws USBException, DispatchException,
 			BDIException {
-		logger.finer("readSPR(" + spr + ")");
+		logger.fine("readSPR(" + spr + ")");
 		if (!targetInDebugMode) {
 			throw new BDIException("target not in debug mode");
 		}
@@ -655,7 +704,7 @@ public class MPC555 {
 
 	public static void writeSPR(int spr, int value) throws USBException,
 			DispatchException, BDIException {
-		logger.finer("writeSPR(" + spr + ", 0x" + Integer.toHexString(value)
+		logger.fine("writeSPR(" + spr + ", 0x" + Integer.toHexString(value)
 				+ ")");
 		if (!targetInDebugMode) {
 			throw new BDIException("target not in debug mode");
@@ -672,7 +721,7 @@ public class MPC555 {
 
 	public static int readMSR() throws USBException, DispatchException,
 			BDIException {
-		logger.finer("readMSR()");
+		logger.fine("readMSR()");
 		if (!targetInDebugMode) {
 			throw new BDIException("target not in debug mode");
 		}
@@ -687,7 +736,7 @@ public class MPC555 {
 
 	public static void writeMSR(int value) throws USBException,
 			DispatchException, BDIException {
-		logger.finer("writeMSR(0x" + Integer.toHexString(value) + ")");
+		logger.fine("writeMSR(0x" + Integer.toHexString(value) + ")");
 		if (!targetInDebugMode) {
 			throw new BDIException("target not in debug mode");
 		}
@@ -701,8 +750,8 @@ public class MPC555 {
 
 	public static long readFPR(int fpr, int tmpMemAddr) throws USBException,
 			DispatchException, BDIException {
-		logger.finer("readFPR(" + fpr + ", 0x"
-				+ Integer.toHexString(tmpMemAddr) + ")");
+		logger.fine("readFPR(" + fpr + ", 0x" + Integer.toHexString(tmpMemAddr)
+				+ ")");
 		if (!targetInDebugMode) {
 			throw new BDIException("target not in debug mode");
 		}
@@ -724,7 +773,7 @@ public class MPC555 {
 
 	public static void writeFPR(int fpr, int tmpMemAddr, long value)
 			throws USBException, DispatchException, BDIException {
-		logger.finer("writeFPR(" + fpr + ", 0x"
+		logger.fine("writeFPR(" + fpr + ", 0x"
 				+ Integer.toHexString(tmpMemAddr) + ", 0x"
 				+ Long.toHexString(value) + ")");
 		if (!targetInDebugMode) {
@@ -751,7 +800,7 @@ public class MPC555 {
 
 	public static int readCR() throws USBException, DispatchException,
 			BDIException {
-		logger.finer("readCR()");
+		logger.fine("readCR()");
 		if (!targetInDebugMode) {
 			throw new BDIException("target not in debug mode");
 		}
@@ -766,7 +815,7 @@ public class MPC555 {
 
 	public static void writeCR(int value) throws USBException,
 			DispatchException, BDIException {
-		logger.finer("writeCR(0x" + Integer.toHexString(value) + ")");
+		logger.fine("writeCR(0x" + Integer.toHexString(value) + ")");
 		if (!targetInDebugMode) {
 			throw new BDIException("target not in debug mode");
 		}
@@ -781,7 +830,7 @@ public class MPC555 {
 
 	public static int readFPSCR() throws USBException, DispatchException,
 			BDIException {
-		logger.finer("readFPSCR()");
+		logger.fine("readFPSCR()");
 		if (!targetInDebugMode) {
 			throw new BDIException("target not in debug mode");
 		}
@@ -812,7 +861,7 @@ public class MPC555 {
 
 	public static void writeFPSCR(int value) throws USBException,
 			DispatchException, BDIException {
-		logger.finer("writeFPSCR(0x" + Integer.toHexString(value) + ")");
+		logger.fine("writeFPSCR(0x" + Integer.toHexString(value) + ")");
 		if (!targetInDebugMode) {
 			throw new BDIException("target not in debug mode");
 		}
@@ -826,25 +875,62 @@ public class MPC555 {
 		}
 	}
 
+	/**
+	 * Return the last known state of the freeze signal. This value may not be
+	 * up to date as the target state may have changed meanwhile. To get the up
+	 * to date value use <code>isFreezeAsserted</code> which will issue an USB
+	 * request, read the freeze signal and update the internal value returned by
+	 * this method.
+	 * 
+	 * @return the last known state of the freeze signal
+	 */
 	public static boolean isTargetInDebugMode() {
 		return targetInDebugMode;
 	}
 
+	/**
+	 * Read the currently stored value of the GPR 30 register.<br>
+	 * This value is updated when entering debug mode (break -> prologue).
+	 * 
+	 * @return the store value of this register
+	 */
 	public static int getGpr30() {
 		return gpr30;
 	}
 
-	public static void setGpr30(int gpr30) {
-		logger.finer("gpr30: 0x" + Integer.toHexString(gpr30));
-		MPC555.gpr30 = gpr30;
+	/**
+	 * Set the value of the GPR 30 register.<br>
+	 * This value is written to the GPR30 register when the microcontroller
+	 * resumes from debug mode (go -> epilogue).
+	 * 
+	 * @param value
+	 *            value to write to the register
+	 */
+	public static void setGpr30(int value) {
+		logger.fine("gpr30: 0x" + Integer.toHexString(value));
+		MPC555.gpr30 = value;
 	}
 
+	/**
+	 * Read the currently stored value of the GPR 31 register.<br>
+	 * This value is updated when entering debug mode (break -> prologue).
+	 * 
+	 * @return the store value of this register
+	 */
 	public static int getGpr31() {
 		return gpr31;
 	}
 
-	public static void setGpr31(int gpr31) {
-		logger.finer("gpr31: 0x" + Integer.toHexString(gpr31));
-		MPC555.gpr31 = gpr31;
+	/**
+	 * Set the value of the GPR 31 register.<br>
+	 * This value is written to the GPR31 register when the microcontroller
+	 * resumes from debug mode (go -> epilogue).
+	 * 
+	 * @param value
+	 *            value to write to the register
+	 */
+	public static void setGpr31(int value) {
+		logger.fine("gpr31: 0x" + Integer.toHexString(value));
+		MPC555.gpr31 = value;
 	}
 }
