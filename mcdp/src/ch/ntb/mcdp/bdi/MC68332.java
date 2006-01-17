@@ -274,9 +274,6 @@ public class MC68332 {
 
 		// refer to CPU32 Reference Manual, Section 7.2.7
 		// bit16 = 0 + 16 bits of data (bit15 .. bit0)
-		// TODO check this:
-		// sendData[Dispatch.PACKET_DATA_OFFSET + offset] = (byte) (((data >>>
-		// 9) & 0x7F) | 0x80);
 		sendData[DataPacket.PACKET_DATA_OFFSET + offset] = (byte) ((data >>> 9) & 0x7F);
 		sendData[DataPacket.PACKET_DATA_OFFSET + offset + 1] = (byte) ((data >>> 1) & 0xFF);
 		sendData[DataPacket.PACKET_DATA_OFFSET + offset + 2] = (byte) ((data & 0x01) << 7);
@@ -396,7 +393,7 @@ public class MC68332 {
 	 */
 	public static void break_() throws USBException, DispatchException,
 			BDIException {
-		// TODO: this may be wrong, but works
+		// FIXME: this may be wrong, but works
 		// ignore the result of the first transaction
 		ignoreResult = true;
 		transferAndParse17(NOP);
@@ -406,6 +403,13 @@ public class MC68332 {
 		targetInDebugMode = isFreezeAsserted();
 	}
 
+	/**
+	 * Resume from debug mode.
+	 * 
+	 * @throws USBException
+	 * @throws DispatchException
+	 * @throws BDIException
+	 */
 	public static void go() throws USBException, DispatchException,
 			BDIException {
 		if (!targetInDebugMode) {
@@ -415,6 +419,14 @@ public class MC68332 {
 		targetInDebugMode = isFreezeAsserted();
 	}
 
+	/**
+	 * Send a command to reset the microcontroller.<br>
+	 * The reset is done electrically by the USB-controller.
+	 * 
+	 * @throws USBException
+	 * @throws DispatchException
+	 * @throws BDIException
+	 */
 	private static void hard_reset() throws USBException, DispatchException,
 			BDIException {
 		DataPacket data = transmit(STYPE_BDI_HARD_RESET_332, 0);
@@ -441,6 +453,13 @@ public class MC68332 {
 		break_();
 	}
 
+	/**
+	 * Send the <b>RST</b> command (reset peripherals) to the microcontroller.
+	 * 
+	 * @throws USBException
+	 * @throws DispatchException
+	 * @throws BDIException
+	 */
 	public static void reset_peripherals() throws USBException,
 			DispatchException, BDIException {
 		// hard reset
@@ -456,7 +475,8 @@ public class MC68332 {
 	}
 
 	/**
-	 * Check if the freeze signal is asserted.
+	 * Check if the freeze signal is asserted.<br>
+	 * The freeze siganl is asserted if the target is in debug mode.
 	 * 
 	 * @return
 	 * @throws USBException
@@ -480,9 +500,9 @@ public class MC68332 {
 	}
 
 	/**
-	 * Fill is used in conjunction with the <code>writeMem</code> command to
-	 * fill large blocks of memory. <br>
-	 * The maximal number of words is defined by
+	 * Fill large blocks of memory.<br>
+	 * Fill is used in conjunction with the <code>writeMem</code> command. The
+	 * maximal number of words is defined by
 	 * <code>MAX_NOF_WORDS_FAST_DOWNLOAD</code> for 1 and 2 byte (word) data.
 	 * For 4 byte (long) data, only half the size of
 	 * <code>MAX_NOF_WORDS_FAST_DOWNLOAD</code> is available as 4 bytes of
@@ -504,7 +524,7 @@ public class MC68332 {
 		// check if data fits into USB-packet
 		int currentIndex = 0;
 		DataPacket data;
-		logger.debug("dataLength: " + dataLength);
+		logger.finer("dataLength: " + dataLength);
 		switch (writeMemSize) {
 		case 1:
 			if (dataLength > MAX_NOF_BYTES_WORDS_FILL) {
@@ -589,12 +609,15 @@ public class MC68332 {
 	}
 
 	/**
-	 * Dump is used in conjunction with the <code>readMem(...)</code> command
-	 * to dump large blocks of memory. The size depends on the size set up with
-	 * <code>readMem(...)</code> and is internally stored.
+	 * Dump large blocks of memory. <br>
+	 * Dump is used in conjunction with the <code>readMem(...)</code> command.
+	 * The size depends on the size set up with <code>readMem(...)</code> and
+	 * is internally stored.
 	 * 
 	 * @param nofData
-	 * @return
+	 *            number of bytes/words/longs to read (depends on the size set
+	 *            up with <code>readMem(...)</code>)
+	 * @return read values
 	 * @throws USBException
 	 * @throws DispatchException
 	 * @throws BDIException
@@ -695,15 +718,28 @@ public class MC68332 {
 		}
 	}
 
+	/**
+	 * Write to a specified memory address.<br>
+	 * 
+	 * @param addr
+	 *            address to write
+	 * @param value
+	 *            value to write
+	 * @param size
+	 *            number of bytes to read
+	 * @throws USBException
+	 * @throws DispatchException
+	 * @throws BDIException
+	 */
 	public static void writeMem(int addr, int value, int size)
 			throws USBException, DispatchException, BDIException {
 
 		if (!targetInDebugMode) {
 			throw new BDIException("target not in debug mode");
 		}
-		logger.info("writeMem: 0x" + Integer.toHexString(addr >>> 16) + " 0x"
-				+ Integer.toHexString(addr & 0xFFFF));
-		logger.info("writeMem: 0x" + Integer.toHexString(value >>> 16) + " 0x"
+		logger.info("addr: 0x" + Integer.toHexString(addr >>> 16) + " 0x"
+				+ Integer.toHexString(addr & 0xFFFF) + "\tvalue: 0x"
+				+ Integer.toHexString(value >>> 16) + " 0x"
 				+ Integer.toHexString(value & 0xFFFF));
 
 		writeMemSize = size;
@@ -751,6 +787,18 @@ public class MC68332 {
 		}
 	}
 
+	/**
+	 * Read the value of a specified memory address.<br>
+	 * 
+	 * @param addr
+	 *            address to read
+	 * @param size
+	 *            number of bytes to read
+	 * @return value of this memory address
+	 * @throws USBException
+	 * @throws DispatchException
+	 * @throws BDIException
+	 */
 	public static int readMem(int addr, int size) throws USBException,
 			DispatchException, BDIException {
 
@@ -758,7 +806,7 @@ public class MC68332 {
 			throw new BDIException("target not in debug mode");
 		}
 
-		logger.info("readMem: 0x" + Integer.toHexString(addr >>> 16)
+		logger.info("addr: 0x" + Integer.toHexString(addr >>> 16) + " 0x"
 				+ Integer.toHexString(addr & 0xFFFF));
 
 		readMemSize = size;
@@ -799,6 +847,18 @@ public class MC68332 {
 		}
 	}
 
+	/**
+	 * Read a specified value from a user register. <br>
+	 * See the <b>registerDictionary.xml</b> file for valid registers. This
+	 * file can be found in the <b>mc68332 resource</b>-section.
+	 * 
+	 * @param reg
+	 *            register to read
+	 * @return value of register
+	 * @throws USBException
+	 * @throws DispatchException
+	 * @throws BDIException
+	 */
 	public static int readUserReg(int reg) throws USBException,
 			DispatchException, BDIException {
 
@@ -814,6 +874,19 @@ public class MC68332 {
 		return (valMS << 16) + transferAndParse17(NOP);
 	}
 
+	/**
+	 * Write a specified value to user register. <br>
+	 * See the <b>registerDictionary.xml</b> file for valid registers. This
+	 * file can be found in the <b>mc68332 resource</b>-section.
+	 * 
+	 * @param reg
+	 *            register to write
+	 * @param value
+	 *            value to write to register
+	 * @throws USBException
+	 * @throws DispatchException
+	 * @throws BDIException
+	 */
 	public static void writeUserReg(int reg, int value) throws USBException,
 			DispatchException, BDIException {
 
@@ -833,6 +906,18 @@ public class MC68332 {
 		}
 	}
 
+	/**
+	 * Read a specified value from a system register. <br>
+	 * See the <b>registerDictionary.xml</b> file for valid registers. This
+	 * file can be found in the <b>mc68332 resource</b>-section.
+	 * 
+	 * @param reg
+	 *            register to read
+	 * @return value of register
+	 * @throws USBException
+	 * @throws DispatchException
+	 * @throws BDIException
+	 */
 	public static int readSysReg(int reg) throws USBException,
 			DispatchException, BDIException {
 
@@ -848,16 +933,29 @@ public class MC68332 {
 		return (valMS << 16) + transferAndParse17(NOP);
 	}
 
+	/**
+	 * Write a specified value to system register. <br>
+	 * See the <b>registerDictionary.xml</b> file for valid registers. This
+	 * file can be found in the <b>mc68332 resource</b>-section.
+	 * 
+	 * @param reg
+	 *            register to write
+	 * @param value
+	 *            value to write to register
+	 * @throws USBException
+	 * @throws DispatchException
+	 * @throws BDIException
+	 */
 	public static void writeSysReg(int reg, int value) throws USBException,
 			DispatchException, BDIException {
 
 		if (!targetInDebugMode) {
 			throw new BDIException("target not in debug mode");
 		}
-		logger.info("0x" + Integer.toHexString(reg) + " " + "0x"
-				+ Integer.toHexString(value));
-		logger.info("0x" + Integer.toHexString(WSREG + (reg & 0xF)) + " 0x"
-				+ Integer.toHexString(value >>> 16) + " 0x"
+		logger.info("register: 0x" + Integer.toHexString(reg) + ", value: "
+				+ "0x" + Integer.toHexString(value) + "\tinstructions: 0x"
+				+ Integer.toHexString(WSREG + (reg & 0xF)) + " 0x"
+				+ Integer.toHexString(value >>> 16) + ", 0x"
 				+ Integer.toHexString(value));
 
 		// put instr.
@@ -875,15 +973,17 @@ public class MC68332 {
 	// TODO: remove
 	public static void nop() throws USBException, DispatchException,
 			BDIException {
-		logger.info("0x" + Integer.toHexString(transferAndParse17(NOP)));
+		logger
+				.info("result: 0x"
+						+ Integer.toHexString(transferAndParse17(NOP)));
 	}
 
 	/**
-	 * Return the last known state of the freeze signal. This value may not be
-	 * up to date as the target state may have changed meanwhile. To get the up
-	 * to date value use <code>isFreezeAsserted</code> which will issue an USB
-	 * request, read the freeze signal and update the internal value returned by
-	 * this method.
+	 * Return the last known state of the freeze signal.<br>
+	 * This value may not be up to date as the target state may have changed
+	 * meanwhile. To get the up to date value use <code>isFreezeAsserted</code>
+	 * which will issue an USB request, read the freeze signal and update the
+	 * internal value returned by this method.
 	 * 
 	 * @return the last known state of the freeze signal
 	 */
