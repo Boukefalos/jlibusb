@@ -1,11 +1,15 @@
 package ch.ntb.mcdp.usb;
 
 import java.util.LinkedList;
+import java.util.logging.Logger;
 
+import ch.ntb.mcdp.utils.logger.LogUtil;
 import ch.ntb.usb.USB;
 import ch.ntb.usb.USBException;
 
 public class Dispatch {
+	
+	private static Logger logger = LogUtil.ch_ntb_mcdp_usb;
 
 	// Main Types
 	/**
@@ -65,7 +69,7 @@ public class Dispatch {
 			}
 			mainType = data[index++];
 			subtype = data[index++];
-			int dataLen = data[index++] * 0x100 + data[index++];
+			int dataLen = (data[index++] & 0xFF) * 0x100 + (data[index++] & 0xFF);
 			if (data[index + dataLen] != DataPacket.PACKET_END) {
 				throw new DispatchException("PACKET_END or packetLen ("
 						+ dataLen + " bytes) wrong");
@@ -121,6 +125,7 @@ public class Dispatch {
 
 	public static DataPacket readUART() throws USBException, DispatchException {
 		if (!uartData.isEmpty()) {
+			logger.info("buffer not empty");
 			return uartData.poll();
 		}
 		int dataLength = USBDevice.read_UART(usbData, USB.MAX_DATA_SIZE);
