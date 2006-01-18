@@ -7,15 +7,17 @@ import java.util.logging.Level;
 public class LogUtil {
 
 	public static McdpLogger ch_ntb_mcdp_bdi, ch_ntb_mcdp_bdi_test,
-			ch_ntb_mcdp_usb;
+			ch_ntb_mcdp_mc68332, ch_ntb_mcdp_usb;
 
 	static {
 		// set all loglevels here
 		ch_ntb_mcdp_usb = getLogger("ch.ntb.mcdp.usb", LogLevel.OFF);
 
-		ch_ntb_mcdp_bdi = getLogger("ch.ntb.mcdp.bdi", LogLevel.ALL);
+		ch_ntb_mcdp_bdi = getLogger("ch.ntb.mcdp.bdi", LogLevel.OFF);
 
 		ch_ntb_mcdp_bdi_test = getLogger("ch.ntb.mcdp.bdi.test", LogLevel.ALL);
+
+		ch_ntb_mcdp_mc68332 = getLogger("ch.ntb.mcdp.mc68332", LogLevel.OFF);
 	}
 
 	public static void setLevel(McdpLogger logger, Level loglevel) {
