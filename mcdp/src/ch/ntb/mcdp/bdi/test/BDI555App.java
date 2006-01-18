@@ -35,6 +35,14 @@ public class BDI555App {
 
 	private Button button11 = null;
 
+	private Button button12 = null;
+
+	private Button button13 = null;
+
+	private Button button14 = null;
+
+	private Button button15 = null;
+
 	/**
 	 * This method initializes sShell
 	 */
@@ -42,7 +50,7 @@ public class BDI555App {
 		sShell = new Shell();
 		sShell.setText("Shell");
 		sShell.setLayout(new RowLayout());
-		sShell.setSize(new org.eclipse.swt.graphics.Point(348,108));
+		sShell.setSize(new org.eclipse.swt.graphics.Point(361, 108));
 		button1 = new Button(sShell, SWT.NONE);
 		button1.setText("testBdiTransaction");
 		button1
@@ -83,46 +91,94 @@ public class BDI555App {
 		button5.setText("freeze");
 		button6 = new Button(sShell, SWT.NONE);
 		button6.setText("writeMem");
-		button6.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
-			public void widgetSelected(org.eclipse.swt.events.SelectionEvent e) {
-				BDI555test.button6();
-			}
-		});
+		button6
+				.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
+					public void widgetSelected(
+							org.eclipse.swt.events.SelectionEvent e) {
+						BDI555test.button6();
+					}
+				});
 		button7 = new Button(sShell, SWT.NONE);
 		button7.setText("readMem");
 		button8 = new Button(sShell, SWT.NONE);
 		button8.setText("readMemSeq");
-		button8.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
-			public void widgetSelected(org.eclipse.swt.events.SelectionEvent e) {
-				BDI555test.button8();
-			}
-		});
+		button8
+				.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
+					public void widgetSelected(
+							org.eclipse.swt.events.SelectionEvent e) {
+						BDI555test.button8();
+					}
+				});
 		button9 = new Button(sShell, SWT.NONE);
 		button9.setText("Button9");
 		button10 = new Button(sShell, SWT.NONE);
 		button10.setText("fastDownload");
 		button11 = new Button(sShell, SWT.NONE);
 		button11.setText("read/write Registers");
-		button11.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
-			public void widgetSelected(org.eclipse.swt.events.SelectionEvent e) {
-				BDI555test.button11();
-			}
-		});
-		button10.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
-			public void widgetSelected(org.eclipse.swt.events.SelectionEvent e) {
-				BDI555test.button10();
-			}
-		});
-		button9.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
-			public void widgetSelected(org.eclipse.swt.events.SelectionEvent e) {
-				BDI555test.button9();
-			}
-		});
-		button7.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
-			public void widgetSelected(org.eclipse.swt.events.SelectionEvent e) {
-				BDI555test.button7();
-			}
-		});
+		button12 = new Button(sShell, SWT.NONE);
+		button12.setText("Button12");
+		button12
+				.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
+					public void widgetSelected(
+							org.eclipse.swt.events.SelectionEvent e) {
+						BDI555test.button12();
+					}
+				});
+		button13 = new Button(sShell, SWT.NONE);
+		button13.setText("Button13");
+		button13
+				.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
+					public void widgetSelected(
+							org.eclipse.swt.events.SelectionEvent e) {
+						BDI555test.button13();
+					}
+				});
+		button14 = new Button(sShell, SWT.NONE);
+		button14.setText("Button14");
+		button14
+				.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
+					public void widgetSelected(
+							org.eclipse.swt.events.SelectionEvent e) {
+						BDI555test.button14();
+					}
+				});
+		button15 = new Button(sShell, SWT.NONE);
+		button15.setText("Button15");
+		button15
+				.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
+					public void widgetSelected(
+							org.eclipse.swt.events.SelectionEvent e) {
+						BDI555test.button15();
+					}
+				});
+		button11
+				.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
+					public void widgetSelected(
+							org.eclipse.swt.events.SelectionEvent e) {
+						BDI555test.button11();
+					}
+				});
+		button10
+				.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
+					public void widgetSelected(
+							org.eclipse.swt.events.SelectionEvent e) {
+						BDI555test.button10();
+					}
+				});
+		button9
+				.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
+					public void widgetSelected(
+							org.eclipse.swt.events.SelectionEvent e) {
+						BDI555test.button9();
+					}
+				});
+		button7
+				.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
+					public void widgetSelected(
+							org.eclipse.swt.events.SelectionEvent e) {
+						BDI555test.button7();
+					}
+				});
 		button5
 				.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
 					public void widgetSelected(
