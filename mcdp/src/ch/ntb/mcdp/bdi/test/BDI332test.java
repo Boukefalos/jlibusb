@@ -1,5 +1,11 @@
 package ch.ntb.mcdp.bdi.test;
 
+import java.io.IOException;
+
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.xml.sax.SAXException;
+
 import ch.ntb.mcdp.bdi.BDIException;
 import ch.ntb.mcdp.bdi.MC68332;
 import ch.ntb.mcdp.mc68332.IMCBTargetBoard;
@@ -224,7 +230,7 @@ public class BDI332test {
 		try {
 			logger.info("Data: 0x"
 					+ Integer.toHexString(MC68332.readMem(BASE_ADDR, 4)) + " ");
-			result = MC68332.dumpMem(MC68332.MAX_NOF_LONGS_FILL);
+			result = MC68332.dumpMem(MC68332.MAX_NOF_LONGS);
 			StringBuffer sb = new StringBuffer();
 			for (int i = 0; i < result.length; i++) {
 				sb.append("0x" + Integer.toHexString(result[i]) + " ");
@@ -265,7 +271,7 @@ public class BDI332test {
 		logger.info("fill");
 		try {
 			MC68332.writeMem(BASE_ADDR, 0, 4);
-			int[] data = new int[MC68332.MAX_NOF_LONGS_FILL];
+			int[] data = new int[MC68332.MAX_NOF_LONGS];
 			for (int i = 0; i < data.length; i++) {
 				data[i] = i;
 			}
@@ -286,14 +292,7 @@ public class BDI332test {
 		logger.info("initTarget()");
 		try {
 			IMCBTargetBoard.init();
-		} catch (USBException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (DispatchException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (BDIException e) {
-			// TODO Auto-generated catch block
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
@@ -308,7 +307,7 @@ public class BDI332test {
 		try {
 			logger.info("Fill (1 to data.length)");
 			MC68332.writeMem(BASE_ADDR, 0, 4);
-			int[] data = new int[MC68332.MAX_NOF_LONGS_FILL];
+			int[] data = new int[MC68332.MAX_NOF_LONGS];
 			for (int i = 0; i < data.length; i++) {
 				data[i] = i + 1;
 			}
@@ -324,7 +323,7 @@ public class BDI332test {
 			logger.info((LENGTH + 1) + " bytes written");
 			logger.info("dump data");
 			int firstInt = MC68332.readMem(BASE_ADDR, 4);
-			int[] result = MC68332.dumpMem(MC68332.MAX_NOF_LONGS_FILL);
+			int[] result = MC68332.dumpMem(MC68332.MAX_NOF_LONGS);
 			StringBuffer sb = new StringBuffer();
 			for (int i = 0; i < result.length; i++) {
 				sb.append("0x" + Integer.toHexString(result[i]) + " ");
@@ -348,7 +347,7 @@ public class BDI332test {
 		try {
 			logger.info("initialize data");
 			MC68332.writeMem(BASE_ADDR, FIRST_VAL, 4);
-			int[] data = new int[MC68332.MAX_NOF_LONGS_FILL];
+			int[] data = new int[MC68332.MAX_NOF_LONGS];
 			for (int i = 0; i < data.length; i++) {
 				data[i] = 5;
 			}
@@ -371,7 +370,7 @@ public class BDI332test {
 			}
 			logger.fine("Compare first 0x" + Integer.toHexString(firstResult)
 					+ " == 0x" + Integer.toHexString(FIRST_VAL));
-			int[] result = MC68332.dumpMem(MC68332.MAX_NOF_LONGS_FILL);
+			int[] result = MC68332.dumpMem(MC68332.MAX_NOF_LONGS);
 			for (int i = 0; i < result.length; i++) {
 				logger.fine("Compare " + i + ": 0x"
 						+ Integer.toHexString(result[i]));
@@ -397,7 +396,7 @@ public class BDI332test {
 		logger.info("write data");
 		try {
 			MC68332.writeMem(BASE_ADDR, FIRST_VAL, 4);
-			int[] data = new int[MC68332.MAX_NOF_LONGS_FILL];
+			int[] data = new int[MC68332.MAX_NOF_LONGS];
 			for (int i = 0; i < data.length; i++) {
 				data[i] = i;
 			}
@@ -412,7 +411,7 @@ public class BDI332test {
 			}
 			logger.fine("Compare first 0x" + Integer.toHexString(firstResult)
 					+ " == 0x" + Integer.toHexString(FIRST_VAL));
-			int[] result = MC68332.dumpMem(MC68332.MAX_NOF_LONGS_FILL);
+			int[] result = MC68332.dumpMem(MC68332.MAX_NOF_LONGS);
 			for (int i = 0; i < result.length; i++) {
 				if (data[i] != result[i]) {
 					logger.warning("Error at " + i + ": 0x"
@@ -455,29 +454,28 @@ public class BDI332test {
 	public static void button16() {
 		final int BASE_ADDR = 0x105624;
 		final int DATA = 0x00ff00ff;
-		final int OFFSET = (MC68332.MAX_NOF_LONGS_FILL - 2) * 4;
+		final int OFFSET = (MC68332.MAX_NOF_LONGS - 2) * 4;
 		final int LENGTH = 0x04;
-		final int DUMP_BASE = BASE_ADDR + (MC68332.MAX_NOF_LONGS_FILL / 2) * 4;
+		final int DUMP_BASE = BASE_ADDR + (MC68332.MAX_NOF_LONGS / 2) * 4;
 
 		try {
 			logger.info("REPLACE at the end");
 			logger.info("Fill first");
 			MC68332.writeMem(BASE_ADDR, 0, 4);
-			int[] data = new int[MC68332.MAX_NOF_LONGS_FILL];
+			int[] data = new int[MC68332.MAX_NOF_LONGS];
 			for (int i = 0; i < data.length; i++) {
 				data[i] = i + 1;
 			}
 			MC68332.fillMem(data, data.length);
 			logger.info("Fill second");
-			MC68332.writeMem(BASE_ADDR + (MC68332.MAX_NOF_LONGS_FILL + 1) * 4,
-					0, 4);
+			MC68332.writeMem(BASE_ADDR + (MC68332.MAX_NOF_LONGS + 1) * 4, 0, 4);
 			for (int i = 0; i < data.length; i++) {
-				data[i] = MC68332.MAX_NOF_LONGS_FILL + i + 2;
+				data[i] = MC68332.MAX_NOF_LONGS + i + 2;
 			}
 			MC68332.fillMem(data, data.length);
 			logger.info("Dump from base: 0x" + Integer.toHexString(DUMP_BASE));
 			int firstInt = MC68332.readMem(DUMP_BASE, 4);
-			int[] result = MC68332.dumpMem(MC68332.MAX_NOF_LONGS_FILL);
+			int[] result = MC68332.dumpMem(MC68332.MAX_NOF_LONGS);
 			StringBuffer sb = new StringBuffer();
 			for (int i = 0; i < result.length; i++) {
 				sb.append("0x" + Integer.toHexString(result[i]) + " ");
@@ -497,7 +495,7 @@ public class BDI332test {
 			logger.info("dump data from base: 0x"
 					+ Integer.toHexString(DUMP_BASE));
 			firstInt = MC68332.readMem(DUMP_BASE, 4);
-			result = MC68332.dumpMem(MC68332.MAX_NOF_LONGS_FILL);
+			result = MC68332.dumpMem(MC68332.MAX_NOF_LONGS);
 			sb = new StringBuffer();
 			for (int i = 0; i < result.length; i++) {
 				sb.append("0x" + Integer.toHexString(result[i]) + " ");
@@ -516,15 +514,163 @@ public class BDI332test {
 	}
 
 	public static void button17() {
+		logger.info("test read/write mem byte/word");
+		final int BASE_ADDR = 0x105624;
+		final int DATA = 0x12345678;
 
+		try {
+			logger.info("read 4 bytes at: 0x" + Integer.toHexString(BASE_ADDR)
+					+ ", value: 0x"
+					+ Integer.toHexString(MC68332.readMem(BASE_ADDR, 4)));
+			logger.info("read 2 bytes at: 0x" + Integer.toHexString(BASE_ADDR)
+					+ ", value: 0x"
+					+ Integer.toHexString(MC68332.readMem(BASE_ADDR, 2)));
+			logger.info("read 1 byte at: 0x" + Integer.toHexString(BASE_ADDR)
+					+ ", value: 0x"
+					+ Integer.toHexString(MC68332.readMem(BASE_ADDR, 1)));
+			logger.info("write 1 byte at: 0x" + Integer.toHexString(BASE_ADDR)
+					+ ", value: 0x" + Integer.toHexString(DATA));
+			MC68332.writeMem(BASE_ADDR, DATA, 1);
+			logger.info("read 4 bytes at: 0x" + Integer.toHexString(BASE_ADDR)
+					+ ", value: 0x"
+					+ Integer.toHexString(MC68332.readMem(BASE_ADDR, 4)));
+			logger.info("write 2 byte at: 0x" + Integer.toHexString(BASE_ADDR)
+					+ ", value: 0x" + Integer.toHexString(DATA));
+			MC68332.writeMem(BASE_ADDR, DATA, 2);
+			logger.info("read 4 bytes at: 0x" + Integer.toHexString(BASE_ADDR)
+					+ ", value: 0x"
+					+ Integer.toHexString(MC68332.readMem(BASE_ADDR, 4)));
+			logger.info("write 4 byte at: 0x" + Integer.toHexString(BASE_ADDR)
+					+ ", value: 0x" + Integer.toHexString(DATA));
+			MC68332.writeMem(BASE_ADDR, DATA, 4);
+			logger.info("read 4 bytes at: 0x" + Integer.toHexString(BASE_ADDR)
+					+ ", value: 0x"
+					+ Integer.toHexString(MC68332.readMem(BASE_ADDR, 4)));
+		} catch (USBException e) {
+			e.printStackTrace();
+		} catch (DispatchException e) {
+			e.printStackTrace();
+		} catch (BDIException e) {
+			e.printStackTrace();
+		}
+		logger.info("test done");
+	}
+
+	private static void dump(int baseAddr, int size) throws USBException,
+			DispatchException, BDIException {
+		int dumpSize = 0;
+		if (size > 2) {
+			dumpSize = MC68332.MAX_NOF_LONGS;
+		} else {
+			dumpSize = MC68332.MAX_NOF_BYTES_WORDS;
+		}
+		logger.info("read " + size + " byte(s) at 0x"
+				+ Integer.toHexString(baseAddr) + ", value: "
+				+ Integer.toHexString(MC68332.readMem(baseAddr, size)));
+		int[] result = MC68332.dumpMem(dumpSize);
+		StringBuffer sb = new StringBuffer("data: ");
+		for (int i = 0; i < result.length; i++) {
+			sb.append("0x" + Integer.toHexString(result[i]) + " ");
+		}
+		logger.info(sb.toString());
+	}
+
+	private static void fill(int baseAddr, int size) throws USBException,
+			DispatchException, BDIException {
+		int fillSize = 0;
+		if (size > 2) {
+			fillSize = MC68332.MAX_NOF_LONGS;
+		} else {
+			fillSize = MC68332.MAX_NOF_BYTES_WORDS;
+		}
+		int[] data = new int[fillSize];
+		for (int i = 0; i < data.length; i++) {
+			data[i] = i;
+		}
+		logger.info("fill " + data.length + " integers with size " + size
+				+ " byte(s)");
+		MC68332.writeMem(baseAddr, 0, size);
+		MC68332.fillMem(data, data.length);
 	}
 
 	public static void button18() {
+		final int BASE_ADDR = 0x105624;
+
+		int[] data = new int[MC68332.MAX_NOF_BYTES_WORDS];
+		for (int i = 0; i < data.length; i++) {
+			data[i] = i;
+		}
+		try {
+			IMCBTargetBoard.init();
+			fill(BASE_ADDR, 4);
+			// TODO: this does produce an error why???
+			IMCBTargetBoard.init();
+			dump(BASE_ADDR, 4);
+			IMCBTargetBoard.init();
+			fill(BASE_ADDR, 2);
+			IMCBTargetBoard.init();
+			dump(BASE_ADDR, 2);
+			IMCBTargetBoard.init();
+			fill(BASE_ADDR, 1);
+			IMCBTargetBoard.init();
+			dump(BASE_ADDR, 1);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
 	}
 
 	public static void button19() {
+		logger.info("test read/write register");
 
+		try {
+			int REG = 0x8;
+			int VALUE = 0x12345;
+			logger.info("test SysReg (ATEMP)");
+			MC68332.writeSysReg(REG, VALUE);
+			int result = MC68332.readSysReg(REG);
+			checkResult(VALUE, result);
+
+			REG = 0x5;
+			logger.info("test UserReg (D5)");
+			MC68332.writeUserReg(REG, VALUE);
+			result = MC68332.readUserReg(REG);
+			checkResult(VALUE, result);
+
+			REG = 0xD;
+			logger.info("test UserReg (A5)");
+			MC68332.writeUserReg(REG, VALUE);
+			result = MC68332.readUserReg(REG);
+			checkResult(VALUE, result);
+
+			// Does only work after LoadRam!
+			//
+			// REG = 0xFFFFFA00;
+			// logger.info("test ctrlReg (SIMCR)");
+			// MC68332.writeMem(REG, VALUE, 4);
+			// result = MC68332.readMem(REG, 4);
+			// checkResult(VALUE, result);
+
+		} catch (USBException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (DispatchException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (BDIException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	private static void checkResult(int value, int result) {
+		if (value != result) {
+			logger.severe("value: 0x" + Integer.toHexString(value)
+					+ ", result: 0x" + Integer.toHexString(result));
+		} else {
+			logger.info("test ok: result: 0x" + Integer.toHexString(result));
+		}
 	}
 
 	public static void button20() {
