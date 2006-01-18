@@ -1,18 +1,29 @@
 package ch.ntb.mcdp.mc68332;
 
+import java.io.IOException;
+
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.xml.sax.SAXException;
+
 import ch.ntb.mcdp.bdi.BDIException;
 import ch.ntb.mcdp.bdi.MC68332;
 import ch.ntb.mcdp.usb.DispatchException;
+import ch.ntb.mcdp.utils.logger.LogUtil;
+import ch.ntb.mcdp.utils.logger.McdpLogger;
 import ch.ntb.usb.USBException;
 
 public class IMCBTargetBoard {
+
+	static final McdpLogger logger = LogUtil.ch_ntb_mcdp_mc68332;
+
+	final static String dictionaryPath = "resources/targets/mc68332/registerDictionary.xml";
 
 	static MC68332RegisterDict regDict = new MC68332RegisterDict();
 
 	private static void writeRegister(String name, int value)
 			throws USBException, DispatchException, BDIException {
-		System.out.println("0x" + Integer.toHexString(readRegister(name)));
-		System.out.println("writeRegister: " + name + ", value: 0x"
+		logger.info("writeRegister: " + name + ", value: 0x"
 				+ Integer.toHexString(value));
 		MC68332Register r = (MC68332Register) regDict.getRegister(name);
 		switch (r.type) {
@@ -26,12 +37,11 @@ public class IMCBTargetBoard {
 			MC68332.writeUserReg(r.value, value);
 			break;
 		}
-		System.out.println("0x" + Integer.toHexString(readRegister(name)));
 	}
 
 	private static int readRegister(String name) throws USBException,
 			DispatchException, BDIException {
-		System.out.print("readRegister: " + name);
+		logger.info("readRegister: " + name);
 		MC68332Register r = (MC68332Register) regDict.getRegister(name);
 		switch (r.type) {
 		case MC68332Register.CtrlReg:
@@ -45,7 +55,11 @@ public class IMCBTargetBoard {
 	}
 
 	public static void init() throws USBException, DispatchException,
-			BDIException {
+			BDIException, IOException, ParserConfigurationException,
+			SAXException {
+
+		logger.info("reading dictionary file from " + dictionaryPath);
+		regDict.addRegistersFromFile(dictionaryPath);
 
 		MC68332.reset_target();
 
