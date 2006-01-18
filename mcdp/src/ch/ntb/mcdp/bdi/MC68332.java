@@ -196,23 +196,24 @@ public class MC68332 {
 
 	/**
 	 * Maximal number of words or bytes (1 or 2 bytes) for one usb-packet to
-	 * download (fill). <br>
+	 * download (fill) or read (dump). <br>
 	 * Note that no status bit is used. Therefore one data entity is only 16
 	 * bits wide (not 17 bits like normal commands). <br>
 	 * <code>MAX_NOF_WORDS_FAST_DOWNLOAD</code> is a multiple of 4 (FILLB/W +
 	 * data).
 	 */
-	public static final int MAX_NOF_BYTES_WORDS_FILL = (USB.MAX_DATA_SIZE
+	public static final int MAX_NOF_BYTES_WORDS = (USB.MAX_DATA_SIZE
 			- DataPacket.PACKET_MIN_LENGTH - 2) / 4;
 
 	/**
-	 * Maximal number of longs (4 bytes) for one usb-packet to download (fill).
+	 * Maximal number of longs (4 bytes) for one usb-packet to download (fill)
+	 * or read (dump).<br>
 	 * Note that no status bit is used. Therefore one data entity is only 16
 	 * bits wide (not 17 bits like normal commands). <br>
 	 * <code>MAX_NOF_WORDS_FAST_DOWNLOAD</code> is a multiple of 6 (FILLW + MS
 	 * data + LS data).
 	 */
-	public static final int MAX_NOF_LONGS_FILL = (USB.MAX_DATA_SIZE
+	public static final int MAX_NOF_LONGS = (USB.MAX_DATA_SIZE
 			- DataPacket.PACKET_MIN_LENGTH - 2) / 6;
 
 	private static boolean targetInDebugMode = false;
@@ -527,7 +528,7 @@ public class MC68332 {
 		logger.finer("dataLength: " + dataLength);
 		switch (writeMemSize) {
 		case 1:
-			if (dataLength > MAX_NOF_BYTES_WORDS_FILL) {
+			if (dataLength > MAX_NOF_BYTES_WORDS) {
 				throw new BDIException(
 						"data larger than MAX_NOF_WORDS_FAST_DOWNLOAD_BYTE_WORD");
 			}
@@ -546,7 +547,7 @@ public class MC68332 {
 			data = transmit(STYPE_BDI_17FILL_BYTE_WORD, dataLength * 4 + 2);
 			break;
 		case 2:
-			if (dataLength > MAX_NOF_BYTES_WORDS_FILL) {
+			if (dataLength > MAX_NOF_BYTES_WORDS) {
 				throw new BDIException(
 						"data larger than MAX_NOF_WORDS_FAST_DOWNLOAD_BYTE_WORD");
 			}
@@ -565,7 +566,7 @@ public class MC68332 {
 			data = transmit(STYPE_BDI_17FILL_BYTE_WORD, dataLength * 4 + 2);
 			break;
 		case 4:
-			if (dataLength > (MAX_NOF_LONGS_FILL)) {
+			if (dataLength > (MAX_NOF_LONGS)) {
 				throw new BDIException(
 						"data larger than MAX_NOF_WORDS_FAST_DOWNLOAD_LONG");
 			}
@@ -629,8 +630,8 @@ public class MC68332 {
 		int dataSize;
 		switch (readMemSize) {
 		case 1:
-			if (nofData > MAX_NOF_BYTES_WORDS_FILL)
-				nofData = MAX_NOF_BYTES_WORDS_FILL;
+			if (nofData > MAX_NOF_BYTES_WORDS)
+				nofData = MAX_NOF_BYTES_WORDS;
 			// fill the packet with {DUMPB} + 1 NOP at the end
 			int i;
 			for (i = 0; i < nofData; i++) {
@@ -642,8 +643,8 @@ public class MC68332 {
 			dataSize = i * 2 + 2;
 			break;
 		case 2:
-			if (nofData > MAX_NOF_BYTES_WORDS_FILL)
-				nofData = MAX_NOF_BYTES_WORDS_FILL;
+			if (nofData > MAX_NOF_BYTES_WORDS)
+				nofData = MAX_NOF_BYTES_WORDS;
 			// fill the packet with {DUMPW} + 1 NOP at the end
 			for (i = 0; i < nofData; i++) {
 				sendData[DataPacket.PACKET_DATA_OFFSET + i * 2] = (byte) ((DUMPW >>> 8) & 0xFF);
@@ -654,8 +655,8 @@ public class MC68332 {
 			dataSize = i * 2 + 2;
 			break;
 		case 4:
-			if (nofData > MAX_NOF_LONGS_FILL)
-				nofData = MAX_NOF_LONGS_FILL;
+			if (nofData > MAX_NOF_LONGS)
+				nofData = MAX_NOF_LONGS;
 			// fill the packet with {DUMPL + NOP} + 1 NOP at the end
 			for (i = 0; i < nofData; i++) {
 				sendData[DataPacket.PACKET_DATA_OFFSET + i * 4] = (byte) ((DUMPL >>> 8) & 0xFF);
@@ -687,7 +688,7 @@ public class MC68332 {
 			switch (readMemSize) {
 			case 1:
 			case 2:
-				result = new int[(res.data.length - DataPacket.PACKET_MIN_LENGTH) / 2];
+				result = new int[(res.data.length) / 2];
 				// MS Result before LS Result
 				int resIndex = 0;
 				while (resIndex * 2 < res.data.length) {
