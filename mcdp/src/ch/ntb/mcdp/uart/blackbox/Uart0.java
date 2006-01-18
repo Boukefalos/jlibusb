@@ -61,6 +61,9 @@ public class Uart0 {
 		DataPacket packet;
 		try {
 			packet = Dispatch.readUART();
+			if (packet == null) {
+				return null;
+			}
 			return packet.data;
 		} catch (Exception e) {
 			return null;
