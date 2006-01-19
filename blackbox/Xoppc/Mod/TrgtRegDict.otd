@@ -1,0 +1,190 @@
+
+MODULE XoppcTrgtRegDict;
+(** © ProXon/ED 3.9.94 / 22.11.98 / 4.12.00 / 14.2.02  |  *)
+(** target register operations*)
+	IMPORT
+		XE := XdeErrors, XU := XdeUtilities, BDI := UsbBDI555, Log := StdLog;
+
+	CONST 
+		errPrefix = "RegDir_"; 	regDictPath = "Xoppc/Rsrc/RegisterDictionary.odc"; 
+
+	TYPE 
+		RegName* = ARRAY 8 OF CHAR;
+		RegDesc = RECORD
+			type: RegName;
+			size: INTEGER;
+		END; 
+
+	VAR 
+		Done-: BOOLEAN; (** previous operation successfully completed *)
+		firstErr-: SHORTINT; (** first error occured, see error list at the end of this module *)
+
+		regTypeTab: ARRAY 8 OF RegDesc;
+		curReg, curRegCode, regTextPos: INTEGER; 	curRegName: RegName; 	curRegType: RegName;
+		regScn: XU.Scanner;
+		fprMoveAddr*: INTEGER; 
+
+	PROCEDURE ClearRegAttr; 
+	BEGIN
+		curReg := 0; 	curRegCode := 0; 	regTextPos := 0;
+		curRegType := regTypeTab[0].type; curRegName := ""
+	END ClearRegAttr; 
+
+	PROCEDURE Error (errNr: SHORTINT); 
+	BEGIN
+		IF Done THEN	firstErr := errNr; Done := FALSE 	END;
+		XE.Error("", errPrefix, errNr, TRUE);
+		ClearRegAttr
+	END Error; 
+
+	PROCEDURE LogInt (val: INTEGER); 
+	BEGIN
+		Log.Int(val)
+	END LogInt; 
+
+	PROCEDURE LogHex (val: INTEGER); 
+	BEGIN
+		Log.Char('0'); Log.IntForm(val MOD 100000000L, Log.hexadecimal, 1, ' ', Log.hideBase); Log.Char('H')
+	END LogHex; 
+
+	PROCEDURE SelectRegEntry; 
+	BEGIN
+		curReg := 0;
+		WHILE (curReg < LEN(regTypeTab)) & (regTypeTab[curReg].type # curRegType) DO
+			INC(curReg)
+		END;
+		IF curReg >= LEN(regTypeTab) THEN	Error(6)	END
+	END SelectRegEntry; 
+
+	PROCEDURE SelectNextReg * ; 
+		VAR ch: CHAR;
+	BEGIN
+		regScn.Ident(curRegName); 	regTextPos := regScn.start;
+		regScn.Ident(curRegType);
+		regScn.Int(curRegCode); regScn.Char(ch);
+		IF ~regScn.done THEN
+			IF regScn.eot THEN
+				Done := FALSE; ClearRegAttr
+			ELSE
+				Error(8)
+			END
+		ELSIF ch # ';' THEN
+			Error(8)
+		ELSE
+			SelectRegEntry
+		END
+	END SelectNextReg; 
+
+	PROCEDURE SelectFirstReg * ; 
+	BEGIN
+		IF ~Done THEN
+			XU.GetScanner(regDictPath, regScn); 	Done := TRUE;
+		END;
+		regScn.SetPos(0); SelectNextReg
+	END SelectFirstReg; 
+
+	PROCEDURE SelectReg * (IN name: ARRAY OF CHAR; OUT found: BOOLEAN); 
+	BEGIN
+		SelectFirstReg;
+		WHILE Done & (name # curRegName)	DO	SelectNextReg	END;
+		found := Done
+	END SelectReg; 
+
+	PROCEDURE LogRegs * ; 
+	BEGIN
+		SelectFirstReg;
+		WHILE Done DO
+			SelectNextReg;
+			Log.String(curRegName); Log.Tab; 	Log.String(curRegType); Log.Tab;
+			Log.Int(curRegCode); Log.Tab; 	Log.Int(regTextPos); Log.Ln
+		END
+	END LogRegs; 
+
+	PROCEDURE ReadReg * (IN regName: ARRAY OF CHAR; OUT regVal: LONGINT; OUT size: INTEGER; OUT done: BOOLEAN); 
+	BEGIN
+		Done := TRUE; done := TRUE;
+		IF curRegName # regName THEN	SelectReg(regName, done)	END;
+		IF done THEN
+			size := regTypeTab[curReg].size;
+			CASE curReg OF
+			| 0:
+				regVal := BDI.readGPR(curRegCode);
+			| 1:
+				regVal := BDI.readGPR(curRegCode);
+			| 2:
+				regVal := BDI.readSPR(curRegCode);
+			| 3:
+				regVal := BDI.readMSR();
+			| 4:
+				regVal := BDI.readFPR(curRegCode, fprMoveAddr);
+			| 5:
+				regVal := BDI.readCR();
+			| 6:
+				regVal := BDI.readFPSCR();
+			| 7:
+				regVal := BDI.readMem(curRegCode, 4);
+			END;
+			done := BDI.Done
+		END
+	END ReadReg; 
+
+	PROCEDURE WriteReg * (IN regName: ARRAY OF CHAR; regVal: INTEGER; OUT done: BOOLEAN); 
+	BEGIN
+		Done := TRUE; done := TRUE;
+		IF curRegName # regName THEN	SelectReg(regName, done)	END;
+		IF done THEN
+			CASE curReg OF
+			| 0:
+				BDI.writeGPR(curRegCode, regVal);
+			| 1:
+				BDI.writeGPR(curRegCode, regVal);
+			| 2:
+				BDI.writeSPR(curRegCode, regVal);
+			| 3:
+				BDI.writeMSR(regVal);
+			| 4:
+				BDI.writeFPR(curRegCode, fprMoveAddr, regVal);
+			| 5:
+				BDI.writeCR(regVal);
+			| 6:
+				BDI.writeFPSCR(regVal);
+			| 7:
+				BDI.writeMem(curRegCode, regVal, 4);
+			END;
+			done := BDI.Done
+		END
+	END WriteReg; 
+
+	PROCEDURE Clear * ; 
+		VAR	n: INTEGER;
+	BEGIN
+		Done := TRUE; 	firstErr := 0;
+		FOR n := 0 TO LEN(regTypeTab) - 1 DO
+			regTypeTab[0].type := "???"; regTypeTab[0].size := 4;
+		END
+	END Clear; 
+
+	PROCEDURE Init; 
+	BEGIN
+		Clear;
+		(*__ setup stub reg type *)
+		regTypeTab[0].type := "???"; regTypeTab[0].size := 4;
+		ClearRegAttr;
+
+		(*__ setup register types *)
+		regTypeTab[1].type := "GPR"; regTypeTab[1].size := 4;
+		regTypeTab[2].type := "SPR"; regTypeTab[2].size := 4;
+		regTypeTab[3].type := "MSR"; regTypeTab[3].size := 4;
+		regTypeTab[4].type := "FPR"; regTypeTab[4].size := 8;
+		regTypeTab[5].type := "CR"; regTypeTab[5].size := 4;
+		regTypeTab[6].type := "FPSCR"; regTypeTab[6].size := 4;
+		regTypeTab[7].type := "CtrlReg"; regTypeTab[7].size := 4;
+		XU.GetScanner(regDictPath, regScn);
+		IF ~regScn.done THEN	Error(3)	END
+	END Init; 
+
+
+BEGIN
+	Init
+END XoppcTrgtRegDict.
+
