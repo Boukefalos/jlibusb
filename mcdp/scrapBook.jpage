@@ -106,3 +106,10 @@ System.out.println("0x" + Integer.toHexString(retValue));
 ++++++
 System.out.println(((512 - 6) / 2) & 0xFFFC);
 ++++++
+int MR30TSPR = 0x7FC003A6;
+int spr = 158;
+System.out.println(((spr & 0x1F) * 0x20 + (spr >>> 5)) * 0x800 + MR30TSPR);
++++++++
+int val = 0xFFFFFA00;
+System.out.println("0x" + Integer.toHexString(val >>> 16));
+System.out.println("0x" + Integer.toHexString(val & 0xFFFF));
