@@ -27,6 +27,7 @@ MODULE UsbTargLog;
 	BEGIN
 		done := USB.UART0_read(data, length);
 		IF done THEN
+			length := MIN(length, USB.MAX_UART_DATA_LENGTH );
 			FOR i := 0 TO length - 1 DO
 				logWriter.WriteChar(data[i])
 			END
