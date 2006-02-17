@@ -11,6 +11,8 @@ public class FillTest {
 
 	private static McdpLogger logger = LogUtil.ch_ntb_mcdp_bdi_test;
 
+	public static MPC555 bdi;
+
 	static int[] addr = new int[10000];
 	static int[] val = new int[10000];
 	static int index, baseAddr;
@@ -29,7 +31,7 @@ public class FillTest {
 	public static void doCompare() throws USBException, DispatchException,
 			BDIException {
 		for (int i = 0; i < index; i++) {
-			int result = MPC555.readMem(addr[i], 4);
+			int result = bdi.readMem(addr[i], 4);
 			if (val[i] != result) {
 				logger.severe("Error at " + i + ", addr: 0x"
 						+ Integer.toHexString(addr[i]) + ", expected: 0x"
@@ -43,22 +45,22 @@ public class FillTest {
 			BDIException {
 		index = 0;
 
-		MPC555.writeMem(0x2FC100, 0x01000003, 4);
-		MPC555.writeMem(0x2FC104, 0x0FFC00020, 4);
-		MPC555.writeMem(0x2FC108, 0x0800003, 4);
-		MPC555.writeMem(0x2FC10C, 0x0FFE00020, 4);
-		MPC555.writeMem(0x2FC140, 3, 4);
-		MPC555.writeMem(0x2FC144, 0x7E000000, 4);
-		MPC555.writeSPR(158, 0x07);
-		MPC555.writeMem(0x2FC288, -1, 4);
-		MPC555.writeSPR(149, 0x031C7400F);
-		MPC555.writeSPR(27, 0x03802);
+		bdi.writeMem(0x2FC100, 0x01000003, 4);
+		bdi.writeMem(0x2FC104, 0x0FFC00020, 4);
+		bdi.writeMem(0x2FC108, 0x0800003, 4);
+		bdi.writeMem(0x2FC10C, 0x0FFE00020, 4);
+		bdi.writeMem(0x2FC140, 3, 4);
+		bdi.writeMem(0x2FC144, 0x7E000000, 4);
+		bdi.writeSPR(158, 0x07);
+		bdi.writeMem(0x2FC288, -1, 4);
+		bdi.writeSPR(149, 0x031C7400F);
+		bdi.writeSPR(27, 0x03802);
 
 		int length;
-		int[] data = new int[MPC555.MAX_NOF_WORDS_FAST_DOWNLOAD];
+		int[] data = new int[bdi.getMaxNofWordsFastDownload()];
 
 		baseAddr = 0x3F9800;
-		MPC555.startFastDownload(baseAddr);
+		bdi.startFastDownload(baseAddr);
 		length = 42;
 		data[0] = 0x0;
 		data[1] = 0x0;
@@ -103,10 +105,10 @@ public class FillTest {
 		data[40] = 0x0;
 		data[41] = 0x0;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
-		MPC555.stopFastDownload();
+		bdi.fastDownload(data, length);
+		bdi.stopFastDownload();
 		baseAddr = 0x3F98A8;
-		MPC555.startFastDownload(baseAddr);
+		bdi.startFastDownload(baseAddr);
 		length = 27;
 		data[0] = 0x0;
 		data[1] = 0x3F98E4;
@@ -136,10 +138,10 @@ public class FillTest {
 		data[25] = 0x0;
 		data[26] = 0xE9ACBB39;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
-		MPC555.stopFastDownload();
+		bdi.fastDownload(data, length);
+		bdi.stopFastDownload();
 		baseAddr = 0x3F9BF0;
-		MPC555.startFastDownload(baseAddr);
+		bdi.startFastDownload(baseAddr);
 		length = 101;
 		data[0] = 0x9421FFB0;
 		data[1] = 0xBF810040;
@@ -243,7 +245,7 @@ public class FillTest {
 		data[99] = 0x6D9C0810;
 		data[100] = 0x57830801;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
+		bdi.fastDownload(data, length);
 		length = 101;
 		data[0] = 0x4182000C;
 		data[1] = 0x6B844000;
@@ -347,7 +349,7 @@ public class FillTest {
 		data[99] = 0x90E50000;
 		data[100] = 0x3D000030;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
+		bdi.fastDownload(data, length);
 		length = 54;
 		data[0] = 0x3928C104;
 		data[1] = 0x3D40FFC0;
@@ -404,8 +406,8 @@ public class FillTest {
 		data[52] = 0x39072000;
 		data[53] = 0x3926FFFC;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
-		MPC555.stopFastDownload();
+		bdi.fastDownload(data, length);
+		bdi.stopFastDownload();
 
 	}
 
@@ -413,22 +415,22 @@ public class FillTest {
 			DispatchException {
 		index = 0;
 
-		MPC555.writeMem(0x2FC100, 0x01000003, 4);
-		MPC555.writeMem(0x2FC104, 0x0FFC00020, 4);
-		MPC555.writeMem(0x2FC108, 0x0800003, 4);
-		MPC555.writeMem(0x2FC10C, 0x0FFE00020, 4);
-		MPC555.writeMem(0x2FC140, 3, 4);
-		MPC555.writeMem(0x2FC144, 0x7E000000, 4);
-		MPC555.writeSPR(158, 0x07);
-		MPC555.writeMem(0x2FC288, -1, 4);
-		MPC555.writeSPR(149, 0x031C7400F);
-		MPC555.writeSPR(27, 0x03802);
+		bdi.writeMem(0x2FC100, 0x01000003, 4);
+		bdi.writeMem(0x2FC104, 0x0FFC00020, 4);
+		bdi.writeMem(0x2FC108, 0x0800003, 4);
+		bdi.writeMem(0x2FC10C, 0x0FFE00020, 4);
+		bdi.writeMem(0x2FC140, 3, 4);
+		bdi.writeMem(0x2FC144, 0x7E000000, 4);
+		bdi.writeSPR(158, 0x07);
+		bdi.writeMem(0x2FC288, -1, 4);
+		bdi.writeSPR(149, 0x031C7400F);
+		bdi.writeSPR(27, 0x03802);
 
 		int length;
-		int[] data = new int[MPC555.MAX_NOF_WORDS_FAST_DOWNLOAD];
+		int[] data = new int[bdi.getMaxNofWordsFastDownload()];
 
 		baseAddr = 0x3F9800;
-		MPC555.startFastDownload(baseAddr);
+		bdi.startFastDownload(baseAddr);
 		length = 42;
 		data[0] = 0x0;
 		data[1] = 0x0;
@@ -473,10 +475,10 @@ public class FillTest {
 		data[40] = 0x0;
 		data[41] = 0x0;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
-		MPC555.stopFastDownload();
+		bdi.fastDownload(data, length);
+		bdi.stopFastDownload();
 		baseAddr = 0x3F98A8;
-		MPC555.startFastDownload(baseAddr);
+		bdi.startFastDownload(baseAddr);
 		length = 27;
 		data[0] = 0x0;
 		data[1] = 0x3F98E4;
@@ -506,10 +508,10 @@ public class FillTest {
 		data[25] = 0x0;
 		data[26] = 0xE9ACBB39;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
-		MPC555.stopFastDownload();
+		bdi.fastDownload(data, length);
+		bdi.stopFastDownload();
 		baseAddr = 0x3F9BF0;
-		MPC555.startFastDownload(baseAddr);
+		bdi.startFastDownload(baseAddr);
 		length = 101;
 		data[0] = 0x9421FFB0;
 		data[1] = 0xBF810040;
@@ -613,7 +615,7 @@ public class FillTest {
 		data[99] = 0x6D9C0810;
 		data[100] = 0x57830801;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
+		bdi.fastDownload(data, length);
 		length = 101;
 		data[0] = 0x4182000C;
 		data[1] = 0x6B844000;
@@ -717,7 +719,7 @@ public class FillTest {
 		data[99] = 0x90E50000;
 		data[100] = 0x3D000030;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
+		bdi.fastDownload(data, length);
 		length = 54;
 		data[0] = 0x3928C104;
 		data[1] = 0x3D40FFC0;
@@ -774,10 +776,10 @@ public class FillTest {
 		data[52] = 0x39072000;
 		data[53] = 0x3926FFFC;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
-		MPC555.stopFastDownload();
+		bdi.fastDownload(data, length);
+		bdi.stopFastDownload();
 		baseAddr = 0x3F9FF0;
-		MPC555.startFastDownload(baseAddr);
+		bdi.startFastDownload(baseAddr);
 		length = 101;
 		data[0] = 0x3948FFFC;
 		data[1] = 0x562BE8FF;
@@ -881,7 +883,7 @@ public class FillTest {
 		data[99] = 0x91280000;
 		data[100] = 0x3D400030;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
+		bdi.fastDownload(data, length);
 		length = 46;
 		data[0] = 0x396AC010;
 		data[1] = 0x3D80FFFF;
@@ -930,10 +932,10 @@ public class FillTest {
 		data[44] = 0x4E800020;
 		data[45] = 0xECF41B66;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
-		MPC555.stopFastDownload();
+		bdi.fastDownload(data, length);
+		bdi.stopFastDownload();
 		baseAddr = 0x3F9914;
-		MPC555.startFastDownload(baseAddr);
+		bdi.startFastDownload(baseAddr);
 		length = 101;
 		data[0] = 0x0;
 		data[1] = 0x3F9950;
@@ -1037,7 +1039,7 @@ public class FillTest {
 		data[99] = 0x0;
 		data[100] = 0x0;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
+		bdi.fastDownload(data, length);
 		length = 9;
 		data[0] = 0x0;
 		data[1] = 0x0;
@@ -1049,10 +1051,10 @@ public class FillTest {
 		data[7] = 0x0;
 		data[8] = 0xEA187BE9;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
-		MPC555.stopFastDownload();
+		bdi.fastDownload(data, length);
+		bdi.stopFastDownload();
 		baseAddr = 0x3FA23C;
-		MPC555.startFastDownload(baseAddr);
+		bdi.startFastDownload(baseAddr);
 		length = 101;
 		data[0] = 0x9421FF90;
 		data[1] = 0x7C000026;
@@ -1156,7 +1158,7 @@ public class FillTest {
 		data[99] = 0x7C821A14;
 		data[100] = 0x80A40414;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
+		bdi.fastDownload(data, length);
 		length = 101;
 		data[0] = 0x90BC0008;
 		data[1] = 0xE9C0000;
@@ -1260,7 +1262,7 @@ public class FillTest {
 		data[99] = 0x4E800020;
 		data[100] = 0x9421FFC0;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
+		bdi.fastDownload(data, length);
 		length = 54;
 		data[0] = 0xBFE1003C;
 		data[1] = 0x3BE10038;
@@ -1317,10 +1319,10 @@ public class FillTest {
 		data[52] = 0xE930000;
 		data[53] = 0xE930000;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
-		MPC555.stopFastDownload();
+		bdi.fastDownload(data, length);
+		bdi.stopFastDownload();
 		baseAddr = 0x3FA63C;
-		MPC555.startFastDownload(baseAddr);
+		bdi.startFastDownload(baseAddr);
 		length = 39;
 		data[0] = 0x38D30004;
 		data[1] = 0x90D30000;
@@ -1362,10 +1364,10 @@ public class FillTest {
 		data[37] = 0x4E800020;
 		data[38] = 0x340DD8B;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
-		MPC555.stopFastDownload();
+		bdi.fastDownload(data, length);
+		bdi.stopFastDownload();
 		baseAddr = 0x3F9ACC;
-		MPC555.startFastDownload(baseAddr);
+		bdi.startFastDownload(baseAddr);
 		length = 73;
 		data[0] = 0x10;
 		data[1] = 0x3FABA0;
@@ -1441,10 +1443,10 @@ public class FillTest {
 		data[71] = 0x0;
 		data[72] = 0xEBD013B6;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
-		MPC555.stopFastDownload();
+		bdi.fastDownload(data, length);
+		bdi.stopFastDownload();
 		baseAddr = 0x0;
-		MPC555.startFastDownload(baseAddr);
+		bdi.startFastDownload(baseAddr);
 		length = 101;
 		data[0] = 0x9421FFC0;
 		data[1] = 0xBFC10038;
@@ -1548,7 +1550,7 @@ public class FillTest {
 		data[99] = 0x800100C0;
 		data[100] = 0x382100DC;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
+		bdi.fastDownload(data, length);
 		length = 101;
 		data[0] = 0x4C000064;
 		data[1] = 0x0;
@@ -1652,7 +1654,7 @@ public class FillTest {
 		data[99] = 0x3907C010;
 		data[100] = 0xA3A80000;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
+		bdi.fastDownload(data, length);
 		length = 54;
 		data[0] = 0x3BC00010;
 		data[1] = 0x33DEFFFF;
@@ -1709,10 +1711,10 @@ public class FillTest {
 		data[52] = 0x5F684001;
 		data[53] = 0x41820028;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
-		MPC555.stopFastDownload();
+		bdi.fastDownload(data, length);
+		bdi.stopFastDownload();
 		baseAddr = 0x400;
-		MPC555.startFastDownload(baseAddr);
+		bdi.startFastDownload(baseAddr);
 		length = 101;
 		data[0] = 0x387C0000;
 		data[1] = 0x8123FFFC;
@@ -1816,7 +1818,7 @@ public class FillTest {
 		data[99] = 0x800100CC;
 		data[100] = 0x7C0803A6;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
+		bdi.fastDownload(data, length);
 		length = 101;
 		data[0] = 0x800100C4;
 		data[1] = 0x7C1B03A6;
@@ -1920,7 +1922,7 @@ public class FillTest {
 		data[99] = 0x900100C0;
 		data[100] = 0x7C000026;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
+		bdi.fastDownload(data, length);
 		length = 54;
 		data[0] = 0x900100C4;
 		data[1] = 0x7C0902A6;
@@ -1977,10 +1979,10 @@ public class FillTest {
 		data[52] = 0x0;
 		data[53] = 0x0;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
-		MPC555.stopFastDownload();
+		bdi.fastDownload(data, length);
+		bdi.stopFastDownload();
 		baseAddr = 0x800;
-		MPC555.startFastDownload(baseAddr);
+		bdi.startFastDownload(baseAddr);
 		length = 101;
 		data[0] = 0x9421FF34;
 		data[1] = 0x900100B0;
@@ -2084,7 +2086,7 @@ public class FillTest {
 		data[99] = 0x0;
 		data[100] = 0x0;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
+		bdi.fastDownload(data, length);
 		length = 101;
 		data[0] = 0x0;
 		data[1] = 0x0;
@@ -2188,7 +2190,7 @@ public class FillTest {
 		data[99] = 0x0;
 		data[100] = 0x0;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
+		bdi.fastDownload(data, length);
 		length = 54;
 		data[0] = 0x0;
 		data[1] = 0x0;
@@ -2245,10 +2247,10 @@ public class FillTest {
 		data[52] = 0x0;
 		data[53] = 0x0;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
-		MPC555.stopFastDownload();
+		bdi.fastDownload(data, length);
+		bdi.stopFastDownload();
 		baseAddr = 0xC00;
-		MPC555.startFastDownload(baseAddr);
+		bdi.startFastDownload(baseAddr);
 		length = 101;
 		data[0] = 0x9421FF34;
 		data[1] = 0x900100B0;
@@ -2352,7 +2354,7 @@ public class FillTest {
 		data[99] = 0x800100B4;
 		data[100] = 0x7C1A03A6;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
+		bdi.fastDownload(data, length);
 		length = 101;
 		data[0] = 0x800100B0;
 		data[1] = 0x382100CC;
@@ -2456,7 +2458,7 @@ public class FillTest {
 		data[99] = 0x0;
 		data[100] = 0x0;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
+		bdi.fastDownload(data, length);
 		length = 54;
 		data[0] = 0x0;
 		data[1] = 0x0;
@@ -2513,10 +2515,10 @@ public class FillTest {
 		data[52] = 0x0;
 		data[53] = 0x0;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
-		MPC555.stopFastDownload();
+		bdi.fastDownload(data, length);
+		bdi.stopFastDownload();
 		baseAddr = 0x1000;
-		MPC555.startFastDownload(baseAddr);
+		bdi.startFastDownload(baseAddr);
 		length = 101;
 		data[0] = 0x9421FF34;
 		data[1] = 0x900100B0;
@@ -2620,7 +2622,7 @@ public class FillTest {
 		data[99] = 0x3BA40000;
 		data[100] = 0xE9E0000;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
+		bdi.fastDownload(data, length);
 		length = 101;
 		data[0] = 0x57AA083C;
 		data[1] = 0x316A0001;
@@ -2724,7 +2726,7 @@ public class FillTest {
 		data[99] = 0x0;
 		data[100] = 0x0;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
+		bdi.fastDownload(data, length);
 		length = 54;
 		data[0] = 0x0;
 		data[1] = 0x0;
@@ -2781,10 +2783,10 @@ public class FillTest {
 		data[52] = 0x0;
 		data[53] = 0x0;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
-		MPC555.stopFastDownload();
+		bdi.fastDownload(data, length);
+		bdi.stopFastDownload();
 		baseAddr = 0x1400;
-		MPC555.startFastDownload(baseAddr);
+		bdi.startFastDownload(baseAddr);
 		length = 101;
 		data[0] = 0x0;
 		data[1] = 0x0;
@@ -2888,7 +2890,7 @@ public class FillTest {
 		data[99] = 0x0;
 		data[100] = 0x0;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
+		bdi.fastDownload(data, length);
 		length = 101;
 		data[0] = 0x0;
 		data[1] = 0x0;
@@ -2992,7 +2994,7 @@ public class FillTest {
 		data[99] = 0x0;
 		data[100] = 0x0;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
+		bdi.fastDownload(data, length);
 		length = 54;
 		data[0] = 0x0;
 		data[1] = 0x0;
@@ -3049,10 +3051,10 @@ public class FillTest {
 		data[52] = 0x0;
 		data[53] = 0x0;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
-		MPC555.stopFastDownload();
+		bdi.fastDownload(data, length);
+		bdi.stopFastDownload();
 		baseAddr = 0x1800;
-		MPC555.startFastDownload(baseAddr);
+		bdi.startFastDownload(baseAddr);
 		length = 101;
 		data[0] = 0x0;
 		data[1] = 0x0;
@@ -3156,7 +3158,7 @@ public class FillTest {
 		data[99] = 0x0;
 		data[100] = 0x0;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
+		bdi.fastDownload(data, length);
 		length = 101;
 		data[0] = 0x0;
 		data[1] = 0x0;
@@ -3260,7 +3262,7 @@ public class FillTest {
 		data[99] = 0x0;
 		data[100] = 0x0;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
+		bdi.fastDownload(data, length);
 		length = 54;
 		data[0] = 0x0;
 		data[1] = 0x0;
@@ -3317,10 +3319,10 @@ public class FillTest {
 		data[52] = 0x0;
 		data[53] = 0x0;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
-		MPC555.stopFastDownload();
+		bdi.fastDownload(data, length);
+		bdi.stopFastDownload();
 		baseAddr = 0x1C00;
-		MPC555.startFastDownload(baseAddr);
+		bdi.startFastDownload(baseAddr);
 		length = 101;
 		data[0] = 0x0;
 		data[1] = 0x0;
@@ -3424,7 +3426,7 @@ public class FillTest {
 		data[99] = 0x0;
 		data[100] = 0x0;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
+		bdi.fastDownload(data, length);
 		length = 101;
 		data[0] = 0x0;
 		data[1] = 0x0;
@@ -3528,7 +3530,7 @@ public class FillTest {
 		data[99] = 0x0;
 		data[100] = 0x0;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
+		bdi.fastDownload(data, length);
 		length = 51;
 		data[0] = 0x0;
 		data[1] = 0x0;
@@ -3582,10 +3584,10 @@ public class FillTest {
 		data[49] = 0x4E800020;
 		data[50] = 0x50C5598E;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
-		MPC555.stopFastDownload();
+		bdi.fastDownload(data, length);
+		bdi.stopFastDownload();
 		baseAddr = 0x802000;
-		MPC555.startFastDownload(baseAddr);
+		bdi.startFastDownload(baseAddr);
 		length = 101;
 		data[0] = 0x26;
 		data[1] = 0x80326C;
@@ -3689,7 +3691,7 @@ public class FillTest {
 		data[99] = 0x802370;
 		data[100] = 0x80325C;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
+		bdi.fastDownload(data, length);
 		length = 58;
 		data[0] = 0x8023F4;
 		data[1] = 0x80325C;
@@ -3750,10 +3752,10 @@ public class FillTest {
 		data[56] = 0x0;
 		data[57] = 0x7145256D;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
-		MPC555.stopFastDownload();
+		bdi.fastDownload(data, length);
+		bdi.stopFastDownload();
 		baseAddr = 0x80227C;
-		MPC555.startFastDownload(baseAddr);
+		bdi.startFastDownload(baseAddr);
 		length = 101;
 		data[0] = 0x9421FFC0;
 		data[1] = 0xBFC10038;
@@ -3857,7 +3859,7 @@ public class FillTest {
 		data[99] = 0x90410014;
 		data[100] = 0x3BC30000;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
+		bdi.fastDownload(data, length);
 		length = 101;
 		data[0] = 0x38600062;
 		data[1] = 0x4BFFFE69;
@@ -3961,7 +3963,7 @@ public class FillTest {
 		data[99] = 0xCBC0022;
 		data[100] = 0x578A103A;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
+		bdi.fastDownload(data, length);
 		length = 54;
 		data[0] = 0x7D625214;
 		data[1] = 0x806B0018;
@@ -4018,10 +4020,10 @@ public class FillTest {
 		data[52] = 0x39400000;
 		data[53] = 0xB1420004;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
-		MPC555.stopFastDownload();
+		bdi.fastDownload(data, length);
+		bdi.stopFastDownload();
 		baseAddr = 0x80267C;
-		MPC555.startFastDownload(baseAddr);
+		bdi.startFastDownload(baseAddr);
 		length = 101;
 		data[0] = 0x383FFFC8;
 		data[1] = 0xBB810044;
@@ -4125,7 +4127,7 @@ public class FillTest {
 		data[99] = 0x4086000C;
 		data[100] = 0x4BFFFD19;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
+		bdi.fastDownload(data, length);
 		length = 101;
 		data[0] = 0x428001A4;
 		data[1] = 0xA8620004;
@@ -4229,7 +4231,7 @@ public class FillTest {
 		data[99] = 0x3B9B0000;
 		data[100] = 0x4280FF40;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
+		bdi.fastDownload(data, length);
 		length = 54;
 		data[0] = 0xCBC0022;
 		data[1] = 0x578C103A;
@@ -4286,10 +4288,10 @@ public class FillTest {
 		data[52] = 0x8001004C;
 		data[53] = 0x7C0803A6;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
-		MPC555.stopFastDownload();
+		bdi.fastDownload(data, length);
+		bdi.stopFastDownload();
 		baseAddr = 0x802A7C;
-		MPC555.startFastDownload(baseAddr);
+		bdi.startFastDownload(baseAddr);
 		length = 101;
 		data[0] = 0x38210050;
 		data[1] = 0x4E800020;
@@ -4393,7 +4395,7 @@ public class FillTest {
 		data[99] = 0x387E0000;
 		data[100] = 0x8083FFFC;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
+		bdi.fastDownload(data, length);
 		length = 101;
 		data[0] = 0x8004FFF0;
 		data[1] = 0x7C0903A6;
@@ -4497,7 +4499,7 @@ public class FillTest {
 		data[99] = 0xB0620008;
 		data[100] = 0xA8820008;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
+		bdi.fastDownload(data, length);
 		length = 54;
 		data[0] = 0x2F840022;
 		data[1] = 0x419C0010;
@@ -4554,10 +4556,10 @@ public class FillTest {
 		data[52] = 0x80410014;
 		data[53] = 0x4280FC6C;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
-		MPC555.stopFastDownload();
+		bdi.fastDownload(data, length);
+		bdi.stopFastDownload();
 		baseAddr = 0x802E7C;
-		MPC555.startFastDownload(baseAddr);
+		bdi.startFastDownload(baseAddr);
 		length = 101;
 		data[0] = 0x383FFFC8;
 		data[1] = 0xBB610048;
@@ -4661,7 +4663,7 @@ public class FillTest {
 		data[99] = 0xE9E0000;
 		data[100] = 0x80FE0004;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
+		bdi.fastDownload(data, length);
 		length = 101;
 		data[0] = 0x390003E8;
 		data[1] = 0x7D2743D6;
@@ -4765,7 +4767,7 @@ public class FillTest {
 		data[99] = 0x33DE0001;
 		data[100] = 0x4280FFE0;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
+		bdi.fastDownload(data, length);
 		length = 40;
 		data[0] = 0x3D400080;
 		data[1] = 0x396A2AC8;
@@ -4808,10 +4810,10 @@ public class FillTest {
 		data[38] = 0x4E800020;
 		data[39] = 0x73C16892;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
-		MPC555.stopFastDownload();
+		bdi.fastDownload(data, length);
+		bdi.stopFastDownload();
 		baseAddr = 0x80330C;
-		MPC555.startFastDownload(baseAddr);
+		bdi.startFastDownload(baseAddr);
 		length = 27;
 		data[0] = 0x0;
 		data[1] = 0x803348;
@@ -4841,10 +4843,10 @@ public class FillTest {
 		data[25] = 0x3FA6E0;
 		data[26] = 0x8451FDF2;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
-		MPC555.stopFastDownload();
+		bdi.fastDownload(data, length);
+		bdi.stopFastDownload();
 		baseAddr = 0x803378;
-		MPC555.startFastDownload(baseAddr);
+		bdi.startFastDownload(baseAddr);
 		length = 87;
 		data[0] = 0x9421FFB0;
 		data[1] = 0x7C000026;
@@ -4934,10 +4936,10 @@ public class FillTest {
 		data[85] = 0x4E800020;
 		data[86] = 0x84BDA90A;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
-		MPC555.stopFastDownload();
+		bdi.fastDownload(data, length);
+		bdi.stopFastDownload();
 		baseAddr = 0x8034DC;
-		MPC555.startFastDownload(baseAddr);
+		bdi.startFastDownload(baseAddr);
 		length = 60;
 		data[0] = 0x1;
 		data[1] = 0x803728;
@@ -5000,10 +5002,10 @@ public class FillTest {
 		data[58] = 0x0;
 		data[59] = 0x86212A8C;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
-		MPC555.stopFastDownload();
+		bdi.fastDownload(data, length);
+		bdi.stopFastDownload();
 		baseAddr = 0x8035CC;
-		MPC555.startFastDownload(baseAddr);
+		bdi.startFastDownload(baseAddr);
 		length = 83;
 		data[0] = 0x9421FFB0;
 		data[1] = 0x7C0802A6;
@@ -5089,30 +5091,30 @@ public class FillTest {
 		data[81] = 0x4E800020;
 		data[82] = 0x87111E2A;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
-		MPC555.stopFastDownload();
+		bdi.fastDownload(data, length);
+		bdi.stopFastDownload();
 	}
 
 	public static void doFill2() throws BDIException, USBException,
 			DispatchException {
 		index = 0;
 
-		MPC555.writeMem(0x2FC100, 0x01000003, 4);
-		MPC555.writeMem(0x2FC104, 0x0FFC00020, 4);
-		MPC555.writeMem(0x2FC108, 0x0800003, 4);
-		MPC555.writeMem(0x2FC10C, 0x0FFE00020, 4);
-		MPC555.writeMem(0x2FC140, 3, 4);
-		MPC555.writeMem(0x2FC144, 0x7E000000, 4);
-		MPC555.writeSPR(158, 0x07);
-		MPC555.writeMem(0x2FC288, -1, 4);
-		MPC555.writeSPR(149, 0x031C7400F);
-		MPC555.writeSPR(27, 0x03802);
+		bdi.writeMem(0x2FC100, 0x01000003, 4);
+		bdi.writeMem(0x2FC104, 0x0FFC00020, 4);
+		bdi.writeMem(0x2FC108, 0x0800003, 4);
+		bdi.writeMem(0x2FC10C, 0x0FFE00020, 4);
+		bdi.writeMem(0x2FC140, 3, 4);
+		bdi.writeMem(0x2FC144, 0x7E000000, 4);
+		bdi.writeSPR(158, 0x07);
+		bdi.writeMem(0x2FC288, -1, 4);
+		bdi.writeSPR(149, 0x031C7400F);
+		bdi.writeSPR(27, 0x03802);
 
 		int length;
-		int[] data = new int[MPC555.MAX_NOF_WORDS_FAST_DOWNLOAD];
+		int[] data = new int[bdi.getMaxNofWordsFastDownload()];
 
 		baseAddr = 0x3f9800;
-		MPC555.startFastDownload(baseAddr);
+		bdi.startFastDownload(baseAddr);
 		length = 101;
 		data[0] = 0x0;
 		data[1] = 0x0;
@@ -5216,10 +5218,10 @@ public class FillTest {
 		data[99] = 0x1;
 		data[100] = 0x10be340;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
-		MPC555.stopFastDownload();
+		bdi.fastDownload(data, length);
+		bdi.stopFastDownload();
 		baseAddr = 0x3f98a8;
-		MPC555.startFastDownload(baseAddr);
+		bdi.startFastDownload(baseAddr);
 		length = 101;
 		data[0] = 0x0;
 		data[1] = 0x3f98e4;
@@ -5323,10 +5325,10 @@ public class FillTest {
 		data[99] = 0x1;
 		data[100] = 0x10be340;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
-		MPC555.stopFastDownload();
+		bdi.fastDownload(data, length);
+		bdi.stopFastDownload();
 		baseAddr = 0x3f9bf0;
-		MPC555.startFastDownload(baseAddr);
+		bdi.startFastDownload(baseAddr);
 		length = 101;
 		data[0] = 0x9421ffb0;
 		data[1] = 0xbf810040;
@@ -5430,7 +5432,7 @@ public class FillTest {
 		data[99] = 0x6d9c0810;
 		data[100] = 0x57830801;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
+		bdi.fastDownload(data, length);
 		length = 101;
 		data[0] = 0x4182000c;
 		data[1] = 0x6b844000;
@@ -5534,7 +5536,7 @@ public class FillTest {
 		data[99] = 0x90e50000;
 		data[100] = 0x3d000030;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
+		bdi.fastDownload(data, length);
 		length = 101;
 		data[0] = 0x3928c104;
 		data[1] = 0x3d40ffc0;
@@ -5638,10 +5640,10 @@ public class FillTest {
 		data[99] = 0x90e50000;
 		data[100] = 0x3d000030;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
-		MPC555.stopFastDownload();
+		bdi.fastDownload(data, length);
+		bdi.stopFastDownload();
 		baseAddr = 0x3f9ff0;
-		MPC555.startFastDownload(baseAddr);
+		bdi.startFastDownload(baseAddr);
 		length = 101;
 		data[0] = 0x3948fffc;
 		data[1] = 0x562be8ff;
@@ -5745,7 +5747,7 @@ public class FillTest {
 		data[99] = 0x91280000;
 		data[100] = 0x3d400030;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
+		bdi.fastDownload(data, length);
 		length = 101;
 		data[0] = 0x396ac010;
 		data[1] = 0x3d80ffff;
@@ -5849,10 +5851,10 @@ public class FillTest {
 		data[99] = 0x91280000;
 		data[100] = 0x3d400030;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
-		MPC555.stopFastDownload();
+		bdi.fastDownload(data, length);
+		bdi.stopFastDownload();
 		baseAddr = 0x3f9914;
-		MPC555.startFastDownload(baseAddr);
+		bdi.startFastDownload(baseAddr);
 		length = 101;
 		data[0] = 0x0;
 		data[1] = 0x3f9950;
@@ -5956,7 +5958,7 @@ public class FillTest {
 		data[99] = 0x0;
 		data[100] = 0x0;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
+		bdi.fastDownload(data, length);
 		length = 101;
 		data[0] = 0x0;
 		data[1] = 0x0;
@@ -6060,10 +6062,10 @@ public class FillTest {
 		data[99] = 0x0;
 		data[100] = 0x0;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
-		MPC555.stopFastDownload();
+		bdi.fastDownload(data, length);
+		bdi.stopFastDownload();
 		baseAddr = 0x3fa23c;
-		MPC555.startFastDownload(baseAddr);
+		bdi.startFastDownload(baseAddr);
 		length = 101;
 		data[0] = 0x9421ff90;
 		data[1] = 0x7c000026;
@@ -6167,7 +6169,7 @@ public class FillTest {
 		data[99] = 0x7c821a14;
 		data[100] = 0x80a40414;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
+		bdi.fastDownload(data, length);
 		length = 101;
 		data[0] = 0x90bc0008;
 		data[1] = 0xe9c0000;
@@ -6271,7 +6273,7 @@ public class FillTest {
 		data[99] = 0x4e800020;
 		data[100] = 0x9421ffc0;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
+		bdi.fastDownload(data, length);
 		length = 101;
 		data[0] = 0xbfe1003c;
 		data[1] = 0x3be10038;
@@ -6375,10 +6377,10 @@ public class FillTest {
 		data[99] = 0x4e800020;
 		data[100] = 0x9421ffc0;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
-		MPC555.stopFastDownload();
+		bdi.fastDownload(data, length);
+		bdi.stopFastDownload();
 		baseAddr = 0x3fa63c;
-		MPC555.startFastDownload(baseAddr);
+		bdi.startFastDownload(baseAddr);
 		length = 101;
 		data[0] = 0x38d30004;
 		data[1] = 0x90d30000;
@@ -6482,10 +6484,10 @@ public class FillTest {
 		data[99] = 0x4e800020;
 		data[100] = 0x9421ffc0;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
-		MPC555.stopFastDownload();
+		bdi.fastDownload(data, length);
+		bdi.stopFastDownload();
 		baseAddr = 0x3f9acc;
-		MPC555.startFastDownload(baseAddr);
+		bdi.startFastDownload(baseAddr);
 		length = 101;
 		data[0] = 0x10;
 		data[1] = 0x3faba0;
@@ -6589,10 +6591,10 @@ public class FillTest {
 		data[99] = 0x4e800020;
 		data[100] = 0x9421ffc0;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
-		MPC555.stopFastDownload();
+		bdi.fastDownload(data, length);
+		bdi.stopFastDownload();
 		baseAddr = 0x0;
-		MPC555.startFastDownload(baseAddr);
+		bdi.startFastDownload(baseAddr);
 		length = 101;
 		data[0] = 0x9421ffc0;
 		data[1] = 0xbfc10038;
@@ -6696,7 +6698,7 @@ public class FillTest {
 		data[99] = 0x800100c0;
 		data[100] = 0x382100dc;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
+		bdi.fastDownload(data, length);
 		length = 101;
 		data[0] = 0x4c000064;
 		data[1] = 0x0;
@@ -6800,7 +6802,7 @@ public class FillTest {
 		data[99] = 0x3907c010;
 		data[100] = 0xa3a80000;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
+		bdi.fastDownload(data, length);
 		length = 101;
 		data[0] = 0x3bc00010;
 		data[1] = 0x33deffff;
@@ -6904,10 +6906,10 @@ public class FillTest {
 		data[99] = 0x3907c010;
 		data[100] = 0xa3a80000;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
-		MPC555.stopFastDownload();
+		bdi.fastDownload(data, length);
+		bdi.stopFastDownload();
 		baseAddr = 0x400;
-		MPC555.startFastDownload(baseAddr);
+		bdi.startFastDownload(baseAddr);
 		length = 101;
 		data[0] = 0x387c0000;
 		data[1] = 0x8123fffc;
@@ -7011,7 +7013,7 @@ public class FillTest {
 		data[99] = 0x800100cc;
 		data[100] = 0x7c0803a6;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
+		bdi.fastDownload(data, length);
 		length = 101;
 		data[0] = 0x800100c4;
 		data[1] = 0x7c1b03a6;
@@ -7115,7 +7117,7 @@ public class FillTest {
 		data[99] = 0x900100c0;
 		data[100] = 0x7c000026;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
+		bdi.fastDownload(data, length);
 		length = 101;
 		data[0] = 0x900100c4;
 		data[1] = 0x7c0902a6;
@@ -7219,10 +7221,10 @@ public class FillTest {
 		data[99] = 0x900100c0;
 		data[100] = 0x7c000026;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
-		MPC555.stopFastDownload();
+		bdi.fastDownload(data, length);
+		bdi.stopFastDownload();
 		baseAddr = 0x800;
-		MPC555.startFastDownload(baseAddr);
+		bdi.startFastDownload(baseAddr);
 		length = 101;
 		data[0] = 0x9421ff34;
 		data[1] = 0x900100b0;
@@ -7326,7 +7328,7 @@ public class FillTest {
 		data[99] = 0x0;
 		data[100] = 0x0;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
+		bdi.fastDownload(data, length);
 		length = 101;
 		data[0] = 0x0;
 		data[1] = 0x0;
@@ -7430,7 +7432,7 @@ public class FillTest {
 		data[99] = 0x0;
 		data[100] = 0x0;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
+		bdi.fastDownload(data, length);
 		length = 101;
 		data[0] = 0x0;
 		data[1] = 0x0;
@@ -7534,10 +7536,10 @@ public class FillTest {
 		data[99] = 0x0;
 		data[100] = 0x0;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
-		MPC555.stopFastDownload();
+		bdi.fastDownload(data, length);
+		bdi.stopFastDownload();
 		baseAddr = 0xc00;
-		MPC555.startFastDownload(baseAddr);
+		bdi.startFastDownload(baseAddr);
 		length = 101;
 		data[0] = 0x9421ff34;
 		data[1] = 0x900100b0;
@@ -7641,7 +7643,7 @@ public class FillTest {
 		data[99] = 0x800100b4;
 		data[100] = 0x7c1a03a6;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
+		bdi.fastDownload(data, length);
 		length = 101;
 		data[0] = 0x800100b0;
 		data[1] = 0x382100cc;
@@ -7745,7 +7747,7 @@ public class FillTest {
 		data[99] = 0x0;
 		data[100] = 0x0;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
+		bdi.fastDownload(data, length);
 		length = 101;
 		data[0] = 0x0;
 		data[1] = 0x0;
@@ -7849,10 +7851,10 @@ public class FillTest {
 		data[99] = 0x0;
 		data[100] = 0x0;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
-		MPC555.stopFastDownload();
+		bdi.fastDownload(data, length);
+		bdi.stopFastDownload();
 		baseAddr = 0x1000;
-		MPC555.startFastDownload(baseAddr);
+		bdi.startFastDownload(baseAddr);
 		length = 101;
 		data[0] = 0x9421ff34;
 		data[1] = 0x900100b0;
@@ -7956,7 +7958,7 @@ public class FillTest {
 		data[99] = 0x3ba40000;
 		data[100] = 0xe9e0000;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
+		bdi.fastDownload(data, length);
 		length = 101;
 		data[0] = 0x57aa083c;
 		data[1] = 0x316a0001;
@@ -8060,7 +8062,7 @@ public class FillTest {
 		data[99] = 0x0;
 		data[100] = 0x0;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
+		bdi.fastDownload(data, length);
 		length = 101;
 		data[0] = 0x0;
 		data[1] = 0x0;
@@ -8164,10 +8166,10 @@ public class FillTest {
 		data[99] = 0x0;
 		data[100] = 0x0;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
-		MPC555.stopFastDownload();
+		bdi.fastDownload(data, length);
+		bdi.stopFastDownload();
 		baseAddr = 0x1400;
-		MPC555.startFastDownload(baseAddr);
+		bdi.startFastDownload(baseAddr);
 		length = 101;
 		data[0] = 0x0;
 		data[1] = 0x0;
@@ -8271,7 +8273,7 @@ public class FillTest {
 		data[99] = 0x0;
 		data[100] = 0x0;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
+		bdi.fastDownload(data, length);
 		length = 101;
 		data[0] = 0x0;
 		data[1] = 0x0;
@@ -8375,7 +8377,7 @@ public class FillTest {
 		data[99] = 0x0;
 		data[100] = 0x0;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
+		bdi.fastDownload(data, length);
 		length = 101;
 		data[0] = 0x0;
 		data[1] = 0x0;
@@ -8479,10 +8481,10 @@ public class FillTest {
 		data[99] = 0x0;
 		data[100] = 0x0;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
-		MPC555.stopFastDownload();
+		bdi.fastDownload(data, length);
+		bdi.stopFastDownload();
 		baseAddr = 0x1800;
-		MPC555.startFastDownload(baseAddr);
+		bdi.startFastDownload(baseAddr);
 		length = 101;
 		data[0] = 0x0;
 		data[1] = 0x0;
@@ -8586,7 +8588,7 @@ public class FillTest {
 		data[99] = 0x0;
 		data[100] = 0x0;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
+		bdi.fastDownload(data, length);
 		length = 101;
 		data[0] = 0x0;
 		data[1] = 0x0;
@@ -8690,7 +8692,7 @@ public class FillTest {
 		data[99] = 0x0;
 		data[100] = 0x0;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
+		bdi.fastDownload(data, length);
 		length = 101;
 		data[0] = 0x0;
 		data[1] = 0x0;
@@ -8794,10 +8796,10 @@ public class FillTest {
 		data[99] = 0x0;
 		data[100] = 0x0;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
-		MPC555.stopFastDownload();
+		bdi.fastDownload(data, length);
+		bdi.stopFastDownload();
 		baseAddr = 0x1c00;
-		MPC555.startFastDownload(baseAddr);
+		bdi.startFastDownload(baseAddr);
 		length = 101;
 		data[0] = 0x0;
 		data[1] = 0x0;
@@ -8901,7 +8903,7 @@ public class FillTest {
 		data[99] = 0x0;
 		data[100] = 0x0;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
+		bdi.fastDownload(data, length);
 		length = 101;
 		data[0] = 0x0;
 		data[1] = 0x0;
@@ -9005,7 +9007,7 @@ public class FillTest {
 		data[99] = 0x0;
 		data[100] = 0x0;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
+		bdi.fastDownload(data, length);
 		length = 101;
 		data[0] = 0x0;
 		data[1] = 0x0;
@@ -9109,10 +9111,10 @@ public class FillTest {
 		data[99] = 0x0;
 		data[100] = 0x0;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
-		MPC555.stopFastDownload();
+		bdi.fastDownload(data, length);
+		bdi.stopFastDownload();
 		baseAddr = 0x802000;
-		MPC555.startFastDownload(baseAddr);
+		bdi.startFastDownload(baseAddr);
 		length = 101;
 		data[0] = 0x26;
 		data[1] = 0x80326c;
@@ -9216,7 +9218,7 @@ public class FillTest {
 		data[99] = 0x802370;
 		data[100] = 0x80325c;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
+		bdi.fastDownload(data, length);
 		length = 101;
 		data[0] = 0x8023f4;
 		data[1] = 0x80325c;
@@ -9320,10 +9322,10 @@ public class FillTest {
 		data[99] = 0x802370;
 		data[100] = 0x80325c;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
-		MPC555.stopFastDownload();
+		bdi.fastDownload(data, length);
+		bdi.stopFastDownload();
 		baseAddr = 0x80227c;
-		MPC555.startFastDownload(baseAddr);
+		bdi.startFastDownload(baseAddr);
 		length = 101;
 		data[0] = 0x9421ffc0;
 		data[1] = 0xbfc10038;
@@ -9427,7 +9429,7 @@ public class FillTest {
 		data[99] = 0x90410014;
 		data[100] = 0x3bc30000;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
+		bdi.fastDownload(data, length);
 		length = 101;
 		data[0] = 0x38600062;
 		data[1] = 0x4bfffe69;
@@ -9531,7 +9533,7 @@ public class FillTest {
 		data[99] = 0xcbc0022;
 		data[100] = 0x578a103a;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
+		bdi.fastDownload(data, length);
 		length = 101;
 		data[0] = 0x7d625214;
 		data[1] = 0x806b0018;
@@ -9635,10 +9637,10 @@ public class FillTest {
 		data[99] = 0xcbc0022;
 		data[100] = 0x578a103a;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
-		MPC555.stopFastDownload();
+		bdi.fastDownload(data, length);
+		bdi.stopFastDownload();
 		baseAddr = 0x80267c;
-		MPC555.startFastDownload(baseAddr);
+		bdi.startFastDownload(baseAddr);
 		length = 101;
 		data[0] = 0x383fffc8;
 		data[1] = 0xbb810044;
@@ -9742,7 +9744,7 @@ public class FillTest {
 		data[99] = 0x4086000c;
 		data[100] = 0x4bfffd19;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
+		bdi.fastDownload(data, length);
 		length = 101;
 		data[0] = 0x428001a4;
 		data[1] = 0xa8620004;
@@ -9846,7 +9848,7 @@ public class FillTest {
 		data[99] = 0x3b9b0000;
 		data[100] = 0x4280ff40;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
+		bdi.fastDownload(data, length);
 		length = 101;
 		data[0] = 0xcbc0022;
 		data[1] = 0x578c103a;
@@ -9950,10 +9952,10 @@ public class FillTest {
 		data[99] = 0x3b9b0000;
 		data[100] = 0x4280ff40;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
-		MPC555.stopFastDownload();
+		bdi.fastDownload(data, length);
+		bdi.stopFastDownload();
 		baseAddr = 0x802a7c;
-		MPC555.startFastDownload(baseAddr);
+		bdi.startFastDownload(baseAddr);
 		length = 101;
 		data[0] = 0x38210050;
 		data[1] = 0x4e800020;
@@ -10057,7 +10059,7 @@ public class FillTest {
 		data[99] = 0x387e0000;
 		data[100] = 0x8083fffc;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
+		bdi.fastDownload(data, length);
 		length = 101;
 		data[0] = 0x8004fff0;
 		data[1] = 0x7c0903a6;
@@ -10161,7 +10163,7 @@ public class FillTest {
 		data[99] = 0xb0620008;
 		data[100] = 0xa8820008;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
+		bdi.fastDownload(data, length);
 		length = 101;
 		data[0] = 0x2f840022;
 		data[1] = 0x419c0010;
@@ -10265,10 +10267,10 @@ public class FillTest {
 		data[99] = 0xb0620008;
 		data[100] = 0xa8820008;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
-		MPC555.stopFastDownload();
+		bdi.fastDownload(data, length);
+		bdi.stopFastDownload();
 		baseAddr = 0x802e7c;
-		MPC555.startFastDownload(baseAddr);
+		bdi.startFastDownload(baseAddr);
 		length = 101;
 		data[0] = 0x383fffc8;
 		data[1] = 0xbb610048;
@@ -10372,7 +10374,7 @@ public class FillTest {
 		data[99] = 0xe9e0000;
 		data[100] = 0x80fe0004;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
+		bdi.fastDownload(data, length);
 		length = 101;
 		data[0] = 0x390003e8;
 		data[1] = 0x7d2743d6;
@@ -10476,7 +10478,7 @@ public class FillTest {
 		data[99] = 0x33de0001;
 		data[100] = 0x4280ffe0;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
+		bdi.fastDownload(data, length);
 		length = 101;
 		data[0] = 0x3d400080;
 		data[1] = 0x396a2ac8;
@@ -10580,10 +10582,10 @@ public class FillTest {
 		data[99] = 0x33de0001;
 		data[100] = 0x4280ffe0;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
-		MPC555.stopFastDownload();
+		bdi.fastDownload(data, length);
+		bdi.stopFastDownload();
 		baseAddr = 0x80330c;
-		MPC555.startFastDownload(baseAddr);
+		bdi.startFastDownload(baseAddr);
 		length = 101;
 		data[0] = 0x0;
 		data[1] = 0x803348;
@@ -10687,10 +10689,10 @@ public class FillTest {
 		data[99] = 0x33de0001;
 		data[100] = 0x4280ffe0;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
-		MPC555.stopFastDownload();
+		bdi.fastDownload(data, length);
+		bdi.stopFastDownload();
 		baseAddr = 0x803378;
-		MPC555.startFastDownload(baseAddr);
+		bdi.startFastDownload(baseAddr);
 		length = 101;
 		data[0] = 0x9421ffb0;
 		data[1] = 0x7c000026;
@@ -10794,10 +10796,10 @@ public class FillTest {
 		data[99] = 0x33de0001;
 		data[100] = 0x4280ffe0;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
-		MPC555.stopFastDownload();
+		bdi.fastDownload(data, length);
+		bdi.stopFastDownload();
 		baseAddr = 0x8034dc;
-		MPC555.startFastDownload(baseAddr);
+		bdi.startFastDownload(baseAddr);
 		length = 101;
 		data[0] = 0x1;
 		data[1] = 0x803728;
@@ -10901,10 +10903,10 @@ public class FillTest {
 		data[99] = 0x33de0001;
 		data[100] = 0x4280ffe0;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
-		MPC555.stopFastDownload();
+		bdi.fastDownload(data, length);
+		bdi.stopFastDownload();
 		baseAddr = 0x8035cc;
-		MPC555.startFastDownload(baseAddr);
+		bdi.startFastDownload(baseAddr);
 		length = 101;
 		data[0] = 0x9421ffb0;
 		data[1] = 0x7c0802a6;
@@ -11008,7 +11010,7 @@ public class FillTest {
 		data[99] = 0x33de0001;
 		data[100] = 0x4280ffe0;
 		add(baseAddr, data, length);
-		MPC555.fastDownload(data, length);
-		MPC555.stopFastDownload();
+		bdi.fastDownload(data, length);
+		bdi.stopFastDownload();
 	}
 }

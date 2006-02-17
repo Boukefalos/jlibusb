@@ -6,6 +6,7 @@ import ch.ntb.mcdp.usb.DispatchException;
 import ch.ntb.mcdp.usb.USBDevice;
 import ch.ntb.mcdp.utils.logger.LogUtil;
 import ch.ntb.mcdp.utils.logger.McdpLogger;
+import ch.ntb.usb.Device;
 import ch.ntb.usb.USB;
 import ch.ntb.usb.USBException;
 
@@ -74,6 +75,9 @@ public class MPC555 {
 	 */
 	private static final byte STYPE_BDI_ERROR_TIMEOUT = 0x73;
 
+	/**
+	 * number of bytes per BDI transfer (35 bits)
+	 */
 	private static final int BDI_DATA35_LENGTH = 5;
 
 	/**
@@ -111,23 +115,29 @@ public class MPC555 {
 	 */
 	private static final int MTBRTR30 = 0x7FC002E6;
 
+	/**
+	 * Null indication result of a BDI transaction
+	 */
 	private static final int NULL_INDICATION = -1;
 
-	public static final int MAX_NOF_WORDS_FAST_DOWNLOAD = ((USB.MAX_DATA_SIZE - DataPacket.PACKET_MIN_LENGTH) / BDI_DATA35_LENGTH);
+	private final int maxNofWordsFastDownload;
 
-	private static boolean fastDownloadStarted = false;
+	private boolean fastDownloadStarted;
 
-	private static boolean targetInDebugMode = false;
+	private boolean targetInDebugMode;
 
-	private static byte[] sendData;
+	private byte[] sendData;
 
-	private static int gpr30, gpr31, ecr;
+	private int gpr30, gpr31, ecr;
 
-	static {
-		sendData = new byte[USB.MAX_DATA_SIZE];
+	public MPC555(Device device) {
+		targetInDebugMode = false;
+		fastDownloadStarted = false;
+		maxNofWordsFastDownload = ((device.getMaxPacketSize() - DataPacket.PACKET_MIN_LENGTH) / BDI_DATA35_LENGTH);
+		sendData = new byte[USB.HIGHSPEED_MAX_BULK_PACKET_SIZE];
 	}
 
-	private static void initPacket(byte STYPE, int dataLength) {
+	private void initPacket(byte STYPE, int dataLength) {
 		logger.finest("initPacket(0x" + Integer.toHexString(STYPE) + ", "
 				+ dataLength + ")");
 		sendData[0] = DataPacket.PACKET_HEADER;
@@ -138,7 +148,7 @@ public class MPC555 {
 		sendData[DataPacket.PACKET_DATA_OFFSET + dataLength] = DataPacket.PACKET_END;
 	}
 
-	private static DataPacket transmit(int dataLength) throws USBException,
+	private DataPacket transmit(int dataLength) throws USBException,
 			DispatchException, BDIException {
 		// write USB-command
 		USBDevice
@@ -156,8 +166,8 @@ public class MPC555 {
 		return data;
 	}
 
-	private static void fillPacket(boolean modeBit, boolean controlBit,
-			int data, int offset) {
+	private void fillPacket(boolean modeBit, boolean controlBit, int data,
+			int offset) {
 
 		// startBit = 1 | modeBit | controlBit | 32 bits of data
 		byte b = (byte) 0x80;
@@ -175,8 +185,8 @@ public class MPC555 {
 		sendData[DataPacket.PACKET_DATA_OFFSET + offset + 4] = (byte) ((data & 0x07) << 5);
 	}
 
-	private static DataPacket transfer(boolean modeBit, boolean controlBit,
-			int data) throws USBException, DispatchException, BDIException {
+	private DataPacket transfer(boolean modeBit, boolean controlBit, int data)
+			throws USBException, DispatchException, BDIException {
 
 		initPacket(STYPE_BDI_35IN, BDI_DATA35_LENGTH);
 
@@ -185,7 +195,7 @@ public class MPC555 {
 		return transmit(BDI_DATA35_LENGTH);
 	}
 
-	private static int parseResult35(DataPacket data) throws BDIException {
+	private int parseResult35(DataPacket data) throws BDIException {
 		if (data.subtype != STYPE_BDI_35OUT) {
 			throw new BDIException("wrong subtype: " + data.subtype);
 		}
@@ -219,12 +229,12 @@ public class MPC555 {
 		}
 	}
 
-	private static int transferAndParse35(boolean modeBit, boolean controlBit,
-			int data) throws USBException, DispatchException, BDIException {
+	private int transferAndParse35(boolean modeBit, boolean controlBit, int data)
+			throws USBException, DispatchException, BDIException {
 		return parseResult35(transfer(modeBit, controlBit, data));
 	}
 
-	private static void epilogue() throws USBException, DispatchException,
+	private void epilogue() throws USBException, DispatchException,
 			BDIException {
 
 		logger.fine("epilogue()");
@@ -249,7 +259,7 @@ public class MPC555 {
 		transferAndParse35(false, false, RFI);
 	}
 
-	private static void prologue() throws USBException, DispatchException,
+	private void prologue() throws USBException, DispatchException,
 			BDIException {
 		final int EBRK_bit = 1;
 
@@ -293,8 +303,7 @@ public class MPC555 {
 	 * @throws DispatchException
 	 * @throws BDIException
 	 */
-	public static void break_() throws USBException, DispatchException,
-			BDIException {
+	public void break_() throws USBException, DispatchException, BDIException {
 		logger.fine("break_()");
 		// assert maskable breakpoint
 		if (transferAndParse35(true, true, 0x7E000000) == NULL_INDICATION) {
@@ -313,8 +322,7 @@ public class MPC555 {
 	 * @throws DispatchException
 	 * @throws BDIException
 	 */
-	public static void go() throws USBException, DispatchException,
-			BDIException {
+	public void go() throws USBException, DispatchException, BDIException {
 		logger.fine("go()");
 		if (!targetInDebugMode) {
 			throw new BDIException("target not in debug mode");
@@ -332,7 +340,7 @@ public class MPC555 {
 	 * @throws DispatchException
 	 * @throws BDIException
 	 */
-	private static void hard_reset() throws USBException, DispatchException,
+	private void hard_reset() throws USBException, DispatchException,
 			BDIException {
 		initPacket(STYPE_BDI_HARD_RESET_555, 0);
 		DataPacket data = transmit(0);
@@ -352,7 +360,7 @@ public class MPC555 {
 	 * @throws DispatchException
 	 * @throws BDIException
 	 */
-	public static void reset_target() throws USBException, DispatchException,
+	public void reset_target() throws USBException, DispatchException,
 			BDIException {
 		logger.fine("reset_target()");
 		// hard reset
@@ -383,8 +391,8 @@ public class MPC555 {
 	 * @throws DispatchException
 	 * @throws BDIException
 	 */
-	public static boolean isFreezeAsserted() throws USBException,
-			DispatchException, BDIException {
+	public boolean isFreezeAsserted() throws USBException, DispatchException,
+			BDIException {
 		initPacket(STYPE_BDI_GET_FREEZE, 0);
 		logger.fine("isFreezeAsserted()");
 		DataPacket data = transmit(0);
@@ -410,7 +418,7 @@ public class MPC555 {
 	 * @throws DispatchException
 	 * @throws BDIException
 	 */
-	public static void startFastDownload(int startAddr) throws USBException,
+	public void startFastDownload(int startAddr) throws USBException,
 			DispatchException, BDIException {
 		logger.fine("startFastDownload(" + startAddr + ")");
 		if (!targetInDebugMode) {
@@ -433,7 +441,7 @@ public class MPC555 {
 
 	/**
 	 * Fill one USB-Packet with data to download. The maximal number of words is
-	 * defined by <code>MAX_NOF_WORDS_FAST_DOWNLOAD</code><br>
+	 * defined by <code>maxNofWordsFastDownload</code><br>
 	 * <code>startFastDownload</code> has to be called before to set up the
 	 * start address.
 	 * 
@@ -445,16 +453,15 @@ public class MPC555 {
 	 * @throws DispatchException
 	 * @throws USBException
 	 */
-	public static void fastDownload(int[] downloadData, int dataLength)
+	public void fastDownload(int[] downloadData, int dataLength)
 			throws BDIException, USBException, DispatchException {
 		logger.fine("fastDownload(int[], " + dataLength + ")");
 		if (!fastDownloadStarted) {
 			throw new BDIException("start fast download first");
 		}
 		// check if data fits into USB-packet
-		if (dataLength > MAX_NOF_WORDS_FAST_DOWNLOAD) {
-			throw new BDIException(
-					"data larger than MAX_NOF_WORDS_FAST_DOWNLOAD");
+		if (dataLength > maxNofWordsFastDownload) {
+			throw new BDIException("data larger than maxNofWordsFastDownload");
 		}
 		int currentIndex = 0;
 		initPacket(STYPE_BDI_35FD_DATA, dataLength * BDI_DATA35_LENGTH);
@@ -491,8 +498,8 @@ public class MPC555 {
 	 * @throws DispatchException
 	 * @throws BDIException
 	 */
-	public static void stopFastDownload() throws USBException,
-			DispatchException, BDIException {
+	public void stopFastDownload() throws USBException, DispatchException,
+			BDIException {
 		fastDownloadStarted = false;
 		logger.fine("stopFastDownload()");
 		// stop fast download
@@ -507,8 +514,8 @@ public class MPC555 {
 		transferAndParse35(false, true, 0x0);
 	}
 
-	public static void writeMem(int addr, int value, int size)
-			throws USBException, DispatchException, BDIException {
+	public void writeMem(int addr, int value, int size) throws USBException,
+			DispatchException, BDIException {
 		logger.fine("writeMem(0x" + Integer.toHexString(addr) + ", 0x"
 				+ Integer.toHexString(value) + ", " + size + ")");
 		if (!targetInDebugMode) {
@@ -542,7 +549,7 @@ public class MPC555 {
 		}
 	}
 
-	public static int readMem(int addr, int size) throws USBException,
+	public int readMem(int addr, int size) throws USBException,
 			DispatchException, BDIException {
 		logger.fine("readMem(0x" + Integer.toHexString(addr) + ", " + size
 				+ ")");
@@ -577,7 +584,7 @@ public class MPC555 {
 		return transferAndParse35(false, false, NOP);
 	}
 
-	public static void writeMemSeq(int value, int size) throws USBException,
+	public void writeMemSeq(int value, int size) throws USBException,
 			DispatchException, BDIException {
 		logger.fine("writeMemSeq(int, int)");
 		if (!targetInDebugMode) {
@@ -607,8 +614,8 @@ public class MPC555 {
 		}
 	}
 
-	public static int readMemSeq(int size) throws USBException,
-			DispatchException, BDIException {
+	public int readMemSeq(int size) throws USBException, DispatchException,
+			BDIException {
 		logger.fine("readMemSeq(int)");
 		if (!targetInDebugMode) {
 			throw new BDIException("target not in debug mode");
@@ -637,7 +644,7 @@ public class MPC555 {
 		return transferAndParse35(false, false, NOP);
 	}
 
-	public static int readGPR(int gpr) throws USBException, DispatchException,
+	public int readGPR(int gpr) throws USBException, DispatchException,
 			BDIException {
 		logger.fine("readGPR(" + gpr + ")");
 		if (!targetInDebugMode) {
@@ -657,7 +664,7 @@ public class MPC555 {
 		return transferAndParse35(false, false, NOP);
 	}
 
-	public static void writeGPR(int gpr, int value) throws USBException,
+	public void writeGPR(int gpr, int value) throws USBException,
 			DispatchException, BDIException {
 		logger.fine("writeGPR(" + gpr + ", 0x" + Integer.toHexString(value)
 				+ ")");
@@ -680,7 +687,7 @@ public class MPC555 {
 		transferAndParse35(false, true, value);
 	}
 
-	public static int readSPR(int spr) throws USBException, DispatchException,
+	public int readSPR(int spr) throws USBException, DispatchException,
 			BDIException {
 		logger.fine("readSPR(" + spr + ")");
 		if (!targetInDebugMode) {
@@ -702,7 +709,7 @@ public class MPC555 {
 		return transferAndParse35(false, false, NOP);
 	}
 
-	public static void writeSPR(int spr, int value) throws USBException,
+	public void writeSPR(int spr, int value) throws USBException,
 			DispatchException, BDIException {
 		logger.fine("writeSPR(" + spr + ", 0x" + Integer.toHexString(value)
 				+ ")");
@@ -719,8 +726,7 @@ public class MPC555 {
 		transferAndParse35(false, false, cmd);
 	}
 
-	public static int readMSR() throws USBException, DispatchException,
-			BDIException {
+	public int readMSR() throws USBException, DispatchException, BDIException {
 		logger.fine("readMSR()");
 		if (!targetInDebugMode) {
 			throw new BDIException("target not in debug mode");
@@ -734,8 +740,8 @@ public class MPC555 {
 		return transferAndParse35(false, false, NOP);
 	}
 
-	public static void writeMSR(int value) throws USBException,
-			DispatchException, BDIException {
+	public void writeMSR(int value) throws USBException, DispatchException,
+			BDIException {
 		logger.fine("writeMSR(0x" + Integer.toHexString(value) + ")");
 		if (!targetInDebugMode) {
 			throw new BDIException("target not in debug mode");
@@ -748,7 +754,7 @@ public class MPC555 {
 		transferAndParse35(false, false, 0x7FC00124);
 	}
 
-	public static long readFPR(int fpr, int tmpMemAddr) throws USBException,
+	public long readFPR(int fpr, int tmpMemAddr) throws USBException,
 			DispatchException, BDIException {
 		logger.fine("readFPR(" + fpr + ", 0x" + Integer.toHexString(tmpMemAddr)
 				+ ")");
@@ -771,7 +777,7 @@ public class MPC555 {
 				+ readMem(tmpMemAddr + 4, 4);
 	}
 
-	public static void writeFPR(int fpr, int tmpMemAddr, long value)
+	public void writeFPR(int fpr, int tmpMemAddr, long value)
 			throws USBException, DispatchException, BDIException {
 		logger.fine("writeFPR(" + fpr + ", 0x"
 				+ Integer.toHexString(tmpMemAddr) + ", 0x"
@@ -798,8 +804,7 @@ public class MPC555 {
 		transferAndParse35(false, false, NOP);
 	}
 
-	public static int readCR() throws USBException, DispatchException,
-			BDIException {
+	public int readCR() throws USBException, DispatchException, BDIException {
 		logger.fine("readCR()");
 		if (!targetInDebugMode) {
 			throw new BDIException("target not in debug mode");
@@ -813,8 +818,8 @@ public class MPC555 {
 		return transferAndParse35(false, false, NOP);
 	}
 
-	public static void writeCR(int value) throws USBException,
-			DispatchException, BDIException {
+	public void writeCR(int value) throws USBException, DispatchException,
+			BDIException {
 		logger.fine("writeCR(0x" + Integer.toHexString(value) + ")");
 		if (!targetInDebugMode) {
 			throw new BDIException("target not in debug mode");
@@ -828,8 +833,7 @@ public class MPC555 {
 		transferAndParse35(false, false, 0x7FCFF120);
 	}
 
-	public static int readFPSCR() throws USBException, DispatchException,
-			BDIException {
+	public int readFPSCR() throws USBException, DispatchException, BDIException {
 		logger.fine("readFPSCR()");
 		if (!targetInDebugMode) {
 			throw new BDIException("target not in debug mode");
@@ -859,8 +863,8 @@ public class MPC555 {
 		return retVal;
 	}
 
-	public static void writeFPSCR(int value) throws USBException,
-			DispatchException, BDIException {
+	public void writeFPSCR(int value) throws USBException, DispatchException,
+			BDIException {
 		logger.fine("writeFPSCR(0x" + Integer.toHexString(value) + ")");
 		if (!targetInDebugMode) {
 			throw new BDIException("target not in debug mode");
@@ -884,7 +888,7 @@ public class MPC555 {
 	 * 
 	 * @return the last known state of the freeze signal
 	 */
-	public static boolean isTargetInDebugMode() {
+	public boolean isTargetInDebugMode() {
 		return targetInDebugMode;
 	}
 
@@ -894,7 +898,7 @@ public class MPC555 {
 	 * 
 	 * @return the store value of this register
 	 */
-	public static int getGpr30() {
+	public int getGpr30() {
 		return gpr30;
 	}
 
@@ -906,9 +910,9 @@ public class MPC555 {
 	 * @param value
 	 *            value to write to the register
 	 */
-	public static void setGpr30(int value) {
+	public void setGpr30(int value) {
 		logger.fine("gpr30: 0x" + Integer.toHexString(value));
-		MPC555.gpr30 = value;
+		gpr30 = value;
 	}
 
 	/**
@@ -917,7 +921,7 @@ public class MPC555 {
 	 * 
 	 * @return the store value of this register
 	 */
-	public static int getGpr31() {
+	public int getGpr31() {
 		return gpr31;
 	}
 
@@ -929,8 +933,16 @@ public class MPC555 {
 	 * @param value
 	 *            value to write to the register
 	 */
-	public static void setGpr31(int value) {
+	public void setGpr31(int value) {
 		logger.fine("gpr31: 0x" + Integer.toHexString(value));
-		MPC555.gpr31 = value;
+		gpr31 = value;
+	}
+
+	/**
+	 * @return number of maximal words used in the <code>fastDownload</code>
+	 *         procedure
+	 */
+	public int getMaxNofWordsFastDownload() {
+		return maxNofWordsFastDownload;
 	}
 }

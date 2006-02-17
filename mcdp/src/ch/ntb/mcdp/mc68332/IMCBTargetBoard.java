@@ -15,53 +15,58 @@ import ch.ntb.usb.USBException;
 
 public class IMCBTargetBoard {
 
-	static final McdpLogger logger = LogUtil.ch_ntb_mcdp_mc68332;
+	private static final McdpLogger logger = LogUtil.ch_ntb_mcdp_mc68332;
 
-	final static String dictionaryPath = "resources/targets/mc68332/registerDictionary.xml";
+	private final static String dictionaryPath = "resources/targets/mc68332/registerDictionary.xml";
 
-	static MC68332RegisterDict regDict = new MC68332RegisterDict();
+	private static MC68332RegisterDict regDict = new MC68332RegisterDict();
 
-	private static void writeRegister(String name, int value)
-			throws USBException, DispatchException, BDIException {
+	private MC68332 bdi;
+
+	public IMCBTargetBoard(MC68332 bdi) {
+		this.bdi = bdi;
+	}
+
+	public void writeRegister(String name, int value) throws USBException,
+			DispatchException, BDIException {
 		logger.info("writeRegister: " + name + ", value: 0x"
 				+ Integer.toHexString(value));
 		MC68332Register r = (MC68332Register) regDict.getRegister(name);
 		switch (r.type) {
 		case MC68332Register.CtrlReg:
-			MC68332.writeMem(r.value, value, r.size);
+			bdi.writeMem(r.value, value, r.size);
 			break;
 		case MC68332Register.SysReg:
-			MC68332.writeSysReg(r.value, value);
+			bdi.writeSysReg(r.value, value);
 			break;
 		case MC68332Register.UserReg:
-			MC68332.writeUserReg(r.value, value);
+			bdi.writeUserReg(r.value, value);
 			break;
 		}
 	}
 
-	private static int readRegister(String name) throws USBException,
+	public int readRegister(String name) throws USBException,
 			DispatchException, BDIException {
 		logger.info("readRegister: " + name);
 		MC68332Register r = (MC68332Register) regDict.getRegister(name);
 		switch (r.type) {
 		case MC68332Register.CtrlReg:
-			return MC68332.readMem(r.value, r.size);
+			return bdi.readMem(r.value, r.size);
 		case MC68332Register.SysReg:
-			return MC68332.readSysReg(r.value);
+			return bdi.readSysReg(r.value);
 		case MC68332Register.UserReg:
-			return MC68332.readUserReg(r.value);
+			return bdi.readUserReg(r.value);
 		}
 		return -1;
 	}
 
-	public static void init() throws USBException, DispatchException,
-			BDIException, IOException, ParserConfigurationException,
-			SAXException {
+	public void init() throws USBException, DispatchException, BDIException,
+			IOException, ParserConfigurationException, SAXException {
 
 		logger.info("reading dictionary file from " + dictionaryPath);
 		regDict.addRegistersFromFile(dictionaryPath);
 
-		MC68332.reset_target();
+		bdi.reset_target();
 
 		// regDict.printRegisters();
 

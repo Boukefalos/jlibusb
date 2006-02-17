@@ -6,6 +6,7 @@ import ch.ntb.mcdp.usb.DispatchException;
 import ch.ntb.mcdp.usb.USBDevice;
 import ch.ntb.mcdp.utils.logger.LogUtil;
 import ch.ntb.mcdp.utils.logger.McdpLogger;
+import ch.ntb.usb.Device;
 import ch.ntb.usb.USB;
 import ch.ntb.usb.USBException;
 
@@ -199,33 +200,37 @@ public class MC68332 {
 	 * download (fill) or read (dump). <br>
 	 * Note that no status bit is used. Therefore one data entity is only 16
 	 * bits wide (not 17 bits like normal commands). <br>
-	 * <code>MAX_NOF_WORDS_FAST_DOWNLOAD</code> is a multiple of 4 (FILLB/W +
+	 * <code>maxNofWordsFastDownload</code> is a multiple of 4 (FILLB/W +
 	 * data).
 	 */
-	public static final int MAX_NOF_BYTES_WORDS = (USB.MAX_DATA_SIZE
-			- DataPacket.PACKET_MIN_LENGTH - 2) / 4;
+	private int maxNofBytesWords;
 
 	/**
 	 * Maximal number of longs (4 bytes) for one usb-packet to download (fill)
 	 * or read (dump).<br>
 	 * Note that no status bit is used. Therefore one data entity is only 16
 	 * bits wide (not 17 bits like normal commands). <br>
-	 * <code>MAX_NOF_WORDS_FAST_DOWNLOAD</code> is a multiple of 6 (FILLW + MS
-	 * data + LS data).
+	 * <code>maxNofLongs</code> is a multiple of 6 (FILLW + MS data + LS
+	 * data).
 	 */
-	public static final int MAX_NOF_LONGS = (USB.MAX_DATA_SIZE
-			- DataPacket.PACKET_MIN_LENGTH - 2) / 6;
+	private int maxNofLongs;
 
-	private static boolean targetInDebugMode = false;
+	private boolean targetInDebugMode = false;
 
-	private static byte[] sendData;
+	private byte[] sendData;
 
-	private static int readMemSize = 0, writeMemSize = 0;
+	private int readMemSize, writeMemSize;
 
-	private static boolean ignoreResult = false;
+	private boolean ignoreResult;
 
-	static {
-		sendData = new byte[USB.MAX_DATA_SIZE];
+	public MC68332(Device device) {
+		ignoreResult = false;
+		readMemSize = 0;
+		writeMemSize = 0;
+		sendData = new byte[USB.HIGHSPEED_MAX_BULK_PACKET_SIZE];
+		maxNofLongs = (device.getMaxPacketSize() - DataPacket.PACKET_MIN_LENGTH - 2) / 6;
+		maxNofBytesWords = (device.getMaxPacketSize()
+				- DataPacket.PACKET_MIN_LENGTH - 2) / 4;
 	}
 
 	/**
@@ -241,7 +246,7 @@ public class MC68332 {
 	 * @throws DispatchException
 	 * @throws BDIException
 	 */
-	private static DataPacket transmit(byte STYPE, int dataLength)
+	private DataPacket transmit(byte STYPE, int dataLength)
 			throws USBException, DispatchException, BDIException {
 		// initialize packet
 		sendData[0] = DataPacket.PACKET_HEADER;
@@ -271,7 +276,7 @@ public class MC68332 {
 	 * @param offset
 	 *            the offset from the beginning of the data
 	 */
-	private static void fillPacket(int data, int offset) {
+	private void fillPacket(int data, int offset) {
 
 		// refer to CPU32 Reference Manual, Section 7.2.7
 		// bit16 = 0 + 16 bits of data (bit15 .. bit0)
@@ -290,7 +295,7 @@ public class MC68332 {
 	 * @throws DispatchException
 	 * @throws BDIException
 	 */
-	public static DataPacket transfer(int data) throws USBException,
+	public DataPacket transfer(int data) throws USBException,
 			DispatchException, BDIException {
 
 		fillPacket(data, 0);
@@ -309,7 +314,7 @@ public class MC68332 {
 	 * @throws USBException
 	 * @throws DispatchException
 	 */
-	private static int parseResult17(DataPacket data) throws BDIException,
+	private int parseResult17(DataPacket data) throws BDIException,
 			USBException, DispatchException {
 		if (data.subtype != STYPE_BDI_17OUT) {
 			throw new BDIException("wrong subtype: " + data.subtype);
@@ -360,7 +365,7 @@ public class MC68332 {
 	 * @throws DispatchException
 	 * @throws BDIException
 	 */
-	private static int transferAndParse17(int data) throws USBException,
+	private int transferAndParse17(int data) throws USBException,
 			DispatchException, BDIException {
 		return parseResult17(transfer(data));
 	}
@@ -373,7 +378,7 @@ public class MC68332 {
 	 * @throws DispatchException
 	 * @throws BDIException
 	 */
-	public static void nopsToLegalCmd() throws USBException, DispatchException,
+	public void nopsToLegalCmd() throws USBException, DispatchException,
 			BDIException {
 		final int NOF_NOPS_TO_LEGAL_CMD = 4;
 		for (int i = 0; i < NOF_NOPS_TO_LEGAL_CMD; i++) {
@@ -392,8 +397,7 @@ public class MC68332 {
 	 * @throws DispatchException
 	 * @throws BDIException
 	 */
-	public static void break_() throws USBException, DispatchException,
-			BDIException {
+	public void break_() throws USBException, DispatchException, BDIException {
 		// FIXME: this may be wrong, but works
 		// ignore the result of the first transaction
 		ignoreResult = true;
@@ -411,8 +415,7 @@ public class MC68332 {
 	 * @throws DispatchException
 	 * @throws BDIException
 	 */
-	public static void go() throws USBException, DispatchException,
-			BDIException {
+	public void go() throws USBException, DispatchException, BDIException {
 		if (!targetInDebugMode) {
 			throw new BDIException("target not in debug mode");
 		}
@@ -428,7 +431,7 @@ public class MC68332 {
 	 * @throws DispatchException
 	 * @throws BDIException
 	 */
-	private static void hard_reset() throws USBException, DispatchException,
+	private void hard_reset() throws USBException, DispatchException,
 			BDIException {
 		DataPacket data = transmit(STYPE_BDI_HARD_RESET_332, 0);
 		if (data == null) {
@@ -446,7 +449,7 @@ public class MC68332 {
 	 * @throws DispatchException
 	 * @throws BDIException
 	 */
-	public static void reset_target() throws USBException, DispatchException,
+	public void reset_target() throws USBException, DispatchException,
 			BDIException {
 		// hard reset
 		hard_reset();
@@ -461,8 +464,8 @@ public class MC68332 {
 	 * @throws DispatchException
 	 * @throws BDIException
 	 */
-	public static void reset_peripherals() throws USBException,
-			DispatchException, BDIException {
+	public void reset_peripherals() throws USBException, DispatchException,
+			BDIException {
 		// hard reset
 		transferAndParse17(RST);
 		// wait for 50ms
@@ -484,8 +487,8 @@ public class MC68332 {
 	 * @throws DispatchException
 	 * @throws BDIException
 	 */
-	public static boolean isFreezeAsserted() throws USBException,
-			DispatchException, BDIException {
+	public boolean isFreezeAsserted() throws USBException, DispatchException,
+			BDIException {
 		DataPacket data = transmit(STYPE_BDI_GET_FREEZE, 0);
 		if (data == null) {
 			throw new BDIException("no data from device");
@@ -520,7 +523,7 @@ public class MC68332 {
 	 * @throws DispatchException
 	 * @throws USBException
 	 */
-	public static void fillMem(int[] downloadData, int dataLength)
+	public void fillMem(int[] downloadData, int dataLength)
 			throws BDIException, USBException, DispatchException {
 		// check if data fits into USB-packet
 		int currentIndex = 0;
@@ -528,7 +531,7 @@ public class MC68332 {
 		logger.finer("dataLength: " + dataLength);
 		switch (writeMemSize) {
 		case 1:
-			if (dataLength > MAX_NOF_BYTES_WORDS) {
+			if (dataLength > maxNofBytesWords) {
 				throw new BDIException(
 						"data larger than MAX_NOF_WORDS_FAST_DOWNLOAD_BYTE_WORD");
 			}
@@ -547,7 +550,7 @@ public class MC68332 {
 			data = transmit(STYPE_BDI_17FILL_BYTE_WORD, dataLength * 4 + 2);
 			break;
 		case 2:
-			if (dataLength > MAX_NOF_BYTES_WORDS) {
+			if (dataLength > maxNofBytesWords) {
 				throw new BDIException(
 						"data larger than MAX_NOF_WORDS_FAST_DOWNLOAD_BYTE_WORD");
 			}
@@ -566,7 +569,7 @@ public class MC68332 {
 			data = transmit(STYPE_BDI_17FILL_BYTE_WORD, dataLength * 4 + 2);
 			break;
 		case 4:
-			if (dataLength > (MAX_NOF_LONGS)) {
+			if (dataLength > (maxNofLongs)) {
 				throw new BDIException(
 						"data larger than MAX_NOF_WORDS_FAST_DOWNLOAD_LONG");
 			}
@@ -623,15 +626,15 @@ public class MC68332 {
 	 * @throws DispatchException
 	 * @throws BDIException
 	 */
-	public static int[] dumpMem(int nofData) throws USBException,
-			DispatchException, BDIException {
+	public int[] dumpMem(int nofData) throws USBException, DispatchException,
+			BDIException {
 
 		// TODO: adjust MAX_NOF_XX_DUMP
 		int dataSize;
 		switch (readMemSize) {
 		case 1:
-			if (nofData > MAX_NOF_BYTES_WORDS)
-				nofData = MAX_NOF_BYTES_WORDS;
+			if (nofData > maxNofBytesWords)
+				nofData = maxNofBytesWords;
 			// fill the packet with {DUMPB} + 1 NOP at the end
 			int i;
 			for (i = 0; i < nofData; i++) {
@@ -643,8 +646,8 @@ public class MC68332 {
 			dataSize = i * 2 + 2;
 			break;
 		case 2:
-			if (nofData > MAX_NOF_BYTES_WORDS)
-				nofData = MAX_NOF_BYTES_WORDS;
+			if (nofData > maxNofBytesWords)
+				nofData = maxNofBytesWords;
 			// fill the packet with {DUMPW} + 1 NOP at the end
 			for (i = 0; i < nofData; i++) {
 				sendData[DataPacket.PACKET_DATA_OFFSET + i * 2] = (byte) ((DUMPW >>> 8) & 0xFF);
@@ -655,8 +658,8 @@ public class MC68332 {
 			dataSize = i * 2 + 2;
 			break;
 		case 4:
-			if (nofData > MAX_NOF_LONGS)
-				nofData = MAX_NOF_LONGS;
+			if (nofData > maxNofLongs)
+				nofData = maxNofLongs;
 			// fill the packet with {DUMPL + NOP} + 1 NOP at the end
 			for (i = 0; i < nofData; i++) {
 				sendData[DataPacket.PACKET_DATA_OFFSET + i * 4] = (byte) ((DUMPL >>> 8) & 0xFF);
@@ -732,8 +735,8 @@ public class MC68332 {
 	 * @throws DispatchException
 	 * @throws BDIException
 	 */
-	public static void writeMem(int addr, int value, int size)
-			throws USBException, DispatchException, BDIException {
+	public void writeMem(int addr, int value, int size) throws USBException,
+			DispatchException, BDIException {
 
 		if (!targetInDebugMode) {
 			throw new BDIException("target not in debug mode");
@@ -800,7 +803,7 @@ public class MC68332 {
 	 * @throws DispatchException
 	 * @throws BDIException
 	 */
-	public static int readMem(int addr, int size) throws USBException,
+	public int readMem(int addr, int size) throws USBException,
 			DispatchException, BDIException {
 
 		if (!targetInDebugMode) {
@@ -860,8 +863,8 @@ public class MC68332 {
 	 * @throws DispatchException
 	 * @throws BDIException
 	 */
-	public static int readUserReg(int reg) throws USBException,
-			DispatchException, BDIException {
+	public int readUserReg(int reg) throws USBException, DispatchException,
+			BDIException {
 
 		if (!targetInDebugMode) {
 			throw new BDIException("target not in debug mode");
@@ -888,7 +891,7 @@ public class MC68332 {
 	 * @throws DispatchException
 	 * @throws BDIException
 	 */
-	public static void writeUserReg(int reg, int value) throws USBException,
+	public void writeUserReg(int reg, int value) throws USBException,
 			DispatchException, BDIException {
 
 		if (!targetInDebugMode) {
@@ -919,8 +922,8 @@ public class MC68332 {
 	 * @throws DispatchException
 	 * @throws BDIException
 	 */
-	public static int readSysReg(int reg) throws USBException,
-			DispatchException, BDIException {
+	public int readSysReg(int reg) throws USBException, DispatchException,
+			BDIException {
 
 		if (!targetInDebugMode) {
 			throw new BDIException("target not in debug mode");
@@ -947,7 +950,7 @@ public class MC68332 {
 	 * @throws DispatchException
 	 * @throws BDIException
 	 */
-	public static void writeSysReg(int reg, int value) throws USBException,
+	public void writeSysReg(int reg, int value) throws USBException,
 			DispatchException, BDIException {
 
 		if (!targetInDebugMode) {
@@ -972,8 +975,7 @@ public class MC68332 {
 	}
 
 	// TODO: remove
-	public static void nop() throws USBException, DispatchException,
-			BDIException {
+	public void nop() throws USBException, DispatchException, BDIException {
 		logger
 				.info("result: 0x"
 						+ Integer.toHexString(transferAndParse17(NOP)));
@@ -988,7 +990,35 @@ public class MC68332 {
 	 * 
 	 * @return the last known state of the freeze signal
 	 */
-	public static boolean isTargetInDebugMode() {
+	public boolean isTargetInDebugMode() {
 		return targetInDebugMode;
+	}
+
+	/**
+	 * Maximal number of words or bytes (1 or 2 bytes) for one usb-packet to
+	 * download (fill) or read (dump). <br>
+	 * Note that no status bit is used. Therefore one data entity is only 16
+	 * bits wide (not 17 bits like normal commands). <br>
+	 * <code>maxNofWordsFastDownload</code> is a multiple of 4 (FILLB/W +
+	 * data).
+	 * 
+	 * @return
+	 */
+	public int getMaxNofBytesWords() {
+		return maxNofBytesWords;
+	}
+
+	/**
+	 * Maximal number of longs (4 bytes) for one usb-packet to download (fill)
+	 * or read (dump).<br>
+	 * Note that no status bit is used. Therefore one data entity is only 16
+	 * bits wide (not 17 bits like normal commands). <br>
+	 * <code>maxNofLongs</code> is a multiple of 6 (FILLW + MS data + LS
+	 * data).
+	 * 
+	 * @return
+	 */
+	public int getMaxNofLongs() {
+		return maxNofLongs;
 	}
 }

@@ -6,6 +6,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
+import ch.ntb.mcdp.bdi.MPC555;
 import ch.ntb.mcdp.usb.USBDevice;
 import ch.ntb.usb.USBException;
 
@@ -197,6 +198,7 @@ public class BDI555App {
 
 		try {
 			USBDevice.open();
+			BDI555test.bdi = new MPC555(USBDevice.getDevice());
 		} catch (USBException e) {
 			e.printStackTrace();
 			return;

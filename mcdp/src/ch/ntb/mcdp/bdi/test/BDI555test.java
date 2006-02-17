@@ -13,6 +13,8 @@ public class BDI555test {
 
 	private static McdpLogger logger = LogUtil.ch_ntb_mcdp_bdi_test;
 
+	public static MPC555 bdi;
+
 	// private static void testBdiTransaction() {
 	// // test bdi transaction
 	// DataPacket result = null;
@@ -36,14 +38,14 @@ public class BDI555test {
 
 	private static void reset_target() {
 		try {
-			MPC555.reset_target();
+			bdi.reset_target();
 			// assign pin to Freeze output
-			MPC555.writeMem(0x02FC000, 0x40000, 4);
+			bdi.writeMem(0x02FC000, 0x40000, 4);
 			// enable bus monitor, disable watchdog timer
-			MPC555.writeMem(0x02FC004, 0x0FFFFFF83, 4);
+			bdi.writeMem(0x02FC004, 0x0FFFFFF83, 4);
 			// SCCR, switch off EECLK for download
-			MPC555.writeMem(0x02FC280, 0x08121C100, 4);
-			logger.info("Is freeze asserted: " + MPC555.isFreezeAsserted());
+			bdi.writeMem(0x02FC280, 0x08121C100, 4);
+			logger.info("Is freeze asserted: " + bdi.isFreezeAsserted());
 		} catch (USBException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -58,7 +60,7 @@ public class BDI555test {
 
 	private static void freeze() {
 		try {
-			logger.info("isFreezeAsserted: " + MPC555.isFreezeAsserted());
+			logger.info("isFreezeAsserted: " + bdi.isFreezeAsserted());
 		} catch (USBException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -74,7 +76,7 @@ public class BDI555test {
 
 	private static void break_() {
 		try {
-			MPC555.break_();
+			bdi.break_();
 			logger.info("break");
 		} catch (USBException e) {
 			// TODO Auto-generated catch block
@@ -90,7 +92,7 @@ public class BDI555test {
 
 	private static void go() {
 		try {
-			MPC555.go();
+			bdi.go();
 			logger.info("go");
 		} catch (USBException e) {
 			// TODO Auto-generated catch block
@@ -107,7 +109,7 @@ public class BDI555test {
 	private static void writeMem() {
 		final int BASE_ADDR = 0x800000, VALUE = 0x123456;
 		try {
-			MPC555.writeMem(BASE_ADDR, VALUE, 4);
+			bdi.writeMem(BASE_ADDR, VALUE, 4);
 			logger.info("writeMem: BASE_ADDR = 0x"
 					+ Integer.toHexString(BASE_ADDR) + ", value = 0x"
 					+ Integer.toHexString(VALUE));
@@ -130,8 +132,9 @@ public class BDI555test {
 					+ Integer.toHexString(BASE_ADDR) + ", value = ");
 			for (int i = 0; i < 10; i++) {
 				sb.append("0x"
-						+ Integer.toHexString(MPC555.readMem(BASE_ADDR + i * 4,
-								4)) + "\n");
+						+ Integer
+								.toHexString(bdi.readMem(BASE_ADDR + i * 4, 4))
+						+ "\n");
 			}
 			logger.info(sb.toString());
 		} catch (USBException e) {
@@ -148,17 +151,17 @@ public class BDI555test {
 
 	private static void fastDownload() {
 		final int BASE_ADDR = 0x800000;
-		int[] testData = new int[MPC555.MAX_NOF_WORDS_FAST_DOWNLOAD];
+		int[] testData = new int[bdi.getMaxNofWordsFastDownload()];
 		for (int i = 0; i < testData.length; i++) {
 			testData[i] = i;
 		}
 		try {
 			logger.info("fastDownload at BASE_ADDR = 0x"
 					+ Integer.toHexString(BASE_ADDR) + ", length = "
-					+ MPC555.MAX_NOF_WORDS_FAST_DOWNLOAD);
-			MPC555.startFastDownload(BASE_ADDR);
-			MPC555.fastDownload(testData, MPC555.MAX_NOF_WORDS_FAST_DOWNLOAD);
-			MPC555.stopFastDownload();
+					+ bdi.getMaxNofWordsFastDownload());
+			bdi.startFastDownload(BASE_ADDR);
+			bdi.fastDownload(testData, bdi.getMaxNofWordsFastDownload());
+			bdi.stopFastDownload();
 		} catch (USBException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -176,10 +179,10 @@ public class BDI555test {
 		try {
 			StringBuffer sb = new StringBuffer("readMemSeq: BASE_ADDR = 0x"
 					+ Integer.toHexString(BASE_ADDR) + "\n" + 0 + "\tData: 0x"
-					+ Integer.toHexString(MPC555.readMem(BASE_ADDR, 4)) + "\n");
+					+ Integer.toHexString(bdi.readMem(BASE_ADDR, 4)) + "\n");
 			for (int i = 1; i < 120; i++) {
 				sb.append(i + "\tData: 0x"
-						+ Integer.toHexString(MPC555.readMemSeq(4)) + "\n");
+						+ Integer.toHexString(bdi.readMemSeq(4)) + "\n");
 			}
 			logger.info(sb.toString());
 		} catch (USBException e) {
@@ -231,13 +234,13 @@ public class BDI555test {
 		final int SPR = 158;
 		final int VALUE = 0x12345;
 		try {
-			int result = MPC555.readSPR(SPR);
+			int result = bdi.readSPR(SPR);
 			logger.info("readSPR(" + SPR + ") = 0x"
 					+ Integer.toHexString(result));
-			MPC555.writeSPR(SPR, VALUE);
+			bdi.writeSPR(SPR, VALUE);
 			logger.info("writeSPR(" + SPR + ", 0x" + Integer.toHexString(VALUE)
 					+ ")");
-			result = MPC555.readSPR(SPR);
+			result = bdi.readSPR(SPR);
 			logger.info("readSPR(" + SPR + ") = 0x"
 					+ Integer.toHexString(result));
 		} catch (USBException e) {
@@ -255,7 +258,7 @@ public class BDI555test {
 
 		// logger.info("hard_reset()");
 		// try {
-		// MPC555.hard_reset();
+		// bdi.hard_reset();
 		// } catch (USBException e) {
 		// e.printStackTrace();
 		// } catch (DispatchException e) {
@@ -290,21 +293,21 @@ public class BDI555test {
 
 			int REG = 152;
 			int VALUE = 0x12345;
-			MPC555.writeSPR(REG, VALUE);
-			int result = MPC555.readSPR(REG);
+			bdi.writeSPR(REG, VALUE);
+			int result = bdi.readSPR(REG);
 			checkResult(VALUE, result);
 
 			logger.info("test GPR");
 			REG = 5;
-			MPC555.writeGPR(REG, VALUE);
-			result = MPC555.readGPR(REG);
+			bdi.writeGPR(REG, VALUE);
+			result = bdi.readGPR(REG);
 			checkResult(VALUE, result);
 
 			logger.info("test FPR");
 			int TMP_MEM_ADDR = 0x800000;
 			long LONG_VAL = 0x12345012345L;
-			MPC555.writeFPR(REG, TMP_MEM_ADDR, LONG_VAL);
-			long fprResult = MPC555.readFPR(REG, TMP_MEM_ADDR);
+			bdi.writeFPR(REG, TMP_MEM_ADDR, LONG_VAL);
+			long fprResult = bdi.readFPR(REG, TMP_MEM_ADDR);
 			if (fprResult != LONG_VAL) {
 				logger.severe("value: 0x" + Long.toHexString(LONG_VAL)
 						+ ", result: 0x" + Long.toHexString(fprResult));
@@ -315,19 +318,19 @@ public class BDI555test {
 			}
 
 			logger.info("test MSR");
-			MPC555.writeMSR(VALUE);
-			result = MPC555.readMSR();
+			bdi.writeMSR(VALUE);
+			result = bdi.readMSR();
 			checkResult(VALUE, result);
 
 			logger.info("test CR");
-			MPC555.writeCR(VALUE);
-			result = MPC555.readCR();
+			bdi.writeCR(VALUE);
+			result = bdi.readCR();
 			checkResult(VALUE, result);
 
 			logger.info("test CtrlReg");
 			int MEM_ADDR = 0x2FC100;
-			MPC555.writeMem(MEM_ADDR, VALUE, 4);
-			result = MPC555.readMem(MEM_ADDR, 4);
+			bdi.writeMem(MEM_ADDR, VALUE, 4);
+			result = bdi.readMem(MEM_ADDR, 4);
 			checkResult(VALUE, result);
 
 		} catch (USBException e) {
@@ -356,7 +359,7 @@ public class BDI555test {
 	public static void button12() {
 		final int BASE_ADDR = 0x3f9bf0;
 
-		int[] data = new int[MPC555.MAX_NOF_WORDS_FAST_DOWNLOAD];
+		int[] data = new int[bdi.getMaxNofWordsFastDownload()];
 
 		data[0] = 0x9421ffb0;
 		data[1] = 0xbf810040;
@@ -463,26 +466,26 @@ public class BDI555test {
 		try {
 			StringBuffer sb = new StringBuffer("dumpData: BASE_ADDR = 0x"
 					+ Integer.toHexString(BASE_ADDR) + "\n" + 0 + "\tData: 0x"
-					+ Integer.toHexString(MPC555.readMem(BASE_ADDR, 4)) + "\n");
+					+ Integer.toHexString(bdi.readMem(BASE_ADDR, 4)) + "\n");
 			for (int i = 1; i < 120; i++) {
 				sb.append(i + "\tData: 0x"
-						+ Integer.toHexString(MPC555.readMemSeq(4)) + "\n");
+						+ Integer.toHexString(bdi.readMemSeq(4)) + "\n");
 			}
 			logger.info(sb.toString());
 
 			logger.info("fastDownload at BASE_ADDR = 0x"
 					+ Integer.toHexString(BASE_ADDR) + ", length = "
-					+ MPC555.MAX_NOF_WORDS_FAST_DOWNLOAD);
-			MPC555.startFastDownload(BASE_ADDR);
-			MPC555.fastDownload(data, MPC555.MAX_NOF_WORDS_FAST_DOWNLOAD);
-			MPC555.stopFastDownload();
+					+ bdi.getMaxNofWordsFastDownload());
+			bdi.startFastDownload(BASE_ADDR);
+			bdi.fastDownload(data, bdi.getMaxNofWordsFastDownload());
+			bdi.stopFastDownload();
 
 			sb = new StringBuffer("dumpData: BASE_ADDR = 0x"
 					+ Integer.toHexString(BASE_ADDR) + "\n" + 0 + "\tData: 0x"
-					+ Integer.toHexString(MPC555.readMem(BASE_ADDR, 4)) + "\n");
+					+ Integer.toHexString(bdi.readMem(BASE_ADDR, 4)) + "\n");
 			for (int i = 1; i < 120; i++) {
 				sb.append(i + "\tData: 0x"
-						+ Integer.toHexString(MPC555.readMemSeq(4)) + "\n");
+						+ Integer.toHexString(bdi.readMemSeq(4)) + "\n");
 			}
 			logger.info(sb.toString());
 		} catch (USBException e) {
@@ -509,20 +512,20 @@ public class BDI555test {
 	private static void testFill(int baseAddr) throws USBException,
 			DispatchException, BDIException {
 		// int length = (int) (1 + Math.random()
-		// * (MPC555.MAX_NOF_WORDS_FAST_DOWNLOAD - 1));
+		// * (bdi.getMaxNofWordsFastDownload() - 1));
 		int length = 101;
 		int[] data = getSampleData(length);
 		logger.info("BaseAddr: 0x" + Integer.toHexString(baseAddr)
 				+ ", dataLength: " + data.length);
 		// download data
-		MPC555.startFastDownload(baseAddr);
-		MPC555.fastDownload(data, data.length);
-		MPC555.stopFastDownload();
+		bdi.startFastDownload(baseAddr);
+		bdi.fastDownload(data, data.length);
+		bdi.stopFastDownload();
 		// read back data
 		int[] compare = new int[data.length];
-		compare[0] = MPC555.readMem(baseAddr, 4);
+		compare[0] = bdi.readMem(baseAddr, 4);
 		for (int i = 1; i < compare.length; i++) {
-			compare[i] = MPC555.readMemSeq(4);
+			compare[i] = bdi.readMemSeq(4);
 		}
 		StringBuffer sb = new StringBuffer();
 		for (int i = 0; i < compare.length; i++) {
@@ -551,16 +554,16 @@ public class BDI555test {
 			// DER = 031C7400FH(* 835141647*)
 			// SRR1 = 03802H(* 14338*)
 
-			MPC555.writeMem(0x2FC100, 0x01000003, 4);
-			MPC555.writeMem(0x2FC104, 0x0FFC00020, 4);
-			MPC555.writeMem(0x2FC108, 0x0800003, 4);
-			MPC555.writeMem(0x2FC10C, 0x0FFE00020, 4);
-			MPC555.writeMem(0x2FC140, 3, 4);
-			MPC555.writeMem(0x2FC144, 0x7E000000, 4);
-			MPC555.writeSPR(158, 0x07);
-			MPC555.writeMem(0x2FC288, -1, 4);
-			MPC555.writeSPR(149, 0x031C7400F);
-			MPC555.writeSPR(27, 0x03802);
+			bdi.writeMem(0x2FC100, 0x01000003, 4);
+			bdi.writeMem(0x2FC104, 0x0FFC00020, 4);
+			bdi.writeMem(0x2FC108, 0x0800003, 4);
+			bdi.writeMem(0x2FC10C, 0x0FFE00020, 4);
+			bdi.writeMem(0x2FC140, 3, 4);
+			bdi.writeMem(0x2FC144, 0x7E000000, 4);
+			bdi.writeSPR(158, 0x07);
+			bdi.writeMem(0x2FC288, -1, 4);
+			bdi.writeSPR(149, 0x031C7400F);
+			bdi.writeSPR(27, 0x03802);
 
 			for (int i = 0; i < nofRuns; i++) {
 				testFill(0x03F9800);
