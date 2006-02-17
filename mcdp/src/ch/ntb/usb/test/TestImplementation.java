@@ -82,11 +82,11 @@ public class TestImplementation {
 	}
 
 	static void read() {
-		byte[] data = new byte[USB.MAX_DATA_SIZE];
+		byte[] data = new byte[dev.getMaxPacketSize()];
 		int lenRead = 0;
 		try {
-			lenRead = dev.bulkread(IN_ENDPOINT, data,
-					USB.MAX_DATA_SIZE, TIMEOUT);
+			lenRead = dev.bulkread(IN_ENDPOINT, data, dev.getMaxPacketSize(),
+					TIMEOUT);
 			StringBuffer sb = new StringBuffer("read_bulkdata: " + lenRead
 					+ " Bytes received: Data: ");
 			for (int i = 0; i < lenRead; i++) {

@@ -6,13 +6,25 @@ import java.util.LinkedList;
 import ch.ntb.usb.logger.LogUtil;
 import ch.ntb.usb.logger.UsbLogger;
 
+/**
+ * This class manages all USB devices and defines some USB specific constants.
+ * 
+ * @author schlaepfer
+ * 
+ */
 public class USB {
 
 	/**
-	 * The maximal data size in bytes which is allowed to be transmitted at
-	 * once.
+	 * The maximum packet size of a bulk transfer when operation in highspeed
+	 * (480 MB/s) mode.
 	 */
-	public static final int MAX_DATA_SIZE = 512;
+	public static int HIGHSPEED_MAX_BULK_PACKET_SIZE = 512;
+
+	/**
+	 * The maximum packet size of a bulk transfer when operation in fullspeed
+	 * (12 MB/s) mode.
+	 */
+	public static int FULLSPEED_MAX_BULK_PACKET_SIZE = 64;
 
 	private static UsbLogger logger = LogUtil.ch_ntb_usb;
 
@@ -33,9 +45,11 @@ public class USB {
 		// check if this device is already registered
 		Device dev = getRegisteredDevice(idVendor, idProduct);
 		if (dev != null) {
+			logger.info("return already registered device");
 			return dev;
 		}
 		dev = new Device(idVendor, idProduct);
+		logger.info("create new device");
 		devices.add(dev);
 		return dev;
 	}
@@ -58,55 +72,5 @@ public class USB {
 			}
 		}
 		return null;
-	}
-
-	/**
-	 * Claim an interface to send and receive USB data.
-	 * 
-	 * @param usb_dev_handle
-	 *            the handle of the device <b>(MUST BE VALID)</b>
-	 * @param configuration
-	 *            the configuration to use
-	 * @param interface_
-	 *            the interface to claim
-	 * @param altinterface
-	 *            the alternative interface to use
-	 * @throws USBException
-	 *             throws an USBException if the action fails
-	 */
-	static void claim_interface(int usb_dev_handle, int configuration,
-			int interface_, int altinterface) throws USBException {
-		if (LibusbWin.usb_set_configuration(usb_dev_handle, configuration) < 0) {
-			throw new USBException("LibusbWin.usb_set_configuration: "
-					+ LibusbWin.usb_strerror());
-		}
-		if (LibusbWin.usb_claim_interface(usb_dev_handle, interface_) < 0) {
-			throw new USBException("LibusbWin.usb_claim_interface: "
-					+ LibusbWin.usb_strerror());
-		}
-		if (LibusbWin.usb_set_altinterface(usb_dev_handle, altinterface) < 0) {
-			throw new USBException("LibusbWin.usb_set_altinterface: "
-					+ LibusbWin.usb_strerror());
-		}
-		logger.info("interface claimed");
-	}
-
-	/**
-	 * Release a previously claimed interface.
-	 * 
-	 * @param dev_handle
-	 *            the handle of the device <b>(MUST BE VALID)</b>
-	 * @param interface_
-	 *            the interface to claim
-	 * @throws USBException
-	 *             throws an USBException if the action fails
-	 */
-	static void release_interface(int dev_handle, int interface_)
-			throws USBException {
-		if (LibusbWin.usb_release_interface(dev_handle, interface_) < 0) {
-			throw new USBException("LibusbWin.usb_release_interface: "
-					+ LibusbWin.usb_strerror());
-		}
-		logger.info("interface released");
 	}
 }

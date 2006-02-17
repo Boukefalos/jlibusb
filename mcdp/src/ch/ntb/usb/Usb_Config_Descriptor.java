@@ -17,9 +17,10 @@ public class Usb_Config_Descriptor {
 
 	public byte MaxPower;
 
-	public Usb_Interface []interface_;
+	public Usb_Interface[] interface_;
 
-	// TODO: Extra descriptors are not interpreted because of their unknown structure
+	// TODO: Extra descriptors are not interpreted because of their unknown
+	// structure
 	public Usb_Config_Descriptor extra; /* Extra descriptors */
 
 	public int extralen;
@@ -32,8 +33,9 @@ public class Usb_Config_Descriptor {
 		sb.append("\tbNumInterfaces: " + bNumInterfaces + "\n");
 		sb.append("\tbConfigurationValue: " + bConfigurationValue + "\n");
 		sb.append("\tiConfiguration: " + iConfiguration + "\n");
-		sb.append("\tbmAttributes: " + bmAttributes + "\n");
-		sb.append("\tMaxPower: " + MaxPower + "\n");
+		sb.append("\tbmAttributes: 0x"
+				+ Integer.toHexString(bmAttributes & 0xFF) + "\n");
+		sb.append("\tMaxPower [mA]: " + MaxPower + "\n");
 		return sb.toString();
 	}
 

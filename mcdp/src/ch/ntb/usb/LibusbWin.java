@@ -1,8 +1,6 @@
 package ch.ntb.usb;
 
 public class LibusbWin {
-	
-	private static final String sysDir = "C:/Windows";
 
 	// Core
 	/**
@@ -15,8 +13,8 @@ public class LibusbWin {
 	/**
 	 * <code>usb_find_busses</code> will find all of the busses on the system.
 	 * 
-	 * @return Returns the number of changes since previous call to this
-	 *         function (total of new busses and busses removed).
+	 * @return the number of changes since previous call to this function (total
+	 *         of new busses and busses removed).
 	 */
 	public static native int usb_find_busses();
 
@@ -24,8 +22,8 @@ public class LibusbWin {
 	 * <code>usb_find_devices</code> will find all of the devices on each bus.
 	 * This should be called after <code>usb_find_busses</code>.
 	 * 
-	 * @return Returns the number of changes since the previous call to this
-	 *         function (total of new device and devices removed).
+	 * @return the number of changes since the previous call to this function
+	 *         (total of new device and devices removed).
 	 */
 	public static native int usb_find_devices();
 
@@ -35,7 +33,7 @@ public class LibusbWin {
 	 * support C calling convention and can use shared libraries, but don't
 	 * support C global variables (like Delphi).
 	 * 
-	 * @return The structure of all busses and devices. <b>Note:</b> The java
+	 * @return the structure of all busses and devices. <b>Note:</b> The java
 	 *         objects are copies of the C structs.
 	 */
 	public static native Usb_Bus usb_get_busses();
@@ -48,7 +46,7 @@ public class LibusbWin {
 	 * 
 	 * @param dev
 	 *            The device to open.
-	 * @return Returns a handle used in future communication with the device.
+	 * @return a handle used in future communication with the device.
 	 */
 	public static native int usb_open(Usb_Device dev);
 
@@ -108,7 +106,7 @@ public class LibusbWin {
 	 * 
 	 * @param dev_handle
 	 *            The handle to the device.
-	 * @return Returns 0 on success or < 0 on error.
+	 * @return 0 on success or < 0 on error.
 	 */
 	public static native int usb_reset(int dev_handle);
 
@@ -155,7 +153,7 @@ public class LibusbWin {
 	 * @param bytes
 	 * @param size
 	 * @param timeout
-	 * @return number of bytes written/read or < 0 on error.
+	 * @return the number of bytes written/read or < 0 on error.
 	 */
 	public static native int usb_control_msg(int dev_handle, int requesttype,
 			int request, int value, int index, byte[] bytes, int size,
@@ -171,7 +169,7 @@ public class LibusbWin {
 	 * @param langid
 	 * @param buf
 	 * @param buflen
-	 * @return number of bytes returned in buf or < 0 on error.
+	 * @return the number of bytes returned in buf or < 0 on error.
 	 */
 	public static native int usb_get_string(int dev_handle, int index,
 			int langid, String buf, int buflen);
@@ -186,7 +184,7 @@ public class LibusbWin {
 	 * @param index
 	 * @param buf
 	 * @param buflen
-	 * @return number of bytes returned in buf or < 0 on error.
+	 * @return the number of bytes returned in buf or < 0 on error.
 	 */
 	public static native int usb_get_string_simple(int dev_handle, int index,
 			String buf, int buflen);
@@ -204,7 +202,7 @@ public class LibusbWin {
 	 * @param index
 	 * @param buf
 	 * @param size
-	 * @return number of bytes read for the descriptor or < 0 on error.
+	 * @return the number of bytes read for the descriptor or < 0 on error.
 	 */
 	public static native int usb_get_descriptor(int dev_handle, byte type,
 			byte index, String buf, int size);
@@ -220,7 +218,7 @@ public class LibusbWin {
 	 * @param index
 	 * @param buf
 	 * @param size
-	 * @return number of bytes read for the descriptor or < 0 on error.
+	 * @return the number of bytes read for the descriptor or < 0 on error.
 	 */
 	public static native int usb_get_descriptor_by_endpoint(int dev_handle,
 			int ep, byte type, byte index, String buf, int size);
@@ -235,7 +233,7 @@ public class LibusbWin {
 	 * @param bytes
 	 * @param size
 	 * @param timeout
-	 * @return number of bytes written on success or < 0 on error.
+	 * @return the number of bytes written on success or < 0 on error.
 	 */
 	public static native int usb_bulk_write(int dev_handle, int ep,
 			byte[] bytes, int size, int timeout);
@@ -249,7 +247,7 @@ public class LibusbWin {
 	 * @param bytes
 	 * @param size
 	 * @param timeout
-	 * @return number of bytes read on success or < 0 on error.
+	 * @return the number of bytes read on success or < 0 on error.
 	 */
 	public static native int usb_bulk_read(int dev_handle, int ep,
 			byte[] bytes, int size, int timeout);
@@ -264,7 +262,7 @@ public class LibusbWin {
 	 * @param bytes
 	 * @param size
 	 * @param timeout
-	 * @return number of bytes written on success or < 0 on error.
+	 * @return the number of bytes written on success or < 0 on error.
 	 */
 	public static native int usb_interrupt_write(int dev_handle, int ep,
 			byte[] bytes, int size, int timeout);
@@ -278,7 +276,7 @@ public class LibusbWin {
 	 * @param bytes
 	 * @param size
 	 * @param timeout
-	 * @return number of bytes read on success or < 0 on error.
+	 * @return the number of bytes read on success or < 0 on error.
 	 */
 	public static native int usb_interrupt_read(int dev_handle, int ep,
 			byte[] bytes, int size, int timeout);
@@ -286,13 +284,13 @@ public class LibusbWin {
 	/**
 	 * Returns the error string after an error occured.
 	 * 
-	 * @return error sring.
+	 * @return the last error sring.
 	 */
 	public static native String usb_strerror();
 
-	/*******************************************************************/
+	/** **************************************************************** */
 
 	static {
-		System.load(sysDir + "/system32/LibusbWin.dll");
+		System.loadLibrary("LibusbWin.dll");
 	}
 }

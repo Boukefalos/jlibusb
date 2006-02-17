@@ -21,7 +21,8 @@ public class Usb_Interface_Descriptor {
 
 	public Usb_Endpoint_Descriptor[] endpoint;
 
-	// TODO: Extra descriptors are not interpreted because of their unknown structure
+	// TODO: Extra descriptors are not interpreted because of their unknown
+	// structure
 	public Usb_Interface_Descriptor extra; /* Extra descriptors */
 
 	public int extralen;
@@ -34,9 +35,12 @@ public class Usb_Interface_Descriptor {
 		sb.append("\tbInterfaceNumber: " + bInterfaceNumber + "\n");
 		sb.append("\tbAlternateSetting: " + bAlternateSetting + "\n");
 		sb.append("\tbNumEndpoints: " + bNumEndpoints + "\n");
-		sb.append("\tbInterfaceClass: " + bInterfaceClass + "\n");
-		sb.append("\tbInterfaceSubClass: " + bInterfaceSubClass + "\n");
-		sb.append("\tbInterfaceProtocol: " + bInterfaceProtocol + "\n");
+		sb.append("\tbInterfaceClass: 0x"
+				+ Integer.toHexString(bInterfaceClass & 0xFF) + "\n");
+		sb.append("\tbInterfaceSubClass: 0x"
+				+ Integer.toHexString(bInterfaceSubClass & 0xFF) + "\n");
+		sb.append("\tbInterfaceProtocol: 0x"
+				+ Integer.toHexString(bInterfaceProtocol & 0xFF) + "\n");
 		sb.append("\tiInterface: " + iInterface + "\n");
 		return sb.toString();
 	}
