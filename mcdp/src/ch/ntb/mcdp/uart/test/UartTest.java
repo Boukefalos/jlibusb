@@ -15,7 +15,7 @@ public class UartTest {
 
 	static InputStream in;
 
-	static byte[] buffer = new byte[UartDispatch.MAX_UART_PAYLOAD];
+	static byte[] buffer = new byte[UartDispatch.UART_BUF_LEN];
 
 	public static void init() {
 
@@ -49,7 +49,7 @@ public class UartTest {
 	}
 
 	static public void button1() {
-		byte[] buffer = new byte[UartDispatch.MAX_UART_PAYLOAD];
+		byte[] buffer = new byte[UartDispatch.UART_BUF_LEN];
 		for (int i = 0; i < buffer.length; i++) {
 			buffer[i] = (byte) ('0' + (i % ('z' - '0')));
 		}

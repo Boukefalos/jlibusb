@@ -27,11 +27,10 @@ public class USBDevice {
 	private static final int BDI_Timeout = 1000;
 
 	private static final int UART_Timeout = 50;
-	
+
 	private static Device dev;
 
 	static {
-		// set data for our device
 		dev = USB.getDevice(IdVendor, IdProduct);
 	}
 
@@ -51,8 +50,7 @@ public class USBDevice {
 		dev.bulkwrite(OUT_Endpoint_BDI, data, length, BDI_Timeout);
 	}
 
-	public static synchronized int read_BDI(byte[] data, int size)
-			throws USBException {
+	public static int read_BDI(byte[] data, int size) throws USBException {
 		return dev.bulkread(IN_Endpoint_BDI, data, size, BDI_Timeout);
 	}
 
@@ -60,8 +58,15 @@ public class USBDevice {
 		dev.bulkwrite(OUT_Endpoint_UART, data, length, UART_Timeout);
 	}
 
-	public static synchronized int read_UART(byte[] data, int size)
-			throws USBException {
+	public static int read_UART(byte[] data, int size) throws USBException {
 		return dev.bulkread(IN_Endpoint_UART, data, size, UART_Timeout);
+	}
+
+	public static int getMaxPacketSize() {
+		return dev.getMaxPacketSize();
+	}
+
+	public static Device getDevice() {
+		return dev;
 	}
 }

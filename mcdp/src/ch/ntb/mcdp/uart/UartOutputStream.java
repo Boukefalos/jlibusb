@@ -36,7 +36,7 @@ public class UartOutputStream extends OutputStream {
 		}
 		int newLen = 0;
 		do {
-			newLen = Math.min(len, UartDispatch.MAX_UART_PAYLOAD);
+			newLen = Math.min(len, UartDispatch.UART_BUF_LEN);
 			byte[] data = new byte[newLen];
 			for (int i = 0; i < newLen; i++) {
 				data[i] = b[off + i];
@@ -47,6 +47,6 @@ public class UartOutputStream extends OutputStream {
 				throw new IOException(e.getMessage());
 			}
 			len -= newLen;
-		} while (len > UartDispatch.MAX_UART_PAYLOAD);
+		} while (len > UartDispatch.UART_BUF_LEN);
 	}
 }

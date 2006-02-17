@@ -14,7 +14,7 @@ public class Uart0 {
 	 */
 	private static final byte STYPE_UART_0_IN = 0x11;
 
-	public static final int MAX_UART_PAYLOAD = UartDispatch.MAX_UART_PAYLOAD;
+	public static final int MAX_UART_PAYLOAD = UartDispatch.UART_BUF_LEN;
 
 	private static void write(byte packetSubType, byte[] data, int len)
 			throws USBException {

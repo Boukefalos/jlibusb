@@ -8,7 +8,7 @@ import ch.ntb.usb.USB;
 import ch.ntb.usb.USBException;
 
 public class Dispatch {
-	
+
 	private static Logger logger = LogUtil.ch_ntb_mcdp_usb;
 
 	// Main Types
@@ -44,7 +44,7 @@ public class Dispatch {
 	 */
 	public static final byte STYPE_ERROR_PACKET_END = 0x72;
 
-	private static byte[] usbData = new byte[USB.MAX_DATA_SIZE];
+	private static byte[] usbData = new byte[USB.HIGHSPEED_MAX_BULK_PACKET_SIZE];
 
 	private static LinkedList<DataPacket> bdiData, uartData;
 
@@ -69,7 +69,8 @@ public class Dispatch {
 			}
 			mainType = data[index++];
 			subtype = data[index++];
-			int dataLen = (data[index++] & 0xFF) * 0x100 + (data[index++] & 0xFF);
+			int dataLen = (data[index++] & 0xFF) * 0x100
+					+ (data[index++] & 0xFF);
 			if (data[index + dataLen] != DataPacket.PACKET_END) {
 				throw new DispatchException("PACKET_END or packetLen ("
 						+ dataLen + " bytes) wrong");
@@ -118,7 +119,8 @@ public class Dispatch {
 		if (!bdiData.isEmpty()) {
 			return bdiData.poll();
 		}
-		int dataLength = USBDevice.read_BDI(usbData, USB.MAX_DATA_SIZE);
+		int dataLength = USBDevice.read_BDI(usbData, USBDevice
+				.getMaxPacketSize());
 		dispatch(usbData, dataLength);
 		return bdiData.poll();
 	}
@@ -128,7 +130,8 @@ public class Dispatch {
 			logger.info("buffer not empty");
 			return uartData.poll();
 		}
-		int dataLength = USBDevice.read_UART(usbData, USB.MAX_DATA_SIZE);
+		int dataLength = USBDevice.read_UART(usbData, USBDevice
+				.getMaxPacketSize());
 		dispatch(usbData, dataLength);
 		return uartData.poll();
 	}

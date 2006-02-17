@@ -13,16 +13,17 @@ import ch.ntb.usb.USBTimeoutException;
 public class UartDispatch {
 
 	/**
-	 * Maximal number of bytes allowed as UART payload. This value is specified
-	 * in <code>UART_INBUF_LEN</code> in the file <code>uart.h</code>.
+	 * Size of the UART buffer on the USB controller. <br>
+	 * This value is specified in <code>UART_BUF_LEN</code> in the file
+	 * <code>uart.h</code>.
 	 */
-	public static final int MAX_UART_PAYLOAD = 128;
+	public static final int UART_BUF_LEN = 256;
 
 	private static boolean running = false;
 
-	static Thread dispatchThread;
+	private static Thread dispatchThread;
 
-	static LinkedList<Uart> uarts = new LinkedList<Uart>();
+	private static LinkedList<Uart> uarts = new LinkedList<Uart>();
 
 	/**
 	 * Starts the read thread for all Uarts. If the thread is already running,
