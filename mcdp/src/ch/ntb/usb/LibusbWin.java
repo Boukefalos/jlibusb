@@ -291,6 +291,6 @@ public class LibusbWin {
 	/** **************************************************************** */
 
 	static {
-		System.loadLibrary("LibusbWin.dll");
+		System.load(System.getenv("SystemRoot") + "/system32/LibusbWin.dll");
 	}
 }
