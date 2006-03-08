@@ -2,31 +2,31 @@ MODULE UsbBDI;
 	IMPORT SYS := SYSTEM, BDI := UsbBDIDll, Log := StdLog, ComTools, WinApi, Services, TextModels, Ports,
 		Files, HostFiles;
 
-	CONST 
+	CONST
 		ttDefaultPeriod = 500; (*500 ms*)	ttPipeHandDisconnected = -1;
 		nul = 0X;
-		ascLf = 0AX; ascCr = 0DX; 
-	CONST 
+		ascLf = 0AX; ascCr = 0DX;
+	CONST
 		FALSE_ = 0;
-		PATH_LENGTH* = 512; 
+		PATH_LENGTH* = 512;
 
-	CONST 
+	CONST
 		JAVA_OUT_FILENAME = "JavaOut.txt";
 		JAVA_ERR_FILENAME = "JavaErr.txt";
 		INVALID_HANDLE_VALUE = -1;
 		STD_OUT_COLOR = Ports.green;
 		STD_ERR_COLOR = Ports.grey50;
 		JAVA_OUT_COLOR = Ports.blue;
-		JAVA_ERR_COLOR = Ports.red; 
+		JAVA_ERR_COLOR = Ports.red;
 
-	CONST 
-		MAX_UART_DATA_LENGTH* = BDI.MAX_UART_DATA_LENGTH; 
+	CONST
+		MAX_UART_DATA_LENGTH* = BDI.MAX_UART_DATA_LENGTH;
 
-	CONST 
+	CONST
 		PATH_SEPERATOR = "\";
-		CLASSPATH = "Usb\Rsrc\usbpdi.jar"; 
+		CLASSPATH = "Usb\Rsrc\usbpdi.jar";
 
-	TYPE 
+	TYPE
 		StdReaderWriter = POINTER TO ABSTRACT RECORD (Services.Action)
 			stdIoText: TextModels.Model; 	stdIoTextPos: INTEGER;
 			time, endTime: LONGINT; 	period: INTEGER;
@@ -36,25 +36,25 @@ MODULE UsbBDI;
 		JvmReaderWriter = POINTER TO EXTENSIBLE RECORD (StdReaderWriter)
 			errText: TextModels.Model; 	stdIoWriter, stdErrWriter: TextModels.Writer;
 			hJavaOut, hJavaErr: WinApi.HANDLE;
-		END; 
+		END;
 
 
-	VAR 
+	VAR
 		bool: BDI.BOOL;
 		Done-, deviceOpen, jvmCreated: BOOLEAN; (** previous operation successfully completed *)
-		readerWriter: JvmReaderWriter; 
+		readerWriter: JvmReaderWriter;
 
 (* ----------- Standard-IO / Java ReaderWriter --------------- *)
-	PROCEDURE (task: StdReaderWriter) Clear, NEW, EXTENSIBLE; 
+	PROCEDURE (task: StdReaderWriter) Clear, NEW, EXTENSIBLE;
 	BEGIN
 		task.stdIoText := NIL; 	task.stdIoTextPos := 0;
 		task.hStdOut := ttPipeHandDisconnected; 	task.hStdErr := ttPipeHandDisconnected;
 		task.time := 0; 	task.endTime := 0; 	task.period := 0;
 		task.connected := FALSE; 	task.running := FALSE;
 		task.prevChar := nul;
-	END Clear; 
+	END Clear;
 
-	PROCEDURE (task: StdReaderWriter) Stop, NEW, EXTENSIBLE; 
+	PROCEDURE (task: StdReaderWriter) Stop, NEW, EXTENSIBLE;
 		VAR	done: WinApi.BOOL;
 	BEGIN
 		Services.RemoveAction(task); 	task.running := FALSE;
@@ -63,70 +63,70 @@ MODULE UsbBDI;
 			done := WinApi.CloseHandle(task.hStdErr);
 		END;
 		task.Clear
-	END Stop; 
+	END Stop;
 
-	PROCEDURE (task: StdReaderWriter) SetTime (startFromNow, period, timeOut: INTEGER), NEW; 
+	PROCEDURE (task: StdReaderWriter) SetTime (startFromNow, period, timeOut: INTEGER), NEW;
 	BEGIN
 		task.time := Services.Ticks() + startFromNow;
 		IF timeOut <= 0 THEN	timeOut := MAX(INTEGER)	END;
 		task.endTime := task.time + LONG(timeOut) * Services.resolution DIV 1000;
 		task.period := period
-	END SetTime; 
+	END SetTime;
 
-	PROCEDURE (task: StdReaderWriter) ConnectStdOutPipe (hStdOut: WinApi.HANDLE), NEW; 
+	PROCEDURE (task: StdReaderWriter) ConnectStdOutPipe (hStdOut: WinApi.HANDLE), NEW;
 		VAR	done: WinApi.BOOL;
 	BEGIN
 		IF task.connected & (task.hStdOut # hStdOut) THEN	done := WinApi.CloseHandle(task.hStdOut)	END;
 		task.hStdOut := hStdOut; 	task.connected := TRUE
-	END ConnectStdOutPipe; 
+	END ConnectStdOutPipe;
 
-	PROCEDURE (task: StdReaderWriter) ConnectStdErrPipe (hStdErr: WinApi.HANDLE), NEW; 
+	PROCEDURE (task: StdReaderWriter) ConnectStdErrPipe (hStdErr: WinApi.HANDLE), NEW;
 		VAR	done: WinApi.BOOL;
 	BEGIN
 		IF task.connected & (task.hStdErr # hStdErr) THEN	done := WinApi.CloseHandle(task.hStdErr)	END;
 		task.hStdErr := hStdErr; 	task.connected := TRUE
-	END ConnectStdErrPipe; 
+	END ConnectStdErrPipe;
 
 	PROCEDURE (task: StdReaderWriter) Start, NEW, ABSTRACT;
 
-	PROCEDURE NewJvmReaderWriter ( ): JvmReaderWriter; 
+	PROCEDURE NewJvmReaderWriter ( ): JvmReaderWriter;
 		VAR rec: JvmReaderWriter;
 	BEGIN
 		NEW(rec); 	rec.Clear; 	RETURN rec
-	END NewJvmReaderWriter; 
+	END NewJvmReaderWriter;
 
-	PROCEDURE (rec: JvmReaderWriter) Clear, EXTENSIBLE; 
+	PROCEDURE (rec: JvmReaderWriter) Clear, EXTENSIBLE;
 		VAR	done: WinApi.BOOL;
 	BEGIN
 		rec.Clear^;
 		rec.errText := NIL; 	rec.stdIoWriter := NIL; 	rec.stdErrWriter := NIL;
 		rec.hJavaOut := ttPipeHandDisconnected; 	rec.hJavaErr := ttPipeHandDisconnected;
-	END Clear; 
+	END Clear;
 
-	PROCEDURE (rec: JvmReaderWriter) Stop, EXTENSIBLE; 
+	PROCEDURE (rec: JvmReaderWriter) Stop, EXTENSIBLE;
 		VAR	done: WinApi.BOOL;
 	BEGIN
 		IF rec.connected THEN
 			rec.Stop^; 	done := WinApi.CloseHandle(rec.hJavaErr); 	done := WinApi.CloseHandle(rec.hJavaOut)
 		END;
 		rec.Clear
-	END Stop; 
+	END Stop;
 
-	PROCEDURE (rec: JvmReaderWriter) ConnectJavaOutPipe (hJavaOut: WinApi.HANDLE), NEW; 
+	PROCEDURE (rec: JvmReaderWriter) ConnectJavaOutPipe (hJavaOut: WinApi.HANDLE), NEW;
 		VAR	done: WinApi.BOOL;
 	BEGIN
 		IF rec.connected & (rec.hJavaOut # hJavaOut) THEN	done := WinApi.CloseHandle(rec.hJavaOut)	END;
 		rec.hJavaOut := hJavaOut; 	rec.connected := TRUE
-	END ConnectJavaOutPipe; 
+	END ConnectJavaOutPipe;
 
-	PROCEDURE (rec: JvmReaderWriter) ConnectJavaErrPipe (hJavaErr: WinApi.HANDLE), NEW; 
+	PROCEDURE (rec: JvmReaderWriter) ConnectJavaErrPipe (hJavaErr: WinApi.HANDLE), NEW;
 		VAR	done: WinApi.BOOL;
 	BEGIN
 		IF rec.connected & (rec.hJavaErr # hJavaErr) THEN	done := WinApi.CloseHandle(rec.hJavaErr)	END;
 		rec.hJavaErr := hJavaErr; 	rec.connected := TRUE
-	END ConnectJavaErrPipe; 
+	END ConnectJavaErrPipe;
 
-	PROCEDURE (rec: JvmReaderWriter) Start; 
+	PROCEDURE (rec: JvmReaderWriter) Start;
 		VAR handle, stdOutHandle, stdErrHandle: WinApi.HANDLE;
 	BEGIN
 		IF rec.running THEN rec.Stop END;
@@ -166,9 +166,9 @@ MODULE UsbBDI;
 		END;
 
 		rec.running := TRUE; 	Services.DoLater(rec, rec.time)
-	END Start; 
+	END Start;
 
-	PROCEDURE (rec: JvmReaderWriter) Do; 
+	PROCEDURE (rec: JvmReaderWriter) Do;
 		VAR
 			outModel: TextModels.Model;
 			n, ioDone, errDone, nofBytesRead, ioBytesAvail, errBytesAvail, exitCode: INTEGER;
@@ -259,11 +259,11 @@ MODULE UsbBDI;
 			END;
 			INC( rec.time, rec.period ); 	Services.DoLater(rec, rec.time )
 		END;
-	END Do; 
+	END Do;
 
 (* ----------- JVM --------------- *)
 
-	PROCEDURE CreateJVM (classpath: ARRAY OF SHORTCHAR); 
+	PROCEDURE CreateJVM (classpath: ARRAY OF SHORTCHAR);
 		VAR string: WinApi.PtrSTR;
 	BEGIN
 		string := ComTools.NewSString(classpath);
@@ -283,9 +283,9 @@ MODULE UsbBDI;
 			readerWriter.Start();
 		END;
 		ComTools.FreeSString(string);
-	END CreateJVM; 
+	END CreateJVM;
 
-	PROCEDURE DestroyJVM ; 
+	PROCEDURE DestroyJVM ;
 	BEGIN
 		bool := BDI.destroyJVM();
 		IF bool = FALSE_ THEN
@@ -296,57 +296,68 @@ MODULE UsbBDI;
 			Log.String("JVM destroyed"); Log.Ln;
 		END;
 		jvmCreated := FALSE;
-	END DestroyJVM; 
+	END DestroyJVM;
 
-	PROCEDURE CheckForExceptions * (): BOOLEAN; 
+	PROCEDURE CheckForExceptions * (): BOOLEAN;
 	BEGIN
 		RETURN (BDI.checkForExceptions() # FALSE_)
-	END CheckForExceptions; 
+	END CheckForExceptions;
 
 (* ----------- USB --------------- *)
 
-	PROCEDURE USB_Device_open ; 
+	PROCEDURE USB_Device_open ;
 	BEGIN
 		BDI.USB_Device_open;
 		Done := ~CheckForExceptions();
 		IF Done THEN
 			deviceOpen := TRUE;
 		END
-	END USB_Device_open; 
+	END USB_Device_open;
 
-	PROCEDURE USB_Device_close ; 
+	PROCEDURE USB_Device_close ;
 	BEGIN
 		BDI.USB_Device_close;
 		Done := ~CheckForExceptions();
 		deviceOpen := FALSE;
-	END USB_Device_close; 
+	END USB_Device_close;
 
-	PROCEDURE USB_Device_reset * ; 
+	PROCEDURE USB_Device_reset * ;
 	BEGIN
 		BDI.USB_Device_reset;
 		Done := ~CheckForExceptions();
 		deviceOpen := FALSE;
-	END USB_Device_reset; 
+	END USB_Device_reset;
 
+	PROCEDURE USB_Device_getMaxPacketSize * (): INTEGER;
+		VAR val: INTEGER;
+	BEGIN
+		IF deviceOpen THEN
+			Done := TRUE;
+			RETURN BDI.USB_Device_getMaxPacketSize();
+		ELSE
+			Done := FALSE;
+			RETURN - 1
+		END
+	END USB_Device_getMaxPacketSize;
 
 (* --------- UART0 ----------------- *)
 
-	PROCEDURE UART0_read * (VAR data: ARRAY OF SHORTCHAR; VAR length: INTEGER): BOOLEAN; 
+	PROCEDURE UART0_read * (VAR data: ARRAY OF SHORTCHAR; VAR length: INTEGER): BOOLEAN;
 	BEGIN
 		length := BDI.UART0_read(data);
 		RETURN length # FALSE_;
-	END UART0_read; 
+	END UART0_read;
 
-	PROCEDURE UART0_write * (VAR data: ARRAY OF SHORTCHAR; length: INTEGER): BOOLEAN; 
+	PROCEDURE UART0_write * (VAR data: ARRAY OF SHORTCHAR; length: INTEGER): BOOLEAN;
 		VAR
 			result: INTEGER;
 	BEGIN
 		RETURN BDI.UART0_write(SYS.ADR(data[0]), length) # FALSE_;
-	END UART0_write; 
+	END UART0_write;
 
 (* -------------- Helper Functions ------------------*)
 
-	PROCEDURE GetUserStartUpPath (VAR startupPath: ARRAY OF SHORTCHAR); 
+	PROCEDURE GetUserStartUpPath (VAR startupPath: ARRAY OF SHORTCHAR);
 		VAR
 			userStartUpLocator: Files.Locator; 	userStartUpHostLoc: HostFiles.Locator;
 			startupPathChar: ARRAY PATH_LENGTH OF CHAR;
@@ -357,10 +368,10 @@ MODULE UsbBDI;
 		FOR i := 0 TO LEN(startupPathChar) - 1 DO
 			startupPath[i] := SYS.VAL(SHORTCHAR, startupPathChar[i]);
 		END
-	END GetUserStartUpPath; 
+	END GetUserStartUpPath;
 
 
-	PROCEDURE ConnectDevice * ; 
+	PROCEDURE ConnectDevice * ;
 		VAR
 			startupPath: ARRAY PATH_LENGTH OF SHORTCHAR;
 	BEGIN
@@ -377,16 +388,17 @@ MODULE UsbBDI;
 			END;
 			BDI.USB_Device_open;
 			IF ~Done THEN HALT(78) END;
+			deviceOpen := TRUE;
 		END
-	END ConnectDevice; 
+	END ConnectDevice;
 
-	PROCEDURE DeviceOpen * (): BOOLEAN ; 
+	PROCEDURE DeviceOpen * (): BOOLEAN ;
 	BEGIN
 		RETURN deviceOpen
-	END DeviceOpen; 
+	END DeviceOpen;
 
 	(* Close and reopen the device *)
-	PROCEDURE ReopenDevice * ; 
+	PROCEDURE ReopenDevice * ;
 	BEGIN
 		USB_Device_close;
 		USB_Device_open;
@@ -395,7 +407,7 @@ MODULE UsbBDI;
 		ELSE
 			Log.String("Error while opening Device"); Log.Ln;
 		END
-	END ReopenDevice; 
+	END ReopenDevice;
 
 BEGIN
 	deviceOpen := FALSE;
