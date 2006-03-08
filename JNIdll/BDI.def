@@ -46,7 +46,7 @@ EXPORTS
     BDI555_startFastDownload = _Z24BDI555_startFastDownloadi @45
     BDI332_isTargetInDebugMode = _Z26BDI332_isTargetInDebugModev @46
     BDI555_isTargetInDebugMode = _Z26BDI555_isTargetInDebugModev @47
-    BDI332_go = _Z9BDI332_gov @48
-    BDI555_go = _Z9BDI555_gov @49
-    createJVM = _Z9createJVMPc @50
-    
+    USB_Device_getMaxPacketSize = _Z27USB_Device_getMaxPacketSizev @48
+    BDI332_go = _Z9BDI332_gov @49
+    BDI555_go = _Z9BDI555_gov @50
+    createJVM = _Z9createJVMPc @51

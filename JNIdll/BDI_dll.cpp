@@ -12,8 +12,8 @@
 
 // Classes
 #define USB_Device_Class "ch/ntb/mcdp/usb/USBDevice"
-#define BDI555_Class "ch/ntb/mcdp/bdi/MPC555"
-#define BDI332_Class "ch/ntb/mcdp/bdi/MC68332"
+#define BDI555_Class "ch/ntb/mcdp/bdi/blackbox/MPC555"
+#define BDI332_Class "ch/ntb/mcdp/bdi/blackbox/MC68332"
 #define Redirect_Class "ch/ntb/mcdp/utils/Redirect"
 #define Uart0_Class "ch/ntb/mcdp/uart/blackbox/Uart0"
 
@@ -35,7 +35,8 @@ int jvm_created = FALSE, jvm_classPtrs_done = FALSE, \
 // Java classes
 jclass cls_USB_Device, cls_BDI555, cls_BDI332, cls_Redirect, cls_Uart0;
 // USB_Device
-jmethodID mid_USB_Dev_open, mid_USB_Dev_close, mid_USB_Dev_reset;
+jmethodID mid_USB_Dev_open, mid_USB_Dev_close, mid_USB_Dev_reset, \
+mid_USB_Dev_getMaxPacketSize;
 // BDI555
 jmethodID mid_BDI555_break_, mid_BDI555_go, mid_BDI555_reset_target, \
 mid_BDI555_isFreezeAsserted, mid_BDI555_startFastDownload, mid_BDI555_fastDownload, \
@@ -267,6 +268,11 @@ EXPORT int createJVM(char *classpath)
 	    mid_USB_Dev_reset = env->GetStaticMethodID(cls_USB_Device, "reset", "()V");
 	    if (mid_USB_Dev_reset == 0) {
 	        fprintf_flush(stderr, "Can't find USB_Device.reset\n");
+	        return FALSE;
+	    }
+	    mid_USB_Dev_getMaxPacketSize = env->GetStaticMethodID(cls_USB_Device, "getMaxPacketSize", "()I");
+	    if (mid_USB_Dev_getMaxPacketSize == 0) {
+	        fprintf_flush(stderr, "Can't find USB_Device.getMaxPacketSize\n");
 	        return FALSE;
 	    }
 	
@@ -532,6 +538,11 @@ EXPORT void USB_Device_close()
 EXPORT void USB_Device_reset()
 {
 	env->CallStaticVoidMethod(cls_USB_Device, mid_USB_Dev_reset);
+}
+
+EXPORT int USB_Device_getMaxPacketSize()
+{
+	return env->CallStaticIntMethod(cls_USB_Device, mid_USB_Dev_getMaxPacketSize);
 }
 
 /* BDI 555 methods
