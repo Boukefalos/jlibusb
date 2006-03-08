@@ -94,7 +94,7 @@ public class Device {
 								for (int k = 0; k < intDesc.length; k++) {
 									Usb_Endpoint_Descriptor[] epDesc = intDesc[k].endpoint;
 									for (int l = 0; l < epDesc.length; l++) {
-										Math.max(epDesc[l].wMaxPacketSize,
+										maxPacketSize = Math.max(epDesc[l].wMaxPacketSize,
 												maxPacketSize);
 									}
 								}
