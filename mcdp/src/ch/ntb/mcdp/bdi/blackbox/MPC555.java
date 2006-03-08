@@ -10,10 +10,9 @@ public class MPC555 {
 	private static ch.ntb.mcdp.bdi.MPC555 bdi;
 
 	/**
-	 * Create a new BDI instance. This procedure has to be called AFTER opening
-	 * the USB device and BEFORE using any BDI commands.
+	 * Create a new BDI instance.
 	 */
-	public static void initialise() {
+	static {
 		bdi = new ch.ntb.mcdp.bdi.MPC555(USBDevice.getDevice());
 	}
 

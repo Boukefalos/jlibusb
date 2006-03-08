@@ -6,6 +6,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
+import ch.ntb.mcdp.bdi.MC68332;
 import ch.ntb.mcdp.usb.USBDevice;
 import ch.ntb.usb.USBException;
 
@@ -194,7 +195,7 @@ public class BDI332App {
 				.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
 					public void widgetSelected(
 							org.eclipse.swt.events.SelectionEvent e) {
-						BDI332test.button19();
+						Dump332.dumpToBin();
 					}
 				});
 		button20 = new Button(sShell, SWT.NONE);
@@ -203,7 +204,7 @@ public class BDI332App {
 				.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
 					public void widgetSelected(
 							org.eclipse.swt.events.SelectionEvent e) {
-						BDI332test.button20();
+						Dump332.dumpToHex();
 					}
 				});
 		button15
@@ -252,6 +253,9 @@ public class BDI332App {
 
 		try {
 			USBDevice.open();
+			MC68332 bdi = new MC68332(USBDevice.getDevice());
+			BDI332test.bdi = bdi;
+			Dump332.bdi = bdi;
 			System.out.println("open device...");
 		} catch (USBException e) {
 			e.printStackTrace();

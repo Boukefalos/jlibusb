@@ -120,7 +120,7 @@ public class MPC555 {
 	 */
 	private static final int NULL_INDICATION = -1;
 
-	private final int maxNofWordsFastDownload;
+	private int maxNofWordsFastDownload;
 
 	private boolean fastDownloadStarted;
 
@@ -130,10 +130,12 @@ public class MPC555 {
 
 	private int gpr30, gpr31, ecr;
 
+	private Device device;
+
 	public MPC555(Device device) {
 		targetInDebugMode = false;
 		fastDownloadStarted = false;
-		maxNofWordsFastDownload = ((device.getMaxPacketSize() - DataPacket.PACKET_MIN_LENGTH) / BDI_DATA35_LENGTH);
+		this.device = device;
 		sendData = new byte[USB.HIGHSPEED_MAX_BULK_PACKET_SIZE];
 	}
 
@@ -459,9 +461,14 @@ public class MPC555 {
 		if (!fastDownloadStarted) {
 			throw new BDIException("start fast download first");
 		}
+		// update the value (now the device should be connected)
+		if (maxNofWordsFastDownload <= 0) {
+			maxNofWordsFastDownload = ((device.getMaxPacketSize() - DataPacket.PACKET_MIN_LENGTH) / BDI_DATA35_LENGTH);
+		}
 		// check if data fits into USB-packet
 		if (dataLength > maxNofWordsFastDownload) {
-			throw new BDIException("data larger than maxNofWordsFastDownload");
+			throw new BDIException("data larger than maxNofWordsFastDownload: "
+					+ dataLength + " > " + maxNofWordsFastDownload);
 		}
 		int currentIndex = 0;
 		initPacket(STYPE_BDI_35FD_DATA, dataLength * BDI_DATA35_LENGTH);
