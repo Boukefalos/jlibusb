@@ -1,0 +1,15 @@
+真CXdeCmdsDev.CompileThis
+	UsbBDIDll
+	UsbBDI
+	UsbBDI332
+	UsbBDI555
+	UsbTargLog
+真E
+
+真CDevDebug.UnloadThis
+	UsbTargLog
+	UsbBDI555
+	UsbBDI332
+	UsbBDI
+	UsbBDIDll
+	真E
