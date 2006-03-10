@@ -464,6 +464,8 @@ public class MPC555 {
 		// update the value (now the device should be connected)
 		if (maxNofWordsFastDownload <= 0) {
 			maxNofWordsFastDownload = ((device.getMaxPacketSize() - DataPacket.PACKET_MIN_LENGTH) / BDI_DATA35_LENGTH);
+			logger.finer("update maxNofWordsFastDownload: "
+					+ maxNofWordsFastDownload);
 		}
 		// check if data fits into USB-packet
 		if (dataLength > maxNofWordsFastDownload) {
