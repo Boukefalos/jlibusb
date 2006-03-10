@@ -223,14 +223,14 @@ public class MC68332 {
 
 	private boolean ignoreResult;
 
+	private Device device;
+
 	public MC68332(Device device) {
 		ignoreResult = false;
 		readMemSize = 0;
 		writeMemSize = 0;
 		sendData = new byte[USB.HIGHSPEED_MAX_BULK_PACKET_SIZE];
-		maxNofLongs = (device.getMaxPacketSize() - DataPacket.PACKET_MIN_LENGTH - 2) / 6;
-		maxNofBytesWords = (device.getMaxPacketSize()
-				- DataPacket.PACKET_MIN_LENGTH - 2) / 4;
+		this.device = device;
 	}
 
 	/**
@@ -503,6 +503,18 @@ public class MC68332 {
 		return targetInDebugMode;
 	}
 
+	private void updateMaxValues() {
+		// update the values (now the device should be connected)
+		if ((maxNofLongs <= 0) | (maxNofBytesWords <= 0)) {
+			maxNofLongs = (device.getMaxPacketSize()
+					- DataPacket.PACKET_MIN_LENGTH - 2) / 6;
+			maxNofBytesWords = (device.getMaxPacketSize()
+					- DataPacket.PACKET_MIN_LENGTH - 2) / 4;
+			logger.finer("update maxNofLongs: " + maxNofLongs
+					+ ", maxNofBytesWords: " + maxNofBytesWords);
+		}
+	}
+
 	/**
 	 * Fill large blocks of memory.<br>
 	 * Fill is used in conjunction with the <code>writeMem</code> command. The
@@ -529,11 +541,13 @@ public class MC68332 {
 		int currentIndex = 0;
 		DataPacket data;
 		logger.finer("dataLength: " + dataLength);
+		updateMaxValues();
 		switch (writeMemSize) {
 		case 1:
 			if (dataLength > maxNofBytesWords) {
-				throw new BDIException(
-						"data larger than MAX_NOF_WORDS_FAST_DOWNLOAD_BYTE_WORD");
+				throw new BDIException("data length (" + dataLength
+						+ ") larger than maxNofBytesWords (" + maxNofBytesWords
+						+ ")");
 			}
 			while (currentIndex < dataLength) {
 				// FILLB
@@ -551,8 +565,9 @@ public class MC68332 {
 			break;
 		case 2:
 			if (dataLength > maxNofBytesWords) {
-				throw new BDIException(
-						"data larger than MAX_NOF_WORDS_FAST_DOWNLOAD_BYTE_WORD");
+				throw new BDIException("data length (" + dataLength
+						+ ") larger than maxNofBytesWords (" + maxNofBytesWords
+						+ ")");
 			}
 			while (currentIndex < dataLength) {
 				// FILLW
@@ -570,8 +585,8 @@ public class MC68332 {
 			break;
 		case 4:
 			if (dataLength > (maxNofLongs)) {
-				throw new BDIException(
-						"data larger than MAX_NOF_WORDS_FAST_DOWNLOAD_LONG");
+				throw new BDIException("data length (" + dataLength
+						+ ") larger than maxNofLongs (" + maxNofLongs + ")");
 			}
 			while (currentIndex < dataLength) {
 				// FILL
@@ -630,6 +645,7 @@ public class MC68332 {
 			BDIException {
 
 		// TODO: adjust MAX_NOF_XX_DUMP
+		updateMaxValues();
 		int dataSize;
 		switch (readMemSize) {
 		case 1:
@@ -972,13 +988,6 @@ public class MC68332 {
 		if (transferAndParse17(NOP) != STATUS_OK) {
 			throw new BDIException("error on writeUserReg");
 		}
-	}
-
-	// TODO: remove
-	public void nop() throws USBException, DispatchException, BDIException {
-		logger
-				.info("result: 0x"
-						+ Integer.toHexString(transferAndParse17(NOP)));
 	}
 
 	/**

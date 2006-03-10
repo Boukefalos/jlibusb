@@ -244,18 +244,19 @@ public class BDI332test {
 	}
 
 	public static void button9() {
-		try {
-			bdi.nop();
-		} catch (USBException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (DispatchException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (BDIException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		logger.info("not implemented");
+		// try {
+		// bdi.nop();
+		// } catch (USBException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// } catch (DispatchException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// } catch (BDIException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// }
 	}
 
 	public static void button10() {
