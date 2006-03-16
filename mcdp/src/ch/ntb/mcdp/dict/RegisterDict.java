@@ -6,66 +6,48 @@ import java.lang.reflect.Method;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.ErrorHandler;
+import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
+import org.xml.sax.helpers.DefaultHandler;
 
-/**
- * Representation of a register dictionary. All registers are read from an
- * xml-file specified by <code>registerDictionary.dtd</code>. Note that the
- * type values are implementation specific. Therefore each <i>Register</i> has
- * its own <i>registerDictionary.dtd</i> definition. For an example see
- * <code>MPC555Register</code> and the corresponding
- * <code>resources/targets/mpc555/registerDictionary.dtd</code> file.
- * 
- * @author schlaepfer
- */
-public abstract class RegisterDict {
-
-	private LinkedList registers;
-
-	private Class<? extends Register> regClass;
-
-	private Method regClassGetTypesMethod;
-
-	private static final String GetTypes_METHOD_NAME = "getTypes";
-
-	private String[] types;
+public abstract class RegisterDict extends DefaultHandler {
 
 	private static final long serialVersionUID = -582382284126896830L;
 
-	private static final String REGISTER_DEFINITIONS = "registerDefinitions";
+	private Class<? extends Register> regClass;
+	private Method regClassGetTypesMethod;
+	private static final String GetTypes_METHOD_NAME = "getTypes";
 
-	private static final String REGISTER_GROUP = "registerGroup";
+	private LinkedList registers;
 
-	private static final String REG_GROUP_ATTR_BASEADDR = "baseAddress";
+	private String[] types;
 
-	private static final String REGISTER = "register";
+	private static final String ELEMENT_REGISTER = "register";
+	private static final String ELEMENT_DESCRIPTION = "description";
 
-	private static final String DESCRIPTION = "description";
+	private static final String ATTR_MNEMONIC = "mnemonic";
+	private static final String ATTR_ALTMNEMONIC = "altmnemonic";
+	private static final String ATTR_TYPE = "type";
+	private static final String ATTR_VALUE = "value";
+	private static final String ATTR_SIZE = "size";
+	private static final String ATTR_ACCESSMODE = "accessmode";
+	private static final String ATTR_ACCESSATTR = "accessattr";
 
-	private static final String REG_ATTR_MNEMONIC = "mnemonic";
-
-	private static final String REG_ATTR_TYPE = "type";
-
-	private static final String REG_ATTR_VALUE = "value";
-
-	private static final String REG_ATTR_SIZE = "size";
+	private Register reg;
+	private StringBuffer cdata;
 
 	/**
 	 * Default constructor which takes the Class object from a
 	 * <code>Register</code> subclass as argument. The registerDict will be of
 	 * this Register-type.<br>
 	 * An example:<br>
-	 * MPC555Register extends Register -> use MPC555Register.class as parameter.
+	 * MPC555Register extends Register -> use <code>MPC555Register.class</code>
+	 * as parameter.
 	 * 
 	 * @param registerClass
 	 *            subclass of Register
@@ -85,44 +67,13 @@ public abstract class RegisterDict {
 		this.registers = new LinkedList();
 	}
 
-	/**
-	 * Add a new register to the registerDict.
-	 * 
-	 * @param name
-	 *            name of the register. Registers are identified by this value.
-	 * @param type
-	 *            register specific type
-	 * @param value
-	 *            address or a register specific value (e.g. BDI-identifier)
-	 * @param size
-	 *            size in bytes
-	 * @param description
-	 *            a string description of the register
-	 */
-	@SuppressWarnings("unchecked")
-	public void add(String name, int type, int value, int size,
-			String description) {
-		// remove before add for updates
-		for (Iterator i = registers.iterator(); i.hasNext();) {
-			Register r = (Register) i.next();
-			if (r.getMnemonic().equals(name) || r.getAltmnemonic().equals(name)) {
-				i.remove();
+	private int convertType(String typeStr) throws SAXException {
+		for (int index = 0; index < types.length; index++) {
+			if (typeStr.equals(types[index])) {
+				return index;
 			}
 		}
-		Register reg = null;
-		try {
-			reg = (Register) regClass.newInstance();
-			reg.setMnemonic(name);
-			reg.setType(type);
-			reg.setValue(value);
-			reg.setSize(size);
-			reg.setDescription(description);
-		} catch (Exception e) {
-			e.printStackTrace();
-			// TODO exception handling
-			System.exit(1);
-		}
-		registers.add(reg);
+		throw new SAXException("invalid register definition: " + typeStr);
 	}
 
 	private int parseInt(String s) {
@@ -146,20 +97,37 @@ public abstract class RegisterDict {
 	}
 
 	/**
-	 * Get a register by its name.
+	 * Adds the registers from the specified xml-file to the register
+	 * dictionary. <br>
+	 * The xml-file must be structured according to
+	 * <code>registerDictionary.dtd</code>. The dtd-file must be adapted to
+	 * the type values specific to this register. Include
+	 * <code><!DOCTYPE registerDefinitions SYSTEM "registerDictionary.dtd"></code>
+	 * in your xml file.
 	 * 
-	 * @param name
-	 *            the register name
-	 * @return register on null if no register is found
+	 * @param xmlPathname
+	 *            path to the xml file
+	 * @throws IOException
+	 *             throws an IOException if the file is not found
+	 * @throws SAXException
+	 * @throws ParserConfigurationException
+	 * @throws ParserConfigurationException
+	 *             throws an ParserConfigurationException if the SAX parser
+	 *             can't be configured
+	 * @throws SAXException
+	 *             throws an SAXException if the file could not be successfully
+	 *             parsed
 	 */
-	public Register getRegister(String name) {
-		for (Iterator i = registers.iterator(); i.hasNext();) {
-			Register r = (Register) i.next();
-			if (r.getMnemonic().equals(name) || r.getAltmnemonic().equals(name)) {
-				return r;
-			}
-		}
-		return null;
+	public void addRegistersFromFile(String xmlPathname) throws IOException,
+			ParserConfigurationException, SAXException {
+		// reset temporary register variable
+		reg = null;
+		// Use the default (non-validating) parser
+		SAXParserFactory factory = SAXParserFactory.newInstance();
+		factory.setValidating(true);
+		// Parse the input
+		SAXParser saxParser = factory.newSAXParser();
+		saxParser.parse(new File(xmlPathname), this);
 	}
 
 	/**
@@ -181,122 +149,112 @@ public abstract class RegisterDict {
 	}
 
 	/**
-	 * Adds the registers from the specified xml-file to the register
-	 * dictionary. <br>
-	 * The xml-file must be structured according to
-	 * <code>registerDictionary.dtd</code>. The dtd-file must be adapted to
-	 * the type values specific to this register. Include
-	 * <code><!DOCTYPE registerDefinitions SYSTEM "registerDictionary.dtd"></code>
-	 * in your xml file.
+	 * Get a register by its name.
 	 * 
-	 * @param xmlPathname
-	 *            path to the xml file
-	 * @throws IOException
-	 *             throws an IOException if the file is not found
-	 * @throws ParserConfigurationException
-	 *             throws an ParserConfigurationException if the SAX parser
-	 *             can't be configured
-	 * @throws SAXException
-	 *             throws an SAXException if the file could not be successfully
-	 *             parsed
+	 * @param name
+	 *            the register name
+	 * @return register on null if no register is found
 	 */
-	public void addRegistersFromFile(String xmlPathname) throws IOException,
-			ParserConfigurationException, SAXException {
-		Document document;
-		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-		factory.setValidating(true);
-		DocumentBuilder builder = factory.newDocumentBuilder();
-		builder.setErrorHandler(new ErrorHandler() {
-			// ignore fatal errors (an exception is guaranteed)
-			public void fatalError(SAXParseException exception)
-					throws SAXException {
+	public Register getRegister(String name) {
+		for (Iterator i = registers.iterator(); i.hasNext();) {
+			Register r = (Register) i.next();
+			if (r.getMnemonic().equals(name) || r.getAltmnemonic().equals(name)) {
+				return r;
 			}
+		}
+		return null;
+	}
 
-			// treat validation errors as fatal error
-			public void error(SAXParseException e) throws SAXParseException {
-				throw e;
-			}
+	// ===========================================================
+	// SAX DocumentHandler methods
+	// ===========================================================
 
-			// treat warnings as fatal error
-			public void warning(SAXParseException e) throws SAXParseException {
-				throw e;
-			}
-		});
-		document = builder.parse(new File(xmlPathname));
-		NodeList list = document.getElementsByTagName(REGISTER_DEFINITIONS);
-		for (int i = 0; i < list.getLength(); i++) {
-			if (list.item(i).getNodeName().equals(REGISTER_DEFINITIONS)) {
-				list = list.item(i).getChildNodes();
-			}
-			for (int j = 0; j < list.getLength(); j++) {
-				if (list.item(j).getNodeName().equals(REGISTER_GROUP)) {
-					NamedNodeMap attributes = list.item(j).getAttributes();
-					for (int k = 0; k < attributes.getLength(); k++) {
-						if (attributes.item(k).getNodeName().equals(
-								REG_GROUP_ATTR_BASEADDR)) {
-							int baseAddr = parseInt(attributes.item(k)
-									.getNodeValue());
-							parseRegisterGroup(list.item(j), baseAddr);
-						}
-					}
-				} else if (list.item(j).getNodeName().equals(REGISTER)) {
-					NamedNodeMap attributes = list.item(j).getAttributes();
-					// attributes: name, type, offset, size
-					Node n = attributes.getNamedItem(REG_ATTR_MNEMONIC);
-					String name = n.getNodeValue();
-					n = attributes.getNamedItem(REG_ATTR_TYPE);
-					String typeStr = n.getNodeValue();
-					int type = convertType(typeStr);
-					n = attributes.getNamedItem(REG_ATTR_VALUE);
-					int value = parseInt(n.getNodeValue());
-					n = attributes.getNamedItem(REG_ATTR_SIZE);
-					int size = parseInt(n.getNodeValue());
-					parseRegister(list.item(j), name, type, value, size);
+	public void startDocument() throws SAXException {
+	}
+
+	public void endDocument() throws SAXException {
+	}
+
+	public void startElement(String namespaceURI, String lName, // local name
+			String qName, // qualified name
+			Attributes attrs) throws SAXException {
+		if (qName.equals(ELEMENT_REGISTER)) {
+			if (attrs != null) {
+				// instantiate new register
+				try {
+					reg = (Register) regClass.newInstance();
+				} catch (Exception e) {
+					throw new SAXException(e.getMessage());
 				}
+				for (int i = 0; i < attrs.getLength(); i++) {
+					String attr_qName = attrs.getQName(i);
+					String attr_value = attrs.getValue(i);
+					if (attr_qName.equals(ATTR_MNEMONIC)) {
+						reg.setMnemonic(attr_value);
+					} else if (attr_qName.equals(ATTR_ALTMNEMONIC)) {
+						reg.setAltmnemonic(attr_value);
+					} else if (attr_qName.equals(ATTR_TYPE)) {
+						reg.setType(convertType(attr_value));
+					} else if (attr_qName.equals(ATTR_SIZE)) {
+						reg.setSize(parseInt(attr_value));
+					} else if (attr_qName.equals(ATTR_VALUE)) {
+						reg.setValue(parseInt(attr_value));
+					} else if (attr_qName.equals(ATTR_ACCESSMODE)) {
+						reg.setAccessmode(Register.Accessmode
+								.valueOf(attr_value));
+					} else if (attr_qName.equals(ATTR_ACCESSATTR)) {
+						reg.setAccessattr(Register.Accessattr
+								.valueOf(attr_value));
+					}
+				}
+			} else {
+				throw new SAXException("attributes expected");
 			}
+		} else if (qName.equals(ELEMENT_DESCRIPTION)) {
+			// reset the cdata for descriptions
+			cdata = new StringBuffer();
 		}
 	}
 
-	protected int convertType(String typeStr) throws SAXException {
-		for (int index = 0; index < types.length; index++) {
-			if (typeStr.equals(types[index])) {
-				return index;
-			}
+	@SuppressWarnings("unchecked")
+	public void endElement(String namespaceURI, String sName, // simple
+			// name
+			String qName // qualified name
+	) throws SAXException {
+		if (qName.equals(ELEMENT_DESCRIPTION)) {
+			reg.setDescription(cdata.toString().trim());
 		}
-		throw new SAXException("invalid register definition: " + typeStr);
-	}
-
-	private void parseRegisterGroup(Node registerGroup, int baseAddr)
-			throws SAXException {
-		NodeList list = registerGroup.getChildNodes();
-		for (int i = 0; i < list.getLength(); i++) {
-			if (list.item(i).getNodeName().equals(REGISTER)) {
-				NamedNodeMap attributes = list.item(i).getAttributes();
-				// attributes: name, type, offset, size
-				Node n = attributes.getNamedItem(REG_ATTR_MNEMONIC);
-				String name = n.getNodeValue();
-				n = attributes.getNamedItem(REG_ATTR_TYPE);
-				String typeStr = n.getNodeValue();
-				int type = convertType(typeStr);
-				n = attributes.getNamedItem(REG_ATTR_VALUE);
-				int offset = parseInt(n.getNodeValue());
-				n = attributes.getNamedItem(REG_ATTR_SIZE);
-				int size = parseInt(n.getNodeValue());
-
-				parseRegister(list.item(i), name, type, baseAddr + offset, size);
-			}
+		if (reg != null) {
+			registers.add(reg);
+			reg = null;
 		}
 	}
 
-	private void parseRegister(Node register, String name, int type, int addr,
-			int size) throws SAXException {
-		NodeList list = register.getChildNodes();
-		String description = "";
-		for (int i = 0; i < list.getLength(); i++) {
-			if (list.item(i).getNodeName().equals(DESCRIPTION)) {
-				description = list.item(i).getTextContent();
-			}
+	public void characters(char buf[], int offset, int len) throws SAXException {
+		int startOffset = offset;
+		while ((offset < startOffset + len) && (buf[offset] <= ' ')) {
+			offset++;
 		}
-		add(name, type, addr, size, description);
+		len -= offset - startOffset;
+		while ((len > 0) && (buf[offset + len - 1] <= ' ')) {
+			len--;
+		}
+		cdata.append(buf, offset, len);
+	}
+
+	// ===========================================================
+	// SAX ErrorHandler methods
+	// ===========================================================
+
+	// treat validation errors as fatal
+	public void error(SAXParseException e) throws SAXParseException {
+		throw e;
+	}
+
+	// dump warnings too
+	public void warning(SAXParseException err) throws SAXParseException {
+		System.out.println("** Warning" + ", line " + err.getLineNumber()
+				+ ", uri " + err.getSystemId());
+		System.out.println("   " + err.getMessage());
 	}
 }

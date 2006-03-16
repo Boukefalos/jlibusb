@@ -32,15 +32,15 @@ public class IMCBTargetBoard {
 		logger.info("writeRegister: " + name + ", value: 0x"
 				+ Integer.toHexString(value));
 		MC68332Register r = (MC68332Register) regDict.getRegister(name);
-		switch (r.type) {
+		switch (r.getType()) {
 		case MC68332Register.CtrlReg:
-			bdi.writeMem(r.value, value, r.size);
+			bdi.writeMem(r.getValue(), value, r.getSize());
 			break;
 		case MC68332Register.SysReg:
-			bdi.writeSysReg(r.value, value);
+			bdi.writeSysReg(r.getValue(), value);
 			break;
 		case MC68332Register.UserReg:
-			bdi.writeUserReg(r.value, value);
+			bdi.writeUserReg(r.getValue(), value);
 			break;
 		}
 	}
@@ -49,13 +49,13 @@ public class IMCBTargetBoard {
 			DispatchException, BDIException {
 		logger.info("readRegister: " + name);
 		MC68332Register r = (MC68332Register) regDict.getRegister(name);
-		switch (r.type) {
+		switch (r.getType()) {
 		case MC68332Register.CtrlReg:
-			return bdi.readMem(r.value, r.size);
+			return bdi.readMem(r.getValue(), r.getSize());
 		case MC68332Register.SysReg:
-			return bdi.readSysReg(r.value);
+			return bdi.readSysReg(r.getValue());
 		case MC68332Register.UserReg:
-			return bdi.readUserReg(r.value);
+			return bdi.readUserReg(r.getValue());
 		}
 		return -1;
 	}
