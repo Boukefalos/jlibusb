@@ -863,7 +863,7 @@
 		<register mnemonic="TICR_A" type="CtrlReg" value="0x008"
 			size="2" accessmode="supervisor">
 			<description>
-				TPU3_A Interrupt Configuration Register.
+				TPU3_A Interrupt Configuration Register
 			</description>
 		</register>
 		<register mnemonic="CIER_A" type="CtrlReg" value="0x00a"
@@ -875,7 +875,7 @@
 		<register mnemonic="CFSR0_A" type="CtrlReg" value="0x00c"
 			size="2" accessmode="supervisor">
 			<description>
-				TPU3_A Channel Function Selection Register 0.
+				TPU3_A Channel Function Selection Register 0
 			</description>
 		</register>
 		<register mnemonic="CFSR1_A" type="CtrlReg" value="0x00e"
@@ -1669,7 +1669,7 @@
 		<register mnemonic="MIOS1TPCR" type="CtrlReg" value="0x800"
 			size="2" accessmode="supervisor">
 			<description>
-				MIOS1 Test and Pin Control Register.
+				MIOS1 Test and Pin Control Register
 			</description>
 		</register>
 		<register mnemonic="MIOS1VNR" type="CtrlReg" value="0x804"
@@ -1731,7 +1731,7 @@
 		<register mnemonic="TCNMCR_A" type="CtrlReg" value="0x080"
 			size="2" accessmode="supervisor">
 			<description>
-				TouCAN_A Module Configuration Register.
+				TouCAN_A Module Configuration Register
 			</description>
 		</register>
 		<register mnemonic="CANTCR_A" type="CtrlReg" value="0x082"
@@ -1741,7 +1741,7 @@
 		<register mnemonic="CANICR_A" type="CtrlReg" value="0x084"
 			size="2" accessmode="supervisor">
 			<description>
-				TouCAN_A Interrupt Configuration Register.
+				TouCAN_A Interrupt Configuration Register
 			</description>
 		</register>
 		<register mnemonic="CANCTRL0_A" altmnemonic="CANCTRL1_A"
@@ -1761,7 +1761,7 @@
 		<register mnemonic="TIMER_A" type="CtrlReg" value="0x08a"
 			size="2">
 			<description>
-				TouCAN_A Free-Running Timer Register.
+				TouCAN_A Free-Running Timer Register
 			</description>
 		</register>
 		<register mnemonic="RXGMSKHI_A" type="CtrlReg" value="0x090"
@@ -1821,7 +1821,7 @@
 		<register mnemonic="TCNMCR_B" type="CtrlReg" value="0x480"
 			size="2" accessmode="supervisor">
 			<description>
-				TouCAN_B Module Configuration Register.
+				TouCAN_B Module Configuration Register
 			</description>
 		</register>
 		<register mnemonic="CANTCR_B" type="CtrlReg" value="0x482"
@@ -1831,7 +1831,7 @@
 		<register mnemonic="CANICR_B" type="CtrlReg" value="0x484"
 			size="2" accessmode="supervisor">
 			<description>
-				TouCAN_B Interrupt Configuration Register.
+				TouCAN_B Interrupt Configuration Register
 			</description>
 		</register>
 		<register mnemonic="CANCTRL0_B" altmnemonic="CANCTRL1_B"
@@ -1851,7 +1851,7 @@
 		<register mnemonic="TIMER_B" type="CtrlReg" value="0x48a"
 			size="2">
 			<description>
-				TouCAN_B Free-Running Timer Register.
+				TouCAN_B Free-Running Timer Register
 			</description>
 		</register>
 		<register mnemonic="RXGMSKHI_B" type="CtrlReg" value="0x490"
