@@ -5,7 +5,19 @@ package ch.ntb.mcdp.dict;
  * 
  * @author schlaepfer
  */
+/**
+ * @author schlaepfer
+ * 
+ */
 public abstract class Register {
+
+	public enum Accessmode {
+		none, supervisor, user, test
+	};
+
+	public enum Accessattr {
+		none, readonly, writeonly
+	};
 
 	private static final String INIT_STRING = "***";
 
@@ -48,7 +60,17 @@ public abstract class Register {
 	/**
 	 * A string description of the register
 	 */
-	private String description;
+	private String description = "";
+
+	/**
+	 * The register access mode
+	 */
+	private Accessmode accessmode = Accessmode.none;
+
+	/**
+	 * The register access attribute
+	 */
+	private Accessattr accessattr = Accessattr.none;
 
 	/**
 	 * @return the mnemonic of this register
@@ -174,5 +196,37 @@ public abstract class Register {
 	 */
 	public static String[] getTypes() {
 		return types;
+	}
+
+	/**
+	 * @return the access attributes of the register
+	 */
+	public Accessattr getAccessattr() {
+		return accessattr;
+	}
+
+	/**
+	 * Set the access attribute of the register
+	 * 
+	 * @param accessattr
+	 */
+	public void setAccessattr(Accessattr accessattr) {
+		this.accessattr = accessattr;
+	}
+
+	/**
+	 * @return the access mode of this register
+	 */
+	public Accessmode getAccessmode() {
+		return accessmode;
+	}
+
+	/**
+	 * Set the access mode of this register
+	 * 
+	 * @param accessmode
+	 */
+	public void setAccessmode(Accessmode accessmode) {
+		this.accessmode = accessmode;
 	}
 }
