@@ -52,7 +52,7 @@ public abstract class RegisterDict {
 
 	private static final String DESCRIPTION = "description";
 
-	private static final String REG_ATTR_NAME = "name";
+	private static final String REG_ATTR_MNEMONIC = "mnemonic";
 
 	private static final String REG_ATTR_TYPE = "type";
 
@@ -104,16 +104,22 @@ public abstract class RegisterDict {
 			String description) {
 		// remove before add for updates
 		for (Iterator i = registers.iterator(); i.hasNext();) {
-			if (((Register) i.next()).name.equals(name)) {
+			Register r = (Register) i.next();
+			if (r.getMnemonic().equals(name) || r.getAltmnemonic().equals(name)) {
 				i.remove();
 			}
 		}
 		Register reg = null;
 		try {
 			reg = (Register) regClass.newInstance();
-			reg.init(name, type, value, size, description);
+			reg.setMnemonic(name);
+			reg.setType(type);
+			reg.setValue(value);
+			reg.setSize(size);
+			reg.setDescription(description);
 		} catch (Exception e) {
 			e.printStackTrace();
+			// TODO exception handling
 			System.exit(1);
 		}
 		registers.add(reg);
@@ -149,7 +155,7 @@ public abstract class RegisterDict {
 	public Register getRegister(String name) {
 		for (Iterator i = registers.iterator(); i.hasNext();) {
 			Register r = (Register) i.next();
-			if (r.name.equals(name)) {
+			if (r.getMnemonic().equals(name) || r.getAltmnemonic().equals(name)) {
 				return r;
 			}
 		}
@@ -162,7 +168,8 @@ public abstract class RegisterDict {
 	public void printRegisters() {
 		System.out
 				.println("******************** register dictionary *********************");
-		System.out.println("Name\tType\tAddress\tSize\tDescription");
+		System.out
+				.println("Mnemonic\tAltmnemonic\tType\tAddress\tSize\tDescription");
 		System.out
 				.println("**************************************************************");
 		for (Iterator i = registers.iterator(); i.hasNext();) {
@@ -235,7 +242,7 @@ public abstract class RegisterDict {
 				} else if (list.item(j).getNodeName().equals(REGISTER)) {
 					NamedNodeMap attributes = list.item(j).getAttributes();
 					// attributes: name, type, offset, size
-					Node n = attributes.getNamedItem(REG_ATTR_NAME);
+					Node n = attributes.getNamedItem(REG_ATTR_MNEMONIC);
 					String name = n.getNodeValue();
 					n = attributes.getNamedItem(REG_ATTR_TYPE);
 					String typeStr = n.getNodeValue();
@@ -266,7 +273,7 @@ public abstract class RegisterDict {
 			if (list.item(i).getNodeName().equals(REGISTER)) {
 				NamedNodeMap attributes = list.item(i).getAttributes();
 				// attributes: name, type, offset, size
-				Node n = attributes.getNamedItem(REG_ATTR_NAME);
+				Node n = attributes.getNamedItem(REG_ATTR_MNEMONIC);
 				String name = n.getNodeValue();
 				n = attributes.getNamedItem(REG_ATTR_TYPE);
 				String typeStr = n.getNodeValue();

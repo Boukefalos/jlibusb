@@ -5,14 +5,17 @@
 	to the specific register used in this registerDict.
 -->
 
-<!ELEMENT registerDefinitions ((registerGroup*, register*) | (register*, registerGroup*))>
+<!ELEMENT registerDefinitions ((registerGroup* | register*)*)>
 <!ELEMENT registerGroup (register+)>
 <!ATTLIST registerGroup
 		baseAddress CDATA #REQUIRED>
 <!ELEMENT register (description?)>
 <!ATTLIST register
-		name CDATA #REQUIRED
+		mnemonic CDATA #REQUIRED
+		altmnemonic CDATA #IMPLIED
 		type (type1|type2|type3) #REQUIRED
 		value CDATA #REQUIRED
-		size (1|2|4) #REQUIRED>
+		size (1|2|4) #REQUIRED
+		accessmode (supervisor|user|test) #IMPLIED
+		accessattr (readonly|writeonly) #IMPLIED>
 <!ELEMENT description (#PCDATA)>

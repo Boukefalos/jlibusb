@@ -2,6 +2,12 @@ package ch.ntb.mcdp.mpc555;
 
 import ch.ntb.mcdp.dict.Register;
 
+/**
+ * Representation of a MPC555 Register
+ * 
+ * @author schlaepfer
+ * 
+ */
 public class MPC555Register extends Register {
 
 	// Register Types
