@@ -7,20 +7,20 @@ MODULE UsbTargLog;
 	IMPORT
 		USB := UsbBDI, Log := StdLog, Services, TextModels, XUT := XdeUtilities;
 
-	CONST 
+	CONST
 		logTitle = "USB Target Log";
-		PERIOD = 200; 
+		PERIOD = 500;
 
-	TYPE 
+	TYPE
 		Receiver = POINTER TO RECORD (Services.Action)
 			time: LONGINT; 	period: INTEGER
-		END; 
+		END;
 
-	VAR 
+	VAR
 		receiver: Receiver;
-		logTextModel: TextModels.Model; logWriter: TextModels.Writer; 
+		logTextModel: TextModels.Model; logWriter: TextModels.Writer;
 
-	PROCEDURE (receiver: Receiver) Do; 
+	PROCEDURE (receiver: Receiver) Do;
 		VAR
 			length, i: INTEGER; done: BOOLEAN;
 			data: ARRAY USB.MAX_UART_DATA_LENGTH OF SHORTCHAR;
@@ -33,23 +33,23 @@ MODULE UsbTargLog;
 			END
 		END;
 		INC( receiver.time, receiver.period ); 	Services.DoLater(receiver, receiver.time )
-	END Do; 
+	END Do;
 
-	PROCEDURE Stop * ; 
+	PROCEDURE Stop * ;
 	BEGIN
 		IF receiver # NIL THEN	Services.RemoveAction(receiver ); receiver := NIL	END;
 		logWriter := NIL; logTextModel := NIL
-	END Stop; 
+	END Stop;
 
-	PROCEDURE StartReceiver; 
+	PROCEDURE StartReceiver;
 	BEGIN
 		IF receiver # NIL THEN	Services.RemoveAction(receiver ); receiver := NIL	END;
 		NEW(receiver);
 		receiver.time := Services.Ticks(); 	receiver.period := PERIOD;
 		Services.DoLater(receiver, receiver.time)
-	END StartReceiver; 
+	END StartReceiver;
 
-	PROCEDURE Start * ; 
+	PROCEDURE Start * ;
 		VAR beg, end: INTEGER;
 	BEGIN
 		IF ~USB.DeviceOpen() THEN
@@ -60,9 +60,9 @@ MODULE UsbTargLog;
 		XUT.GetTextModel("", logTextModel, beg, end); logWriter := logTextModel.NewWriter(NIL);
 		XUT.ShowTextView(logTextModel, logTitle);
 		StartReceiver;
-	END Start; 
+	END Start;
 
-	PROCEDURE SendSelToTarget * ; 
+	PROCEDURE SendSelToTarget * ;
 	(** send all visible char of the current selection to the target
 	*)
 		VAR
@@ -97,14 +97,14 @@ MODULE UsbTargLog;
 				Log.String("Data sent successfully"); Log.Ln;
 			END
 		END
-	END SendSelToTarget; 
+	END SendSelToTarget;
 
-	PROCEDURE ClearText * ; 
+	PROCEDURE ClearText * ;
 	BEGIN
 		IF logTextModel # NIL THEN
 			logTextModel.Delete(0, logTextModel.Length()); logWriter.SetPos(0)
 		END
-	END ClearText; 
+	END ClearText;
 
 CLOSE
 	Stop
