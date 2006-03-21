@@ -24,7 +24,9 @@ MODULE UsbBDI;
 
 	CONST
 		PATH_SEPERATOR = "\";
-		CLASSPATH = "Usb\Rsrc\usbpdi.jar";
+		JAR_FILE = "usbpdi.jar";
+		JAR_LOCATION = "Usb" + PATH_SEPERATOR + "Rsrc";
+		CLASSPATH = JAR_LOCATION + PATH_SEPERATOR + JAR_FILE;
 
 	TYPE
 		StdReaderWriter = POINTER TO ABSTRACT RECORD (Services.Action)
@@ -139,12 +141,6 @@ MODULE UsbBDI;
 		rec.stdErrWriter.SetPos(rec.errText.Length());
 
 		(* Connect Std pipes *)
-(*
-		stdOutHandle := BDI.getOutPipeHandle();
-		stdErrHandle := BDI.getErrPipeHandle();
-		Log.String("stdOutHandle: "); Log.Int(stdOutHandle); Log.Ln;
-		Log.String("stdErrHandle: "); Log.Int(stdErrHandle); Log.Ln;
-*)
 		rec.ConnectStdOutPipe(BDI.getOutPipeHandle());
 		rec.ConnectStdErrPipe(BDI.getErrPipeHandle());
 
@@ -370,6 +366,38 @@ MODULE UsbBDI;
 		END
 	END GetUserStartUpPath;
 
+	PROCEDURE GetSystemStartUpPath (VAR startupPath: ARRAY OF SHORTCHAR);
+		VAR
+			cmdLinePtr: WinApi.PtrWSTR; args: WinApi.RetCommandLineToArgvW;
+			n, i, nofArgs: INTEGER;
+			sysStartUpLocator: Files.Locator; 	sysStartUpHostLoc: HostFiles.Locator;
+	BEGIN
+		cmdLinePtr := WinApi.GetCommandLineW();
+		args := WinApi.CommandLineToArgvW(cmdLinePtr, nofArgs);
+
+		n := LEN(args[0]$);
+		REPEAT	DEC(n)	UNTIL (args[0][n] = PATH_SEPERATOR) OR (n <= 0); 	args[0][n] := nul;
+
+		sysStartUpLocator := HostFiles.NewLocator(args[0]$); 	args[0][n] := PATH_SEPERATOR;
+		sysStartUpHostLoc := sysStartUpLocator(HostFiles.Locator);
+		FOR i := 0 TO LEN(sysStartUpHostLoc.path$) DO
+			startupPath[i] := SYS.VAL(SHORTCHAR, sysStartUpHostLoc.path[i]);
+		END;
+	END GetSystemStartUpPath;
+
+	PROCEDURE CheckIfFileExists (filePath: ARRAY OF CHAR; fileName: ARRAY OF CHAR): BOOLEAN;
+		VAR
+			i: INTEGER;	done: BOOLEAN;
+			loc: Files.Locator;	file: Files.File;	name: Files.Name;
+	BEGIN
+		loc := Files.dir.This(filePath);
+		IF loc.res # 0 THEN (*RETURN FALSE*) END;
+		FOR i := 0 TO LEN(fileName$) DO
+			name[i] := fileName[i];
+		END;
+		file := Files.dir.Old(loc, name, Files.shared);
+		RETURN loc.res = 0
+	END CheckIfFileExists;
 
 	PROCEDURE ConnectDevice * ;
 		VAR
@@ -377,7 +405,14 @@ MODULE UsbBDI;
 	BEGIN
 		IF ~deviceOpen THEN
 			IF ~jvmCreated THEN
+				(* Check for existence of jar-file (whether in user of system directory) *)
 				GetUserStartUpPath(startupPath);
+				IF ~CheckIfFileExists(startupPath + PATH_SEPERATOR + JAR_LOCATION, JAR_FILE) THEN
+					GetSystemStartUpPath(startupPath);
+					IF ~CheckIfFileExists(startupPath + PATH_SEPERATOR + JAR_LOCATION, JAR_FILE) THEN
+						Log.String(JAR_FILE + " not found in user or system path; expected in " + JAR_LOCATION); Log.Ln;
+					END
+				END;
 				Log.String("Startup Path: " + startupPath); Log.Ln;
 				CreateJVM(startupPath + PATH_SEPERATOR + CLASSPATH);
 				(*
