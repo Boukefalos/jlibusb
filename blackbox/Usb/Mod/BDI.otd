@@ -267,6 +267,7 @@ MODULE UsbBDI;
 		IF bool = FALSE_ THEN
 			Done := FALSE;
 			Log.String("creating JVM failed"); Log.Ln;
+			HALT(77);
 		ELSE
 			Done := TRUE;
 			Log.String("JVM successfully created"); Log.Ln;
@@ -387,8 +388,8 @@ MODULE UsbBDI;
 
 	PROCEDURE CheckIfFileExists (filePath: ARRAY OF CHAR; fileName: ARRAY OF CHAR): BOOLEAN;
 		VAR
-			i: INTEGER;	done: BOOLEAN;
-			loc: Files.Locator;	file: Files.File;	name: Files.Name;
+			i: INTEGER; 	done: BOOLEAN;
+			loc: Files.Locator; 	file: Files.File; 	name: Files.Name;
 	BEGIN
 		loc := Files.dir.This(filePath);
 		IF loc.res # 0 THEN (*RETURN FALSE*) END;
@@ -418,11 +419,11 @@ MODULE UsbBDI;
 				(*
 				CreateJVM("D:\work\USB\eclipse\mcdp\bin\");
 				*)
-				IF ~Done THEN HALT(77) END;
+				IF ~Done THEN HALT(78) END;
 				jvmCreated := TRUE;
 			END;
 			BDI.USB_Device_open;
-			IF ~Done THEN HALT(78) END;
+			IF ~Done THEN HALT(79) END;
 			deviceOpen := TRUE;
 		END
 	END ConnectDevice;
@@ -435,6 +436,7 @@ MODULE UsbBDI;
 	(* Close and reopen the device *)
 	PROCEDURE ReopenDevice * ;
 	BEGIN
+		ConnectDevice;
 		USB_Device_close;
 		USB_Device_open;
 		IF Done THEN
