@@ -208,7 +208,10 @@ public class MPC555 {
 			throw new BDIException("ready bit is not 0: 0x"
 					+ Integer.toHexString(data.data[0] & 0xFF));
 		}
+		// status[0:1]
 		switch ((data.data[0] >>> 5) & 0x03) {
+		// for status 1 to 3, the first bit (after status) indicates the freeze
+		// status, and the second bit if a download procedure is in progress
 		case 0:
 			// first byte
 			int retValue = (((data.data[0] << 3) & 0xFF) + ((data.data[1] & 0xFF) >>> 5)) << 24;
@@ -221,10 +224,19 @@ public class MPC555 {
 					+ ((data.data[4] & 0xFF) >>> 5);
 			return retValue;
 		case 1:
+			// update freeze status
+			targetInDebugMode = (data.data[0] & 0x10) > 0;
+			logger.finer("targetInDebugMode: " + targetInDebugMode);
 			throw new BDIException("Sequencing Error: " + data.toString());
 		case 2:
+			// update freeze status
+			targetInDebugMode = (data.data[0] & 0x10) > 0;
+			logger.finer("targetInDebugMode: " + targetInDebugMode);
 			throw new BDIException("CPU Exception: " + data.toString());
 		case 3:
+			// update freeze status
+			targetInDebugMode = (data.data[0] & 0x10) > 0;
+			logger.finer("targetInDebugMode: " + targetInDebugMode);
 			return NULL_INDICATION;
 		default:
 			throw new BDIException("invalid case");
@@ -376,9 +388,10 @@ public class MPC555 {
 		ecr = transferAndParse35(false, false, NOP);
 		// check if entry into debug mode was because of DPI
 		// User's Manual 21.7.11 ECR
+		logger.fine("ecr: " + ecr);
 		if (ecr != 0x01) {
 			throw new BDIException(
-					"Wrong debug enable cause (not due to DPI): Exception Cause Register = 0x"
+					"Wrong debug enable cause (not because of DPI): Exception Cause Register = 0x"
 							+ Integer.toHexString(ecr));
 		}
 		targetInDebugMode = true;
@@ -949,9 +962,16 @@ public class MPC555 {
 
 	/**
 	 * @return number of maximal words used in the <code>fastDownload</code>
-	 *         procedure
+	 *         procedure<br>
+	 *         Note that this procedure only returns a valid value if the device
+	 *         is already connected (the USB bulk transfer size must be known).
 	 */
 	public int getMaxNofWordsFastDownload() {
+		if (maxNofWordsFastDownload <= 0) {
+			maxNofWordsFastDownload = ((device.getMaxPacketSize() - DataPacket.PACKET_MIN_LENGTH) / BDI_DATA35_LENGTH);
+			logger.finer("update maxNofWordsFastDownload: "
+					+ maxNofWordsFastDownload);
+		}
 		return maxNofWordsFastDownload;
 	}
 }
