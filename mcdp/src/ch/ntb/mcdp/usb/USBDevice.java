@@ -26,7 +26,7 @@ public class USBDevice {
 
 	private static final int BDI_Timeout = 1000;
 
-	private static final int UART_Timeout = 50;
+	private static final int UART_Timeout = 1;
 
 	private static Device dev;
 
