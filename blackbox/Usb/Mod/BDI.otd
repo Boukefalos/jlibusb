@@ -422,7 +422,7 @@ MODULE UsbBDI;
 				IF ~Done THEN HALT(78) END;
 				jvmCreated := TRUE;
 			END;
-			BDI.USB_Device_open;
+			USB_Device_open;
 			IF ~Done THEN HALT(79) END;
 			deviceOpen := TRUE;
 		END
