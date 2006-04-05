@@ -255,7 +255,7 @@ public class MPC555 {
 
 		// restore GPR30
 		// put instr mfspr: GPR30, DPDR
-		transferAndParse35(false, false, 0x7FF69AA6);
+		transferAndParse35(false, false, 0x7FD69AA6);
 		// put GPR30 in DPDR
 		logger.finer("write gpr30: 0x" + Integer.toHexString(gpr30));
 		transferAndParse35(false, true, gpr30);
@@ -300,12 +300,8 @@ public class MPC555 {
 		// throw an exception if EBRK (External breakpoint exception) bit is not
 		// set
 		if ((ecr & (EBRK_bit * 2)) <= 0) {
-			// TODO: change exception string
-			logger
-					.warning("Wrong debug enable cause (not due to EBRK): Exception Cause Register = "
-							+ "0x" + Integer.toHexString(ecr));
-			System.err
-					.println("Wrong debug enable cause (not due to EBRK): Exception Cause Register = "
+			throw new BDIException(
+					"Wrong debug enable cause (not due to EBRK): Exception Cause Register = "
 							+ "0x" + Integer.toHexString(ecr));
 		}
 	}
@@ -325,8 +321,6 @@ public class MPC555 {
 		}
 		// negate breakpoint
 		transferAndParse35(true, true, 0x3E000000);
-		// check if target is in debug mode
-		targetInDebugMode = isFreezeAsserted();
 	}
 
 	/**
@@ -343,6 +337,9 @@ public class MPC555 {
 		}
 
 		epilogue();
+		// force a check whether the freeze signal is asserted or not
+		// this has to be done, because the state is not updated in the epilogue
+		// instructions
 		targetInDebugMode = isFreezeAsserted();
 	}
 
@@ -394,7 +391,6 @@ public class MPC555 {
 					"Wrong debug enable cause (not because of DPI): Exception Cause Register = 0x"
 							+ Integer.toHexString(ecr));
 		}
-		targetInDebugMode = true;
 	}
 
 	/**
