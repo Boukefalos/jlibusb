@@ -32,6 +32,8 @@ public class USBDevice {
 
 	static {
 		dev = USB.getDevice(IdVendor, IdProduct);
+		dev.setReopenOnTimeout(true);
+		dev.setResetOnFirstOpen(true);
 	}
 
 	public static void open() throws USBException {

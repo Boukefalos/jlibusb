@@ -24,7 +24,13 @@ public class Device {
 
 	private int usb_dev_handle;
 
+	private boolean reopenOnTimeout, reopenDone, resetOnFirstOpen, resetDone;
+
 	protected Device(short idVendor, short idProduct) {
+		reopenOnTimeout = false;
+		reopenDone = false;
+		resetOnFirstOpen = false;
+		resetDone = false;
 		maxPacketSize = -1;
 		this.idVendor = idVendor;
 		this.idProduct = idProduct;
@@ -94,7 +100,8 @@ public class Device {
 								for (int k = 0; k < intDesc.length; k++) {
 									Usb_Endpoint_Descriptor[] epDesc = intDesc[k].endpoint;
 									for (int l = 0; l < epDesc.length; l++) {
-										maxPacketSize = Math.max(epDesc[l].wMaxPacketSize,
+										maxPacketSize = Math.max(
+												epDesc[l].wMaxPacketSize,
 												maxPacketSize);
 									}
 								}
@@ -117,8 +124,19 @@ public class Device {
 					+ Integer.toHexString(idProduct & 0xFFFF) + " not found");
 		}
 		claim_interface(usb_dev_handle, configuration, interface_, altinterface);
+		if (resetOnFirstOpen & !resetDone) {
+			logger.info("reset on first open");
+			resetDone = true;
+			reset();
+			open(configuration, interface_, altinterface);
+		}
 	}
 
+	/**
+	 * Release the claimed interface and close the opened device.
+	 * 
+	 * @throws USBException
+	 */
 	public void close() throws USBException {
 		if (usb_dev_handle <= 0) {
 			throw new USBException("invalid device handle");
@@ -154,6 +172,7 @@ public class Device {
 
 	/**
 	 * Write data to the device using a bulk transfer.<br>
+	 * If reopenOnTimeout is set to true, it may take
 	 * 
 	 * @param out_ep_address
 	 *            endpoint address to write to
@@ -182,6 +201,15 @@ public class Device {
 				out_ep_address, data, length, timeout);
 		if (lenWritten < 0) {
 			if (lenWritten == TIMEOUT_ERROR_CODE) {
+				// try to reopen the device and send the data again
+				if (reopenOnTimeout & !reopenDone) {
+					logger.info("try to reopen");
+					reset();
+					open(configuration, interface_, altinterface);
+					reopenDone = true;
+					return bulkwrite(out_ep_address, data, length, timeout);
+				}
+				reopenDone = false;
 				throw new USBTimeoutException("LibusbWin.usb_bulk_write: "
 						+ LibusbWin.usb_strerror());
 			}
@@ -229,6 +257,19 @@ public class Device {
 				data, size, timeout);
 		if (lenRead < 0) {
 			if (lenRead == TIMEOUT_ERROR_CODE) {
+				if (lenRead == TIMEOUT_ERROR_CODE) {
+					// try to reopen the device and send the data again
+					if (reopenOnTimeout & !reopenDone) {
+						logger.info("try to reopen");
+						reset();
+						open(configuration, interface_, altinterface);
+						reopenDone = true;
+						return bulkwrite(in_ep_address, data, size, timeout);
+					}
+					reopenDone = false;
+					throw new USBTimeoutException("LibusbWin.usb_bulk_write: "
+							+ LibusbWin.usb_strerror());
+				}
 				throw new USBTimeoutException("LibusbWin.usb_bulk_read: "
 						+ LibusbWin.usb_strerror());
 			}
@@ -354,6 +395,28 @@ public class Device {
 	 */
 	public int getMaxPacketSize() {
 		return maxPacketSize;
+	}
+
+	/**
+	 * Before a timeout exception is thrown (after issuing a read or write
+	 * command), the device will try to open the connection and send or receive
+	 * the data again.<br>
+	 * The default value is false.
+	 * 
+	 * @param enable
+	 */
+	public void setReopenOnTimeout(boolean enable) {
+		reopenOnTimeout = enable;
+	}
+
+	/**
+	 * If enabled, the device is reset when first opened. This will only happen
+	 * once.
+	 * 
+	 * @param enable
+	 */
+	public void setResetOnFirstOpen(boolean enable) {
+		resetOnFirstOpen = enable;
 	}
 
 }
