@@ -10,6 +10,12 @@ import ch.ntb.usb.Device;
 import ch.ntb.usb.USB;
 import ch.ntb.usb.USBException;
 
+/**
+ * Represents the Background Debugging Interface of the MPC555 microcontroller.
+ * 
+ * @author schlaepfer
+ * 
+ */
 public class MPC555 {
 
 	private static McdpLogger logger = LogUtil.ch_ntb_mcdp_bdi;
@@ -120,18 +126,42 @@ public class MPC555 {
 	 */
 	private static final int NULL_INDICATION = -1;
 
+	/**
+	 * Maximal number of wordsfor one usb-packet to download (fastDownload).
+	 */
 	private int maxNofWordsFastDownload;
 
+	/**
+	 * Internal state whether the fast download procedure has been started.
+	 */
 	private boolean fastDownloadStarted;
 
+	/**
+	 * The last known state on the freeze signal.
+	 */
 	private boolean targetInDebugMode;
 
+	/**
+	 * Temporary buffer of the data to send.
+	 */
 	private byte[] sendData;
 
+	/**
+	 * Temporary register values (see <code>epilogue</code> and
+	 * <code>prologue</code>).
+	 */
 	private int gpr30, gpr31, ecr;
 
+	/**
+	 * The USB device to connect to.
+	 */
 	private Device device;
 
+	/**
+	 * @param device
+	 *            The USB device to connect to. Before using any methods which
+	 *            communicate with the device, the device must be connected.
+	 */
 	public MPC555(Device device) {
 		targetInDebugMode = false;
 		fastDownloadStarted = false;
@@ -139,6 +169,15 @@ public class MPC555 {
 		sendData = new byte[USB.HIGHSPEED_MAX_BULK_PACKET_SIZE];
 	}
 
+	/**
+	 * Initialize an USB packet.
+	 * 
+	 * @param STYPE
+	 *            the subtype
+	 * @param dataLength
+	 *            length of the data contained in the packet (not the length of
+	 *            the USB packet).
+	 */
 	private void initPacket(byte STYPE, int dataLength) {
 		logger.finest("initPacket(0x" + Integer.toHexString(STYPE) + ", "
 				+ dataLength + ")");
@@ -150,6 +189,15 @@ public class MPC555 {
 		sendData[DataPacket.PACKET_DATA_OFFSET + dataLength] = DataPacket.PACKET_END;
 	}
 
+	/**
+	 * Transmit an USB packet and receive the result.
+	 * 
+	 * @param dataLength
+	 * @return
+	 * @throws USBException
+	 * @throws DispatchException
+	 * @throws BDIException
+	 */
 	private DataPacket transmit(int dataLength) throws USBException,
 			DispatchException, BDIException {
 		// write USB-command
@@ -168,6 +216,14 @@ public class MPC555 {
 		return data;
 	}
 
+	/**
+	 * 
+	 * 
+	 * @param modeBit
+	 * @param controlBit
+	 * @param data
+	 * @param offset
+	 */
 	private void fillPacket(boolean modeBit, boolean controlBit, int data,
 			int offset) {
 
@@ -451,6 +507,19 @@ public class MPC555 {
 	}
 
 	/**
+	 * Update the internal maximal values for the <code>fastDownload</code>
+	 * procedure.
+	 */
+	private void updateMaxValues() {
+		// update the value (now the device should be connected)
+		if (maxNofWordsFastDownload <= 0) {
+			maxNofWordsFastDownload = ((device.getMaxPacketSize() - DataPacket.PACKET_MIN_LENGTH) / BDI_DATA35_LENGTH);
+			logger.finer("update maxNofWordsFastDownload: "
+					+ maxNofWordsFastDownload);
+		}
+	}
+
+	/**
 	 * Fill one USB-Packet with data to download. The maximal number of words is
 	 * defined by <code>maxNofWordsFastDownload</code><br>
 	 * <code>startFastDownload</code> has to be called before to set up the
@@ -470,12 +539,7 @@ public class MPC555 {
 		if (!fastDownloadStarted) {
 			throw new BDIException("start fast download first");
 		}
-		// update the value (now the device should be connected)
-		if (maxNofWordsFastDownload <= 0) {
-			maxNofWordsFastDownload = ((device.getMaxPacketSize() - DataPacket.PACKET_MIN_LENGTH) / BDI_DATA35_LENGTH);
-			logger.finer("update maxNofWordsFastDownload: "
-					+ maxNofWordsFastDownload);
-		}
+		updateMaxValues();
 		// check if data fits into USB-packet
 		if (dataLength > maxNofWordsFastDownload) {
 			throw new BDIException("data larger than maxNofWordsFastDownload: "
@@ -532,6 +596,16 @@ public class MPC555 {
 		transferAndParse35(false, true, 0x0);
 	}
 
+	/**
+	 * Write a value to the specified memory address.
+	 * 
+	 * @param addr
+	 * @param value
+	 * @param size
+	 * @throws USBException
+	 * @throws DispatchException
+	 * @throws BDIException
+	 */
 	public void writeMem(int addr, int value, int size) throws USBException,
 			DispatchException, BDIException {
 		logger.fine("writeMem(0x" + Integer.toHexString(addr) + ", 0x"
@@ -567,6 +641,16 @@ public class MPC555 {
 		}
 	}
 
+	/**
+	 * Read a value from the specified memory address.
+	 * 
+	 * @param addr
+	 * @param size
+	 * @return
+	 * @throws USBException
+	 * @throws DispatchException
+	 * @throws BDIException
+	 */
 	public int readMem(int addr, int size) throws USBException,
 			DispatchException, BDIException {
 		logger.fine("readMem(0x" + Integer.toHexString(addr) + ", " + size
@@ -602,6 +686,16 @@ public class MPC555 {
 		return transferAndParse35(false, false, NOP);
 	}
 
+	/**
+	 * Write a value to the next memory address set up with the
+	 * <code>writeMem</code> command.
+	 * 
+	 * @param value
+	 * @param size
+	 * @throws USBException
+	 * @throws DispatchException
+	 * @throws BDIException
+	 */
 	public void writeMemSeq(int value, int size) throws USBException,
 			DispatchException, BDIException {
 		logger.fine("writeMemSeq(int, int)");
@@ -632,6 +726,16 @@ public class MPC555 {
 		}
 	}
 
+	/**
+	 * Read a value from the next memory address set up with the
+	 * <code>readMem</code> command.
+	 * 
+	 * @param size
+	 * @return
+	 * @throws USBException
+	 * @throws DispatchException
+	 * @throws BDIException
+	 */
 	public int readMemSeq(int size) throws USBException, DispatchException,
 			BDIException {
 		logger.fine("readMemSeq(int)");
@@ -662,6 +766,15 @@ public class MPC555 {
 		return transferAndParse35(false, false, NOP);
 	}
 
+	/**
+	 * Read a General Purpose Register.
+	 * 
+	 * @param gpr
+	 * @return
+	 * @throws USBException
+	 * @throws DispatchException
+	 * @throws BDIException
+	 */
 	public int readGPR(int gpr) throws USBException, DispatchException,
 			BDIException {
 		logger.fine("readGPR(" + gpr + ")");
@@ -682,6 +795,15 @@ public class MPC555 {
 		return transferAndParse35(false, false, NOP);
 	}
 
+	/**
+	 * Write a General Purpose Register.
+	 * 
+	 * @param gpr
+	 * @param value
+	 * @throws USBException
+	 * @throws DispatchException
+	 * @throws BDIException
+	 */
 	public void writeGPR(int gpr, int value) throws USBException,
 			DispatchException, BDIException {
 		logger.fine("writeGPR(" + gpr + ", 0x" + Integer.toHexString(value)
@@ -705,6 +827,15 @@ public class MPC555 {
 		transferAndParse35(false, true, value);
 	}
 
+	/**
+	 * Read a Special Purpose Register.
+	 * 
+	 * @param spr
+	 * @return
+	 * @throws USBException
+	 * @throws DispatchException
+	 * @throws BDIException
+	 */
 	public int readSPR(int spr) throws USBException, DispatchException,
 			BDIException {
 		logger.fine("readSPR(" + spr + ")");
@@ -727,6 +858,15 @@ public class MPC555 {
 		return transferAndParse35(false, false, NOP);
 	}
 
+	/**
+	 * Write a Special Purpose Register.
+	 * 
+	 * @param spr
+	 * @param value
+	 * @throws USBException
+	 * @throws DispatchException
+	 * @throws BDIException
+	 */
 	public void writeSPR(int spr, int value) throws USBException,
 			DispatchException, BDIException {
 		logger.fine("writeSPR(" + spr + ", 0x" + Integer.toHexString(value)
@@ -744,6 +884,14 @@ public class MPC555 {
 		transferAndParse35(false, false, cmd);
 	}
 
+	/**
+	 * Read the Machine Status Register.
+	 * 
+	 * @return
+	 * @throws USBException
+	 * @throws DispatchException
+	 * @throws BDIException
+	 */
 	public int readMSR() throws USBException, DispatchException, BDIException {
 		logger.fine("readMSR()");
 		if (!targetInDebugMode) {
@@ -758,6 +906,14 @@ public class MPC555 {
 		return transferAndParse35(false, false, NOP);
 	}
 
+	/**
+	 * Write the Machine Status Register.
+	 * 
+	 * @param value
+	 * @throws USBException
+	 * @throws DispatchException
+	 * @throws BDIException
+	 */
 	public void writeMSR(int value) throws USBException, DispatchException,
 			BDIException {
 		logger.fine("writeMSR(0x" + Integer.toHexString(value) + ")");
@@ -772,6 +928,16 @@ public class MPC555 {
 		transferAndParse35(false, false, 0x7FC00124);
 	}
 
+	/**
+	 * Read a Floating Point Register.
+	 * 
+	 * @param fpr
+	 * @param tmpMemAddr
+	 * @return
+	 * @throws USBException
+	 * @throws DispatchException
+	 * @throws BDIException
+	 */
 	public long readFPR(int fpr, int tmpMemAddr) throws USBException,
 			DispatchException, BDIException {
 		logger.fine("readFPR(" + fpr + ", 0x" + Integer.toHexString(tmpMemAddr)
@@ -795,6 +961,16 @@ public class MPC555 {
 				+ readMem(tmpMemAddr + 4, 4);
 	}
 
+	/**
+	 * Write a Floating Point Register.
+	 * 
+	 * @param fpr
+	 * @param tmpMemAddr
+	 * @param value
+	 * @throws USBException
+	 * @throws DispatchException
+	 * @throws BDIException
+	 */
 	public void writeFPR(int fpr, int tmpMemAddr, long value)
 			throws USBException, DispatchException, BDIException {
 		logger.fine("writeFPR(" + fpr + ", 0x"
@@ -822,6 +998,14 @@ public class MPC555 {
 		transferAndParse35(false, false, NOP);
 	}
 
+	/**
+	 * Read the Condition Register.
+	 * 
+	 * @return
+	 * @throws USBException
+	 * @throws DispatchException
+	 * @throws BDIException
+	 */
 	public int readCR() throws USBException, DispatchException, BDIException {
 		logger.fine("readCR()");
 		if (!targetInDebugMode) {
@@ -836,6 +1020,14 @@ public class MPC555 {
 		return transferAndParse35(false, false, NOP);
 	}
 
+	/**
+	 * Write the Condition Register.
+	 * 
+	 * @param value
+	 * @throws USBException
+	 * @throws DispatchException
+	 * @throws BDIException
+	 */
 	public void writeCR(int value) throws USBException, DispatchException,
 			BDIException {
 		logger.fine("writeCR(0x" + Integer.toHexString(value) + ")");
@@ -851,6 +1043,14 @@ public class MPC555 {
 		transferAndParse35(false, false, 0x7FCFF120);
 	}
 
+	/**
+	 * Read the Floating-Point Status and Control Register.
+	 * 
+	 * @return
+	 * @throws USBException
+	 * @throws DispatchException
+	 * @throws BDIException
+	 */
 	public int readFPSCR() throws USBException, DispatchException, BDIException {
 		logger.fine("readFPSCR()");
 		if (!targetInDebugMode) {
@@ -881,6 +1081,14 @@ public class MPC555 {
 		return retVal;
 	}
 
+	/**
+	 * Write the Floating-Point Status and Control Register.
+	 * 
+	 * @param value
+	 * @throws USBException
+	 * @throws DispatchException
+	 * @throws BDIException
+	 */
 	public void writeFPSCR(int value) throws USBException, DispatchException,
 			BDIException {
 		logger.fine("writeFPSCR(0x" + Integer.toHexString(value) + ")");
@@ -902,7 +1110,9 @@ public class MPC555 {
 	 * up to date as the target state may have changed meanwhile. To get the up
 	 * to date value use <code>isFreezeAsserted</code> which will issue an USB
 	 * request, read the freeze signal and update the internal value returned by
-	 * this method.
+	 * this method.<br>
+	 * The value is also updated when parsing certain BDI results (see
+	 * <code>parseResult35</code>).
 	 * 
 	 * @return the last known state of the freeze signal
 	 */
@@ -912,7 +1122,7 @@ public class MPC555 {
 
 	/**
 	 * Read the currently stored value of the GPR 30 register.<br>
-	 * This value is updated when entering debug mode (break -> prologue).
+	 * This value is updated when entering debug mode (<code>prologue</code>).
 	 * 
 	 * @return the store value of this register
 	 */
@@ -923,7 +1133,7 @@ public class MPC555 {
 	/**
 	 * Set the value of the GPR 30 register.<br>
 	 * This value is written to the GPR30 register when the microcontroller
-	 * resumes from debug mode (go -> epilogue).
+	 * resumes from debug mode (<code>epilogue</code>).
 	 * 
 	 * @param value
 	 *            value to write to the register
@@ -935,7 +1145,7 @@ public class MPC555 {
 
 	/**
 	 * Read the currently stored value of the GPR 31 register.<br>
-	 * This value is updated when entering debug mode (break -> prologue).
+	 * This value is updated when entering debug mode (<code>prologue</code>).
 	 * 
 	 * @return the store value of this register
 	 */
@@ -946,7 +1156,7 @@ public class MPC555 {
 	/**
 	 * Set the value of the GPR 31 register.<br>
 	 * This value is written to the GPR31 register when the microcontroller
-	 * resumes from debug mode (go -> epilogue).
+	 * resumes from debug mode (<code>epilogue</code>).
 	 * 
 	 * @param value
 	 *            value to write to the register
@@ -958,16 +1168,12 @@ public class MPC555 {
 
 	/**
 	 * @return number of maximal words used in the <code>fastDownload</code>
-	 *         procedure<br>
+	 *         procedure.<br>
 	 *         Note that this procedure only returns a valid value if the device
 	 *         is already connected (the USB bulk transfer size must be known).
 	 */
 	public int getMaxNofWordsFastDownload() {
-		if (maxNofWordsFastDownload <= 0) {
-			maxNofWordsFastDownload = ((device.getMaxPacketSize() - DataPacket.PACKET_MIN_LENGTH) / BDI_DATA35_LENGTH);
-			logger.finer("update maxNofWordsFastDownload: "
-					+ maxNofWordsFastDownload);
-		}
+		updateMaxValues();
 		return maxNofWordsFastDownload;
 	}
 }

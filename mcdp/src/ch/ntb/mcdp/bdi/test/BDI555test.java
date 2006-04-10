@@ -15,26 +15,29 @@ public class BDI555test {
 
 	public static MPC555 bdi;
 
-	// private static void testBdiTransaction() {
-	// // test bdi transaction
-	// DataPacket result = null;
-	// try {
-	// result = BDI555.transfer(false, false, 0x7FD69BA6);
-	// result = BDI555.transfer(false, false, 0x60000000);
-	// } catch (USBException e1) {
-	// // TODO Auto-generated catch block
-	// e1.printStackTrace();
-	// } catch (DispatchException e1) {
-	// // TODO Auto-generated catch block
-	// e1.printStackTrace();
-	// } catch (BDIException e) {
-	// // TODO Auto-generated catch block
-	// e.printStackTrace();
-	// }
-	// if (result != null) {
-	// result.toString();
-	// }
-	// }
+	private static void testBdiTransaction() {
+	/*
+		// test bdi transaction
+		DataPacket result = null;
+		try {
+			// result = bdi.transfer(false, false, 0x00000000);
+			result = bdi.transfer(false, false, 0x7FD69BA6);
+			// result = bdi.transfer(false, false, 0x60000000);
+		} catch (USBException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (DispatchException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (BDIException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if (result != null) {
+			System.out.println(result.toString());
+		}
+	*/
+	}
 
 	private static void reset_target() {
 		try {
@@ -197,9 +200,17 @@ public class BDI555test {
 		}
 	}
 
+	private static void nop() throws USBException, DispatchException,
+			BDIException {
+		// nop
+		System.out.println("nop");
+		//int data = bdi.transferAndParse35(true, true, 0x00000000);
+		//System.out.println("0x" + Integer.toHexString(data));
+	}
+
 	public static void button1() {
-		// System.out.println("testBdiTransaction()");
-		// testBdiTransaction();
+		System.out.println("testBdiTransaction()");
+		testBdiTransaction();
 	}
 
 	public static void button2() {
