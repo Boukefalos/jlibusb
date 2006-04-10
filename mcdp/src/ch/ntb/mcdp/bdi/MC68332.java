@@ -10,6 +10,12 @@ import ch.ntb.usb.Device;
 import ch.ntb.usb.USB;
 import ch.ntb.usb.USBException;
 
+/**
+ * Represents the Background Debugging Interface of the MC68332 microcontroller.
+ * 
+ * @author schlaepfer
+ * 
+ */
 public class MC68332 {
 
 	private static McdpLogger logger = LogUtil.ch_ntb_mcdp_bdi;
@@ -197,36 +203,53 @@ public class MC68332 {
 
 	/**
 	 * Maximal number of words or bytes (1 or 2 bytes) for one usb-packet to
-	 * download (fill) or read (dump). <br>
-	 * Note that no status bit is used. Therefore one data entity is only 16
-	 * bits wide (not 17 bits like normal commands). <br>
-	 * <code>maxNofWordsFastDownload</code> is a multiple of 4 (FILLB/W +
-	 * data).
+	 * download (fill).
 	 */
-	private int maxNofBytesWords;
+	private int maxNofBytesWordsFill;
 
 	/**
-	 * Maximal number of longs (4 bytes) for one usb-packet to download (fill)
-	 * or read (dump).<br>
-	 * Note that no status bit is used. Therefore one data entity is only 16
-	 * bits wide (not 17 bits like normal commands). <br>
-	 * <code>maxNofLongs</code> is a multiple of 6 (FILLW + MS data + LS
-	 * data).
+	 * Maximal number of longs (4 bytes) for one usb-packet to download (fill).<br>
 	 */
-	private int maxNofLongs;
+	private int maxNofLongsFill;
 
+	/**
+	 * Maximal number of words or bytes (1 or 2 bytes) to dump in one
+	 * usb-packet.
+	 */
+	private int maxNofBytesWordsDump;
+
+	/**
+	 * Maximal number of longs (4 bytes) to dump in one usb-packet.
+	 */
+	private int maxNofLongsDump;
+
+	/**
+	 * The last known state on the freeze signal.
+	 */
 	private boolean targetInDebugMode = false;
 
+	/**
+	 * Temporary buffer of the data to send.
+	 */
 	private byte[] sendData;
 
+	/**
+	 * Sizes which are setup up when writing or reading memory data. This values
+	 * are used in <code>fillMem</code> and <code>dumpMem</code>.
+	 */
 	private int readMemSize, writeMemSize;
 
-	private boolean ignoreResult;
-
+	/**
+	 * The USB device to connect to.
+	 */
 	private Device device;
 
+	/**
+	 * @param device
+	 *            The USB device to connect to. Before using any methods which
+	 *            communicate with the device, the device must be connected.
+	 */
 	public MC68332(Device device) {
-		ignoreResult = false;
 		readMemSize = 0;
 		writeMemSize = 0;
 		sendData = new byte[USB.HIGHSPEED_MAX_BULK_PACKET_SIZE];
@@ -279,7 +302,7 @@ public class MC68332 {
 	private void fillPacket(int data, int offset) {
 
 		// refer to CPU32 Reference Manual, Section 7.2.7
-		// bit16 = 0 + 16 bits of data (bit15 .. bit0)
+		// bit16 = 0 + 16 bits of data (MSB .. LSB)
 		sendData[DataPacket.PACKET_DATA_OFFSET + offset] = (byte) ((data >>> 9) & 0x7F);
 		sendData[DataPacket.PACKET_DATA_OFFSET + offset + 1] = (byte) ((data >>> 1) & 0xFF);
 		sendData[DataPacket.PACKET_DATA_OFFSET + offset + 2] = (byte) ((data & 0x01) << 7);
@@ -314,22 +337,16 @@ public class MC68332 {
 	 * @throws USBException
 	 * @throws DispatchException
 	 */
-	private int parseResult17(DataPacket data) throws BDIException,
+	private int parseResult17(DataPacket data, int offset) throws BDIException,
 			USBException, DispatchException {
-		if (data.subtype != STYPE_BDI_17OUT) {
+		if ((data.subtype != STYPE_BDI_17OUT)
+				&& (data.subtype != STYPE_BDI_DUMP_DATA)) {
 			throw new BDIException("wrong subtype: " + data.subtype);
 		}
-		// 16 data bits
-		// fist bit is status control bit
-		if (ignoreResult) {
-			ignoreResult = false;
-			return 0xFFFF;
-		}
-
-		boolean statusControlBit = (data.data[0] & 0x80) > 0;
-		int retValue = (((data.data[0] << 1) & 0xFF) + ((data.data[1] & 0x80) >>> 7)) << 8;
-		retValue += ((data.data[1] << 1) & 0xFF)
-				+ ((data.data[2] & 0x80) >>> 7);
+		boolean statusControlBit = (data.data[0 + offset] & 0x80) > 0;
+		int retValue = (((data.data[0 + offset] << 1) & 0xFF) + ((data.data[1 + offset] & 0x80) >>> 7)) << 8;
+		retValue += ((data.data[1 + offset] << 1) & 0xFF)
+				+ ((data.data[2 + offset] & 0x80) >>> 7);
 
 		if (statusControlBit) {
 			switch (retValue) {
@@ -367,7 +384,7 @@ public class MC68332 {
 	 */
 	private int transferAndParse17(int data) throws USBException,
 			DispatchException, BDIException {
-		return parseResult17(transfer(data));
+		return parseResult17(transfer(data), 0);
 	}
 
 	/**
@@ -398,10 +415,6 @@ public class MC68332 {
 	 * @throws BDIException
 	 */
 	public void break_() throws USBException, DispatchException, BDIException {
-		// FIXME: this may be wrong, but works
-		// ignore the result of the first transaction
-		ignoreResult = true;
-		transferAndParse17(NOP);
 		if (transferAndParse17(NOP) != STATUS_OK) {
 			throw new BDIException("no STATUS_OK received");
 		}
@@ -503,15 +516,23 @@ public class MC68332 {
 		return targetInDebugMode;
 	}
 
+	/**
+	 * Update the internal maximal values for the <code>fill</code> and
+	 * <code>dump</code> commands.
+	 */
 	private void updateMaxValues() {
 		// update the values (now the device should be connected)
-		if ((maxNofLongs <= 0) | (maxNofBytesWords <= 0)) {
-			maxNofLongs = (device.getMaxPacketSize()
-					- DataPacket.PACKET_MIN_LENGTH - 2) / 6;
-			maxNofBytesWords = (device.getMaxPacketSize()
-					- DataPacket.PACKET_MIN_LENGTH - 2) / 4;
-			logger.finer("update maxNofLongs: " + maxNofLongs
-					+ ", maxNofBytesWords: " + maxNofBytesWords);
+		if ((maxNofLongsFill <= 0) | (maxNofBytesWordsFill <= 0)
+				| (maxNofBytesWordsDump <= 0) | (maxNofLongsDump <= 0)) {
+			maxNofBytesWordsDump = (device.getMaxPacketSize()
+					- DataPacket.PACKET_MIN_LENGTH - 3/* NOP */) / 3;
+			maxNofBytesWordsFill = (device.getMaxPacketSize()
+					- DataPacket.PACKET_MIN_LENGTH - 3) / 6;
+			maxNofLongsDump = maxNofBytesWordsFill;
+			maxNofLongsFill = (device.getMaxPacketSize()
+					- DataPacket.PACKET_MIN_LENGTH - 3) / 9;
+			logger.finer("update maxNofLongs: " + maxNofLongsFill
+					+ ", maxNofBytesWords: " + maxNofBytesWordsFill);
 		}
 	}
 
@@ -522,7 +543,7 @@ public class MC68332 {
 	 * <code>MAX_NOF_WORDS_FAST_DOWNLOAD</code> for 1 and 2 byte (word) data.
 	 * For 4 byte (long) data, only half the size of
 	 * <code>MAX_NOF_WORDS_FAST_DOWNLOAD</code> is available as 4 bytes of
-	 * data has to be split in two packets (2 x 2 bytes).<br>
+	 * data has to be split in two packets (2 x 3 bytes).<br>
 	 * Befor using <code>fillMem</code>, <code>writeMem</code> has to be
 	 * called to set up the start address and size.
 	 * 
@@ -544,67 +565,59 @@ public class MC68332 {
 		updateMaxValues();
 		switch (writeMemSize) {
 		case 1:
-			if (dataLength > maxNofBytesWords) {
+			if (dataLength > maxNofBytesWordsFill) {
 				throw new BDIException("data length (" + dataLength
-						+ ") larger than maxNofBytesWords (" + maxNofBytesWords
-						+ ")");
+						+ ") larger than maxNofBytesWords ("
+						+ maxNofBytesWordsFill + ")");
 			}
 			while (currentIndex < dataLength) {
 				// FILLB
-				sendData[DataPacket.PACKET_DATA_OFFSET + currentIndex * 4] = (byte) ((FILLB >>> 8) & 0xFF);
-				sendData[DataPacket.PACKET_DATA_OFFSET + currentIndex * 4 + 1] = (byte) (FILLB & 0xFF);
-				// DATA (address)
-				sendData[DataPacket.PACKET_DATA_OFFSET + currentIndex * 4 + 2] = 0;
-				sendData[DataPacket.PACKET_DATA_OFFSET + currentIndex * 4 + 3] = (byte) (downloadData[currentIndex] & 0xFF);
+				fillPacket(FILLB, currentIndex * 6);
+				// DATA
+				fillPacket(downloadData[currentIndex] & 0xFF,
+						currentIndex * 6 + 3);
 				currentIndex++;
 			}
 			// send NOP to get result of last write
-			sendData[DataPacket.PACKET_DATA_OFFSET + currentIndex * 4] = NOP;
-			sendData[DataPacket.PACKET_DATA_OFFSET + currentIndex * 4 + 1] = NOP;
-			data = transmit(STYPE_BDI_17FILL_BYTE_WORD, dataLength * 4 + 2);
+			fillPacket(NOP, currentIndex * 6);
+			data = transmit(STYPE_BDI_17FILL_BYTE_WORD, dataLength * 6 + 3);
 			break;
 		case 2:
-			if (dataLength > maxNofBytesWords) {
+			if (dataLength > maxNofBytesWordsFill) {
 				throw new BDIException("data length (" + dataLength
-						+ ") larger than maxNofBytesWords (" + maxNofBytesWords
-						+ ")");
+						+ ") larger than maxNofBytesWords ("
+						+ maxNofBytesWordsFill + ")");
 			}
 			while (currentIndex < dataLength) {
 				// FILLW
-				sendData[DataPacket.PACKET_DATA_OFFSET + currentIndex * 4] = (byte) ((FILLW >>> 8) & 0xFF);
-				sendData[DataPacket.PACKET_DATA_OFFSET + currentIndex * 4 + 1] = (byte) (FILLW & 0xFF);
-				// DATA (address)
-				sendData[DataPacket.PACKET_DATA_OFFSET + currentIndex * 4 + 2] = (byte) ((downloadData[currentIndex] >>> 8) & 0xFF);
-				sendData[DataPacket.PACKET_DATA_OFFSET + currentIndex * 4 + 3] = (byte) (downloadData[currentIndex] & 0xFF);
+				fillPacket(FILLW, currentIndex * 6);
+				// DATA
+				fillPacket(downloadData[currentIndex], currentIndex * 6 + 3);
 				currentIndex++;
 			}
 			// send NOP to get result of last write
-			sendData[DataPacket.PACKET_DATA_OFFSET + currentIndex * 4] = NOP;
-			sendData[DataPacket.PACKET_DATA_OFFSET + currentIndex * 4 + 1] = NOP;
-			data = transmit(STYPE_BDI_17FILL_BYTE_WORD, dataLength * 4 + 2);
+			fillPacket(NOP, currentIndex * 6);
+			data = transmit(STYPE_BDI_17FILL_BYTE_WORD, dataLength * 6 + 3);
 			break;
 		case 4:
-			if (dataLength > (maxNofLongs)) {
+			if (dataLength > (maxNofLongsFill)) {
 				throw new BDIException("data length (" + dataLength
-						+ ") larger than maxNofLongs (" + maxNofLongs + ")");
+						+ ") larger than maxNofLongs (" + maxNofLongsFill + ")");
 			}
 			while (currentIndex < dataLength) {
-				// FILL
-				sendData[DataPacket.PACKET_DATA_OFFSET + currentIndex * 6] = (byte) ((FILLL >>> 8) & 0xFF);
-				sendData[DataPacket.PACKET_DATA_OFFSET + currentIndex * 6 + 1] = (byte) (FILLL & 0xFF);
+				// FILLL
+				fillPacket(FILLL, currentIndex * 9);
 				// MS data
-				sendData[DataPacket.PACKET_DATA_OFFSET + currentIndex * 6 + 2] = (byte) ((downloadData[currentIndex] >>> 24) & 0xFF);
-				sendData[DataPacket.PACKET_DATA_OFFSET + currentIndex * 6 + 3] = (byte) ((downloadData[currentIndex] >>> 16) & 0xFF);
+				fillPacket((downloadData[currentIndex] >>> 16),
+						currentIndex * 9 + 3);
 				// LS data
-				sendData[DataPacket.PACKET_DATA_OFFSET + currentIndex * 6 + 4] = (byte) ((downloadData[currentIndex] >>> 8) & 0xFF);
-				sendData[DataPacket.PACKET_DATA_OFFSET + currentIndex * 6 + 5] = (byte) (downloadData[currentIndex] & 0xFF);
+				fillPacket(downloadData[currentIndex], currentIndex * 9 + 6);
 				currentIndex++;
 			}
 			// send NOP to get result of last write
-			sendData[DataPacket.PACKET_DATA_OFFSET + currentIndex * 6] = NOP;
-			sendData[DataPacket.PACKET_DATA_OFFSET + currentIndex * 6 + 1] = NOP;
-			data = transmit(STYPE_BDI_17FILL_LONG, dataLength * 6 + 2);
-			logger.info("FILL: Transmit: " + (dataLength * 6 + 2));
+			fillPacket(NOP, currentIndex * 9);
+			data = transmit(STYPE_BDI_17FILL_LONG, dataLength * 9 + 3);
+			logger.fine("FILL: Transmit: " + (dataLength * 9 + 3));
 			break;
 		default:
 			throw new BDIException("invalid writeMemSize: " + writeMemSize);
@@ -616,11 +629,16 @@ public class MC68332 {
 
 		switch (data.subtype) {
 		case STYPE_BDI_SUCCESS_FD:
-
 			break;
 		case STYPE_BDI_ERROR_FD_LENGTH:
+			System.out.println("0x"
+					+ Integer.toHexString(((data.data[0] & 0xff) << 8)
+							+ (data.data[1] & 0xff)));
 			throw new BDIException("length smaller than BDI_DATA17_LENGTH");
 		case STYPE_BDI_ERROR_FD_GENERAL:
+			System.out.println("0x"
+					+ Integer.toHexString(((data.data[0] & 0xff) << 8)
+							+ (data.data[1] & 0xff)));
 			throw new BDIException("general fast download error");
 		default:
 			throw new BDIException("wrong subtype: " + data.subtype);
@@ -644,48 +662,40 @@ public class MC68332 {
 	public int[] dumpMem(int nofData) throws USBException, DispatchException,
 			BDIException {
 
-		// TODO: adjust MAX_NOF_XX_DUMP
 		updateMaxValues();
 		int dataSize;
 		switch (readMemSize) {
 		case 1:
-			if (nofData > maxNofBytesWords)
-				nofData = maxNofBytesWords;
+			if (nofData > maxNofBytesWordsFill)
+				nofData = maxNofBytesWordsFill;
 			// fill the packet with {DUMPB} + 1 NOP at the end
 			int i;
 			for (i = 0; i < nofData; i++) {
-				sendData[DataPacket.PACKET_DATA_OFFSET + i * 2] = (byte) ((DUMPB >>> 8) & 0xFF);
-				sendData[DataPacket.PACKET_DATA_OFFSET + i * 2 + 1] = (byte) (DUMPB & 0xFF);
+				fillPacket(DUMPB, i * 3);
 			}
-			sendData[DataPacket.PACKET_DATA_OFFSET + i * 2] = (byte) ((NOP >>> 8) & 0xFF);
-			sendData[DataPacket.PACKET_DATA_OFFSET + i * 2 + 1] = (byte) (NOP & 0xFF);
-			dataSize = i * 2 + 2;
+			fillPacket(NOP, i * 3);
+			dataSize = i * 3 + 3;
 			break;
 		case 2:
-			if (nofData > maxNofBytesWords)
-				nofData = maxNofBytesWords;
+			if (nofData > maxNofBytesWordsFill)
+				nofData = maxNofBytesWordsFill;
 			// fill the packet with {DUMPW} + 1 NOP at the end
 			for (i = 0; i < nofData; i++) {
-				sendData[DataPacket.PACKET_DATA_OFFSET + i * 2] = (byte) ((DUMPW >>> 8) & 0xFF);
-				sendData[DataPacket.PACKET_DATA_OFFSET + i * 2 + 1] = (byte) (DUMPW & 0xFF);
+				fillPacket(DUMPW, i * 3);
 			}
-			sendData[DataPacket.PACKET_DATA_OFFSET + i * 2] = (byte) ((NOP >>> 8) & 0xFF);
-			sendData[DataPacket.PACKET_DATA_OFFSET + i * 2 + 1] = (byte) (NOP & 0xFF);
-			dataSize = i * 2 + 2;
+			fillPacket(NOP, i * 3);
+			dataSize = i * 3 + 3;
 			break;
 		case 4:
-			if (nofData > maxNofLongs)
-				nofData = maxNofLongs;
+			if (nofData > maxNofLongsFill)
+				nofData = maxNofLongsFill;
 			// fill the packet with {DUMPL + NOP} + 1 NOP at the end
 			for (i = 0; i < nofData; i++) {
-				sendData[DataPacket.PACKET_DATA_OFFSET + i * 4] = (byte) ((DUMPL >>> 8) & 0xFF);
-				sendData[DataPacket.PACKET_DATA_OFFSET + i * 4 + 1] = (byte) (DUMPL & 0xFF);
-				sendData[DataPacket.PACKET_DATA_OFFSET + i * 4 + 2] = (byte) ((NOP >>> 8) & 0xFF);
-				sendData[DataPacket.PACKET_DATA_OFFSET + i * 4 + 3] = (byte) (NOP & 0xFF);
+				fillPacket(DUMPL, i * 6);
+				fillPacket(NOP, i * 6 + 3);
 			}
-			sendData[DataPacket.PACKET_DATA_OFFSET + i * 4] = (byte) ((NOP >>> 8) & 0xFF);
-			sendData[DataPacket.PACKET_DATA_OFFSET + i * 4 + 1] = (byte) (NOP & 0xFF);
-			dataSize = i * 4 + 2;
+			fillPacket(NOP, i * 6);
+			dataSize = i * 6 + 3;
 			break;
 		default:
 			throw new BDIException("invalid readMemSize: " + readMemSize);
@@ -693,9 +703,8 @@ public class MC68332 {
 
 		DataPacket res = transmit(STYPE_BDI_17DUMP, dataSize);
 		/*
-		 * The resulting data is not 17 bits wide, but only 16 bits. The status
-		 * bit is checked on the USB-Controller. If an error occurs, a
-		 * STYPE_BDI_DUMP_ERROR packet is returned.
+		 * The status of each transfer is checked on the USB-Controller. If an
+		 * error occurs, a STYPE_BDI_DUMP_ERROR packet is returned.
 		 */
 		if (res == null) {
 			throw new BDIException("no data from device");
@@ -707,31 +716,30 @@ public class MC68332 {
 			switch (readMemSize) {
 			case 1:
 			case 2:
-				result = new int[(res.data.length) / 2];
+				result = new int[(res.data.length) / 3];
 				// MS Result before LS Result
 				int resIndex = 0;
-				while (resIndex * 2 < res.data.length) {
-					result[resIndex] = ((res.data[resIndex * 2] << 8) & 0xFFFF)
-							+ (res.data[resIndex * 2 + 1] & 0xFF);
+				while (resIndex * 3 + 3 < res.data.length) {
+					result[resIndex] = parseResult17(res, resIndex * 3);
 					resIndex++;
 				}
 				return result;
 			case 4:
-				result = new int[(res.data.length) / 4];
+				result = new int[(res.data.length) / 6];
 				// MS Result before LS Result
 				resIndex = 0;
-				while (resIndex * 4 < res.data.length) {
-					result[resIndex] = (res.data[resIndex * 4] << 24)
-							+ ((res.data[resIndex * 4 + 1] << 16) & 0xFFFFFF)
-							+ ((res.data[resIndex * 4 + 2] << 8) & 0xFFFF)
-							+ (res.data[resIndex * 4 + 3] & 0xFF);
+				while (resIndex * 6 + 6 < res.data.length) {
+					// MS Result
+					result[resIndex] = parseResult17(res, resIndex * 6) << 16;
+					// LS Result
+					result[resIndex] += parseResult17(res, resIndex * 6 + 3);
 					resIndex++;
 				}
 				return result;
 			// the default case is handled above
 			}
 		case STYPE_BDI_DUMP_ERROR:
-			// thows BDI exceptions, but not for "Not Ready"
+			// throws BDI exceptions, but not for "Not Ready"
 			throw new BDIException("STYPE_BDI_DUMP_ERROR");
 		default:
 			throw new BDIException("wrong subtype: " + res.subtype);
@@ -1005,29 +1013,53 @@ public class MC68332 {
 
 	/**
 	 * Maximal number of words or bytes (1 or 2 bytes) for one usb-packet to
-	 * download (fill) or read (dump). <br>
-	 * Note that no status bit is used. Therefore one data entity is only 16
-	 * bits wide (not 17 bits like normal commands). <br>
-	 * <code>maxNofWordsFastDownload</code> is a multiple of 4 (FILLB/W +
-	 * data).
+	 * download (fill).<br>
+	 * This method will only return a valid result, if the USB device is
+	 * connected.
 	 * 
 	 * @return
 	 */
-	public int getMaxNofBytesWords() {
-		return maxNofBytesWords;
+	public int getMaxNofBytesWordsFill() {
+		updateMaxValues();
+		return maxNofBytesWordsFill;
 	}
 
 	/**
 	 * Maximal number of longs (4 bytes) for one usb-packet to download (fill)
 	 * or read (dump).<br>
-	 * Note that no status bit is used. Therefore one data entity is only 16
-	 * bits wide (not 17 bits like normal commands). <br>
-	 * <code>maxNofLongs</code> is a multiple of 6 (FILLW + MS data + LS
-	 * data).
+	 * This method will only return a valid result, if the USB device is
+	 * connected.
 	 * 
 	 * @return
 	 */
-	public int getMaxNofLongs() {
-		return maxNofLongs;
+	public int getMaxNofLongsFill() {
+		updateMaxValues();
+		return maxNofLongsFill;
+	}
+
+	/**
+	 * Maximal number of words or bytes (1 or 2 bytes) to dump in one
+	 * usb-packet.<br>
+	 * This method will only return a valid result, if the USB device is
+	 * connected.
+	 * 
+	 * @return
+	 */
+	public int getMaxNofBytesWordsDump() {
+		updateMaxValues();
+		return maxNofBytesWordsDump;
+	}
+
+	/**
+	 * Maximal number of longs (4 bytes) for one usb-packet to download (fill)
+	 * or read (dump).<br>
+	 * This method will only return a valid result, if the USB device is
+	 * connected.
+	 * 
+	 * @return
+	 */
+	public int getMaxNofLongsDump() {
+		updateMaxValues();
+		return maxNofLongsDump;
 	}
 }

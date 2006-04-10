@@ -20,7 +20,7 @@ public class BDI332test {
 		// test bdi transaction
 		DataPacket result = null;
 		try {
-			result = bdi.transfer(0x0C00);
+			result = bdi.transfer(0xaaaa);
 		} catch (USBException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -224,7 +224,7 @@ public class BDI332test {
 		try {
 			logger.info("Data: 0x"
 					+ Integer.toHexString(bdi.readMem(BASE_ADDR, 4)) + " ");
-			result = bdi.dumpMem(bdi.getMaxNofLongs());
+			result = bdi.dumpMem(bdi.getMaxNofLongsDump());
 			StringBuffer sb = new StringBuffer();
 			for (int i = 0; i < result.length; i++) {
 				sb.append("0x" + Integer.toHexString(result[i]) + " ");
@@ -244,19 +244,24 @@ public class BDI332test {
 	}
 
 	public static void button9() {
-		logger.info("not implemented");
-		// try {
-		// bdi.nop();
-		// } catch (USBException e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// } catch (DispatchException e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// } catch (BDIException e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// }
+		logger.info("nop");
+		// test bdi transaction
+		DataPacket result = null;
+		try {
+			result = bdi.transfer(0x0000);
+		} catch (USBException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (DispatchException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (BDIException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if (result != null) {
+			logger.info(result.toString());
+		}
 	}
 
 	public static void button10() {
@@ -266,7 +271,7 @@ public class BDI332test {
 		logger.info("fill");
 		try {
 			bdi.writeMem(BASE_ADDR, 0, 4);
-			int[] data = new int[bdi.getMaxNofLongs()];
+			int[] data = new int[bdi.getMaxNofLongsFill()];
 			for (int i = 0; i < data.length; i++) {
 				data[i] = i;
 			}
@@ -303,7 +308,7 @@ public class BDI332test {
 		try {
 			logger.info("Fill (1 to data.length)");
 			bdi.writeMem(BASE_ADDR, 0, 4);
-			int[] data = new int[bdi.getMaxNofLongs()];
+			int[] data = new int[bdi.getMaxNofLongsFill()];
 			for (int i = 0; i < data.length; i++) {
 				data[i] = i + 1;
 			}
@@ -319,7 +324,7 @@ public class BDI332test {
 			logger.info((LENGTH + 1) + " bytes written");
 			logger.info("dump data");
 			int firstInt = bdi.readMem(BASE_ADDR, 4);
-			int[] result = bdi.dumpMem(bdi.getMaxNofLongs());
+			int[] result = bdi.dumpMem(bdi.getMaxNofLongsDump());
 			StringBuffer sb = new StringBuffer();
 			for (int i = 0; i < result.length; i++) {
 				sb.append("0x" + Integer.toHexString(result[i]) + " ");
@@ -343,7 +348,7 @@ public class BDI332test {
 		try {
 			logger.info("initialize data");
 			bdi.writeMem(BASE_ADDR, FIRST_VAL, 4);
-			int[] data = new int[bdi.getMaxNofLongs()];
+			int[] data = new int[bdi.getMaxNofLongsFill()];
 			for (int i = 0; i < data.length; i++) {
 				data[i] = 5;
 			}
@@ -366,7 +371,7 @@ public class BDI332test {
 			}
 			logger.fine("Compare first 0x" + Integer.toHexString(firstResult)
 					+ " == 0x" + Integer.toHexString(FIRST_VAL));
-			int[] result = bdi.dumpMem(bdi.getMaxNofLongs());
+			int[] result = bdi.dumpMem(bdi.getMaxNofLongsDump());
 			for (int i = 0; i < result.length; i++) {
 				logger.fine("Compare " + i + ": 0x"
 						+ Integer.toHexString(result[i]));
@@ -392,7 +397,7 @@ public class BDI332test {
 		logger.info("write data");
 		try {
 			bdi.writeMem(BASE_ADDR, FIRST_VAL, 4);
-			int[] data = new int[bdi.getMaxNofLongs()];
+			int[] data = new int[bdi.getMaxNofLongsFill()];
 			for (int i = 0; i < data.length; i++) {
 				data[i] = i;
 			}
@@ -407,7 +412,7 @@ public class BDI332test {
 			}
 			logger.fine("Compare first 0x" + Integer.toHexString(firstResult)
 					+ " == 0x" + Integer.toHexString(FIRST_VAL));
-			int[] result = bdi.dumpMem(bdi.getMaxNofLongs());
+			int[] result = bdi.dumpMem(bdi.getMaxNofLongsFill());
 			for (int i = 0; i < result.length; i++) {
 				if (data[i] != result[i]) {
 					logger.warning("Error at " + i + ": 0x"
@@ -450,28 +455,28 @@ public class BDI332test {
 	public static void button16() {
 		final int BASE_ADDR = 0x105624;
 		final int DATA = 0x00ff00ff;
-		final int OFFSET = (bdi.getMaxNofLongs() - 2) * 4;
+		final int OFFSET = (bdi.getMaxNofLongsFill() - 2) * 4;
 		final int LENGTH = 0x04;
-		final int DUMP_BASE = BASE_ADDR + (bdi.getMaxNofLongs() / 2) * 4;
+		final int DUMP_BASE = BASE_ADDR + (bdi.getMaxNofLongsFill() / 2) * 4;
 
 		try {
 			logger.info("REPLACE at the end");
 			logger.info("Fill first");
 			bdi.writeMem(BASE_ADDR, 0, 4);
-			int[] data = new int[bdi.getMaxNofLongs()];
+			int[] data = new int[bdi.getMaxNofLongsFill()];
 			for (int i = 0; i < data.length; i++) {
 				data[i] = i + 1;
 			}
 			bdi.fillMem(data, data.length);
 			logger.info("Fill second");
-			bdi.writeMem(BASE_ADDR + (bdi.getMaxNofLongs() + 1) * 4, 0, 4);
+			bdi.writeMem(BASE_ADDR + (bdi.getMaxNofLongsFill() + 1) * 4, 0, 4);
 			for (int i = 0; i < data.length; i++) {
-				data[i] = bdi.getMaxNofLongs() + i + 2;
+				data[i] = bdi.getMaxNofLongsFill() + i + 2;
 			}
 			bdi.fillMem(data, data.length);
 			logger.info("Dump from base: 0x" + Integer.toHexString(DUMP_BASE));
 			int firstInt = bdi.readMem(DUMP_BASE, 4);
-			int[] result = bdi.dumpMem(bdi.getMaxNofLongs());
+			int[] result = bdi.dumpMem(bdi.getMaxNofLongsFill());
 			StringBuffer sb = new StringBuffer();
 			for (int i = 0; i < result.length; i++) {
 				sb.append("0x" + Integer.toHexString(result[i]) + " ");
@@ -491,7 +496,7 @@ public class BDI332test {
 			logger.info("dump data from base: 0x"
 					+ Integer.toHexString(DUMP_BASE));
 			firstInt = bdi.readMem(DUMP_BASE, 4);
-			result = bdi.dumpMem(bdi.getMaxNofLongs());
+			result = bdi.dumpMem(bdi.getMaxNofLongsFill());
 			sb = new StringBuffer();
 			for (int i = 0; i < result.length; i++) {
 				sb.append("0x" + Integer.toHexString(result[i]) + " ");
@@ -556,9 +561,9 @@ public class BDI332test {
 			DispatchException, BDIException {
 		int dumpSize = 0;
 		if (size > 2) {
-			dumpSize = bdi.getMaxNofLongs();
+			dumpSize = bdi.getMaxNofLongsFill();
 		} else {
-			dumpSize = bdi.getMaxNofBytesWords();
+			dumpSize = bdi.getMaxNofBytesWordsFill();
 		}
 		logger.info("read " + size + " byte(s) at 0x"
 				+ Integer.toHexString(baseAddr) + ", value: "
@@ -575,9 +580,9 @@ public class BDI332test {
 			DispatchException, BDIException {
 		int fillSize = 0;
 		if (size > 2) {
-			fillSize = bdi.getMaxNofLongs();
+			fillSize = bdi.getMaxNofLongsFill();
 		} else {
-			fillSize = bdi.getMaxNofBytesWords();
+			fillSize = bdi.getMaxNofBytesWordsFill();
 		}
 		int[] data = new int[fillSize];
 		for (int i = 0; i < data.length; i++) {
@@ -592,7 +597,7 @@ public class BDI332test {
 	public static void button18() {
 		final int BASE_ADDR = 0x105624;
 
-		int[] data = new int[bdi.getMaxNofBytesWords()];
+		int[] data = new int[bdi.getMaxNofBytesWordsFill()];
 		for (int i = 0; i < data.length; i++) {
 			data[i] = i;
 		}
