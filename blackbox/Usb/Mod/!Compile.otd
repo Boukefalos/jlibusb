@@ -4,6 +4,7 @@
 	UsbBDI332
 	UsbBDI555
 	UsbTargLog
+	UsbUtils
 ¿¿E
 
 ¿¿CDevDebug.UnloadThis
@@ -12,4 +13,5 @@
 	UsbBDI332
 	UsbBDI
 	UsbBDIDll
+	UsbUtils
 	¿¿E
