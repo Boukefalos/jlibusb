@@ -1,5 +1,5 @@
 MODULE UsbUtils;
-IMPORT WinApi, Strings, Log := StdLog;
+IMPORT SYSTEM, WinApi, Strings, ComTools, Log := StdLog;
 
 	CONST
 		HK_LM_JRE_Key = "SOFTWARE\javaSoft\Java Runtime Environment";
@@ -73,9 +73,14 @@ IMPORT WinApi, Strings, Log := StdLog;
 	PROCEDURE CheckAndSetPath*;
 		CONST
 			PATH_Pattern = "\bin\client";
+
+			SMTO_ABORTIFHUNG = {1} (* 2 in C *);
+			HWND_BROADCAST = 0FFFFH;
+
 		VAR
 			jreHome, regValue, tmpRegValue: ARRAY 2048 OF SHORTCHAR;
-			pos: INTEGER; noUserPathValue, success, found: BOOLEAN;
+			pos, result: INTEGER; noUserPathValue, success, found: BOOLEAN;
+			environment: WinApi.PtrSTR;
 	BEGIN
 		(* get jre home path *)
 		IF ~RegLMQuery(HK_LM_JRE_Key, HK_LM_JRE_CurrentVersion_value, tmpRegValue) 	(* e.g. "1.5" *) THEN
@@ -111,6 +116,12 @@ IMPORT WinApi, Strings, Log := StdLog;
 			ELSE
 				Log.String("UsbUtils: Error on CreateKey with value " + tmpRegValue); Log.Ln;
 			END;
+			(* Notify windows about Environment Change (if this is not done, the changes will only take effect after reboot) *)
+			Log.String("Updating Environment - this may take some seconds..."); Log.Ln;
+			environment := ComTools.NewSString("Environment");
+			result := WinApi.SendMessageTimeout(HWND_BROADCAST, WinApi.WM_SETTINGCHANGE, 0,
+													SYSTEM.VAL(INTEGER, environment), SMTO_ABORTIFHUNG, 2000, result);
+			Log.String("Please restart Blackbox"); Log.Ln;
 		ELSE
 			Log.String("the PATH user variable " + regValue + " is already set"); Log.Ln;
 		END
