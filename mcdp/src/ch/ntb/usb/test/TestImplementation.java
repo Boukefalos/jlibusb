@@ -69,7 +69,8 @@ public class TestImplementation {
 	static void write(byte[] data, int length) {
 		int lenWritten = 0;
 		try {
-			lenWritten = dev.bulkwrite(OUT_ENDPOINT, data, length, TIMEOUT);
+			lenWritten = dev.bulkwrite(OUT_ENDPOINT, data, length, TIMEOUT,
+					false);
 			StringBuffer sb = new StringBuffer("write_bulkdata: " + lenWritten
 					+ " Bytes sent: ");
 			for (int i = 0; i < lenWritten; i++) {
@@ -86,7 +87,7 @@ public class TestImplementation {
 		int lenRead = 0;
 		try {
 			lenRead = dev.bulkread(IN_ENDPOINT, data, dev.getMaxPacketSize(),
-					TIMEOUT);
+					TIMEOUT, false);
 			StringBuffer sb = new StringBuffer("read_bulkdata: " + lenRead
 					+ " Bytes received: Data: ");
 			for (int i = 0; i < lenRead; i++) {

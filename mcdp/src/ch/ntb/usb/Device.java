@@ -24,11 +24,9 @@ public class Device {
 
 	private int usb_dev_handle;
 
-	private boolean reopenOnTimeout, reopenDone, resetOnFirstOpen, resetDone;
+	private boolean resetOnFirstOpen, resetDone;
 
 	protected Device(short idVendor, short idProduct) {
-		reopenOnTimeout = false;
-		reopenDone = false;
 		resetOnFirstOpen = false;
 		resetDone = false;
 		maxPacketSize = -1;
@@ -172,7 +170,6 @@ public class Device {
 
 	/**
 	 * Write data to the device using a bulk transfer.<br>
-	 * If reopenOnTimeout is set to true, it may take
 	 * 
 	 * @param out_ep_address
 	 *            endpoint address to write to
@@ -183,11 +180,14 @@ public class Device {
 	 * @param timeout
 	 *            amount of time in ms the device will try to send the data
 	 *            until a timeout exception is thrown
+	 * @param reopenOnTimeout
+	 *            if set to true, the device will try to open the connection and
+	 *            send the data again before a timeout exception is thrown
 	 * @return the actual number of bytes written
 	 * @throws USBException
 	 */
 	public int bulkwrite(int out_ep_address, byte[] data, int length,
-			int timeout) throws USBException {
+			int timeout, boolean reopenOnTimeout) throws USBException {
 		if (usb_dev_handle <= 0) {
 			throw new USBException("invalid device handle");
 		}
@@ -202,14 +202,13 @@ public class Device {
 		if (lenWritten < 0) {
 			if (lenWritten == TIMEOUT_ERROR_CODE) {
 				// try to reopen the device and send the data again
-				if (reopenOnTimeout & !reopenDone) {
+				if (reopenOnTimeout) {
 					logger.info("try to reopen");
 					reset();
 					open(configuration, interface_, altinterface);
-					reopenDone = true;
-					return bulkwrite(out_ep_address, data, length, timeout);
+					return bulkwrite(out_ep_address, data, length, timeout,
+							false);
 				}
-				reopenDone = false;
 				throw new USBTimeoutException("LibusbWin.usb_bulk_write: "
 						+ LibusbWin.usb_strerror());
 			}
@@ -230,6 +229,8 @@ public class Device {
 	}
 
 	/**
+	 * Read data from the device using a bulk transfer.<br>
+	 * 
 	 * @param in_ep_address
 	 *            endpoint address to read from
 	 * @param data
@@ -239,11 +240,14 @@ public class Device {
 	 * @param timeout
 	 *            amount of time in ms the device will try to receive data until
 	 *            a timeout exception is thrown
+	 * @param reopenOnTimeout
+	 *            if set to true, the device will try to open the connection and
+	 *            receive the data again before a timeout exception is thrown
 	 * @return the actual number of bytes read
 	 * @throws USBException
 	 */
-	public int bulkread(int in_ep_address, byte[] data, int size, int timeout)
-			throws USBException {
+	public int bulkread(int in_ep_address, byte[] data, int size, int timeout,
+			boolean reopenOnTimeout) throws USBException {
 		if (usb_dev_handle <= 0) {
 			throw new USBException("invalid device handle");
 		}
@@ -259,14 +263,13 @@ public class Device {
 			if (lenRead == TIMEOUT_ERROR_CODE) {
 				if (lenRead == TIMEOUT_ERROR_CODE) {
 					// try to reopen the device and send the data again
-					if (reopenOnTimeout & !reopenDone) {
+					if (reopenOnTimeout) {
 						logger.info("try to reopen");
 						reset();
 						open(configuration, interface_, altinterface);
-						reopenDone = true;
-						return bulkwrite(in_ep_address, data, size, timeout);
+						return bulkwrite(in_ep_address, data, size, timeout,
+								false);
 					}
-					reopenDone = false;
 					throw new USBTimeoutException("LibusbWin.usb_bulk_write: "
 							+ LibusbWin.usb_strerror());
 				}
@@ -395,18 +398,6 @@ public class Device {
 	 */
 	public int getMaxPacketSize() {
 		return maxPacketSize;
-	}
-
-	/**
-	 * Before a timeout exception is thrown (after issuing a read or write
-	 * command), the device will try to open the connection and send or receive
-	 * the data again.<br>
-	 * The default value is false.
-	 * 
-	 * @param enable
-	 */
-	public void setReopenOnTimeout(boolean enable) {
-		reopenOnTimeout = enable;
 	}
 
 	/**

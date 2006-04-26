@@ -32,7 +32,6 @@ public class USBDevice {
 
 	static {
 		dev = USB.getDevice(IdVendor, IdProduct);
-		dev.setReopenOnTimeout(true);
 		dev.setResetOnFirstOpen(true);
 	}
 
@@ -49,19 +48,19 @@ public class USBDevice {
 	}
 
 	public static void write_BDI(byte[] data, int length) throws USBException {
-		dev.bulkwrite(OUT_Endpoint_BDI, data, length, BDI_Timeout);
+		dev.bulkwrite(OUT_Endpoint_BDI, data, length, BDI_Timeout, true);
 	}
 
 	public static int read_BDI(byte[] data, int size) throws USBException {
-		return dev.bulkread(IN_Endpoint_BDI, data, size, BDI_Timeout);
+		return dev.bulkread(IN_Endpoint_BDI, data, size, BDI_Timeout, true);
 	}
 
 	public static void write_UART(byte[] data, int length) throws USBException {
-		dev.bulkwrite(OUT_Endpoint_UART, data, length, UART_Timeout);
+		dev.bulkwrite(OUT_Endpoint_UART, data, length, UART_Timeout, false);
 	}
 
 	public static int read_UART(byte[] data, int size) throws USBException {
-		return dev.bulkread(IN_Endpoint_UART, data, size, UART_Timeout);
+		return dev.bulkread(IN_Endpoint_UART, data, size, UART_Timeout, false);
 	}
 
 	public static int getMaxPacketSize() {
