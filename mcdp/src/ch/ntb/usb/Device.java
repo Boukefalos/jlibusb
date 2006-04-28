@@ -126,6 +126,10 @@ public class Device {
 			logger.info("reset on first open");
 			resetDone = true;
 			reset();
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+			}
 			open(configuration, interface_, altinterface);
 		}
 	}
