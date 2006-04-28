@@ -23,10 +23,11 @@ MODULE UsbBDI;
 		MAX_UART_DATA_LENGTH* = BDI.MAX_UART_DATA_LENGTH;
 
 	CONST
-		PATH_SEPERATOR = "\";
-		JAR_FILE = "usbpdi.jar";
-		JAR_LOCATION = "Usb" + PATH_SEPERATOR + "Rsrc";
-		CLASSPATH = JAR_LOCATION + PATH_SEPERATOR + JAR_FILE;
+		PATH_SEPARATOR = "\";
+		ARG_SEPARATOR = ";";
+		JAR_FILE_USB = "usb.jar";
+		JAR_FILE_BDI = "usbpdi.jar";
+		JAR_LOCATION = "Usb" + PATH_SEPARATOR + "Rsrc";
 
 	TYPE
 		StdReaderWriter = POINTER TO ABSTRACT RECORD (Services.Action)
@@ -377,9 +378,9 @@ MODULE UsbBDI;
 		args := WinApi.CommandLineToArgvW(cmdLinePtr, nofArgs);
 
 		n := LEN(args[0]$);
-		REPEAT	DEC(n)	UNTIL (args[0][n] = PATH_SEPERATOR) OR (n <= 0); 	args[0][n] := nul;
+		REPEAT	DEC(n)	UNTIL (args[0][n] = PATH_SEPARATOR) OR (n <= 0); 	args[0][n] := nul;
 
-		sysStartUpLocator := HostFiles.NewLocator(args[0]$); 	args[0][n] := PATH_SEPERATOR;
+		sysStartUpLocator := HostFiles.NewLocator(args[0]$); 	args[0][n] := PATH_SEPARATOR;
 		sysStartUpHostLoc := sysStartUpLocator(HostFiles.Locator);
 		FOR i := 0 TO LEN(sysStartUpHostLoc.path$) DO
 			startupPath[i] := SYS.VAL(SHORTCHAR, sysStartUpHostLoc.path[i]);
@@ -408,16 +409,22 @@ MODULE UsbBDI;
 			IF ~jvmCreated THEN
 				(* Check for existence of jar-file (whether in user of system directory) *)
 				GetUserStartUpPath(startupPath);
-				IF ~CheckIfFileExists(startupPath + PATH_SEPERATOR + JAR_LOCATION, JAR_FILE) THEN
+				IF ~CheckIfFileExists(startupPath + PATH_SEPARATOR + JAR_LOCATION, JAR_FILE_USB) OR
+						~CheckIfFileExists(startupPath + PATH_SEPARATOR + JAR_LOCATION, JAR_FILE_BDI) THEN
 					GetSystemStartUpPath(startupPath);
-					IF ~CheckIfFileExists(startupPath + PATH_SEPERATOR + JAR_LOCATION, JAR_FILE) THEN
-						Log.String(JAR_FILE + " not found in user or system path; expected in " + JAR_LOCATION); Log.Ln;
+					IF ~CheckIfFileExists(startupPath + PATH_SEPARATOR + JAR_LOCATION, JAR_FILE_USB) OR
+							~CheckIfFileExists(startupPath + PATH_SEPARATOR + JAR_LOCATION, JAR_FILE_BDI) THEN
+						Log.String(JAR_FILE_USB + " or " + JAR_FILE_BDI +
+										" not found in user or system path; expected in " + JAR_LOCATION); Log.Ln;
+						HALT(76);
 					END
 				END;
 				Log.String("Startup Path: " + startupPath); Log.Ln;
-				CreateJVM(startupPath + PATH_SEPERATOR + CLASSPATH);
+				CreateJVM(startupPath + PATH_SEPARATOR + JAR_LOCATION + PATH_SEPARATOR + JAR_FILE_USB +
+									ARG_SEPARATOR + startupPath + PATH_SEPARATOR + JAR_LOCATION + PATH_SEPARATOR +
+									JAR_FILE_BDI);
 				(*
-				CreateJVM("D:\work\USB\eclipse\mcdp\bin\");
+				CreateJVM("D:\work\USB\eclipse\mcdp\jars\usb.jar;D:\work\USB\eclipse\mcdp\jars\usbpdi.jar");
 				*)
 				IF ~Done THEN HALT(78) END;
 				jvmCreated := TRUE;
