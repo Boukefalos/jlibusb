@@ -1,6 +1,19 @@
 package ch.ntb.usb;
 
 public class Usb_Endpoint_Descriptor {
+	public static final int USB_MAXENDPOINTS = 32;
+
+	/* in bEndpointAddress */
+	public static final int USB_ENDPOINT_ADDRESS_MASK = 0x0f;
+	public static final int USB_ENDPOINT_DIR_MASK = 0x80;
+
+	/* in bmAttributes */
+	public static final int USB_ENDPOINT_TYPE_MASK = 0x03;
+	public static final int USB_ENDPOINT_TYPE_CONTROL = 0;
+	public static final int USB_ENDPOINT_TYPE_ISOCHRONOUS = 1;
+	public static final int USB_ENDPOINT_TYPE_BULK = 2;
+	public static final int USB_ENDPOINT_TYPE_INTERRUPT = 3;
+
 	public byte bLength;
 
 	public byte bDescriptorType;

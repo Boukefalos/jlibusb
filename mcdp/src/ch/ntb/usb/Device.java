@@ -135,7 +135,7 @@ public class Device {
 	}
 
 	/**
-	 * Release the claimed interface and close the opened device.
+	 * Release the claimed interface and close the opened device.<br>
 	 * 
 	 * @throws USBException
 	 */
@@ -156,7 +156,8 @@ public class Device {
 
 	/**
 	 * Sends an USB reset to the device. The device handle will no longer be
-	 * valid. To use the device again, <code>open</code> must be called.
+	 * valid. To use the device again, {@link #open(int, int, int)} must be
+	 * called.
 	 * 
 	 * @throws USBException
 	 */
@@ -297,7 +298,7 @@ public class Device {
 	}
 
 	/**
-	 * Claim an interface to send and receive USB data.
+	 * Claim an interface to send and receive USB data.<br>
 	 * 
 	 * @param usb_dev_handle
 	 *            the handle of the device <b>(MUST BE VALID)</b>
@@ -328,7 +329,7 @@ public class Device {
 	}
 
 	/**
-	 * Release a previously claimed interface.
+	 * Release a previously claimed interface.<br>
 	 * 
 	 * @param dev_handle
 	 *            the handle of the device <b>(MUST BE VALID)</b>
@@ -396,7 +397,10 @@ public class Device {
 	 * Returns the maximum packet size in bytes which is allowed to be
 	 * transmitted at once.<br>
 	 * The value is determined by reading the endpoint descriptor(s) when
-	 * opening the device. It is invalid before the device is opened!
+	 * opening the device. It is invalid before the device is opened! Note that
+	 * if some endpoints use different packet sizes the maximum packet size is
+	 * return. This value may be used to determine if a device is opened in
+	 * fullspeed or highspeed mode.
 	 * 
 	 * @return the maximum packet size
 	 */
@@ -405,13 +409,15 @@ public class Device {
 	}
 
 	/**
-	 * If enabled, the device is reset when first opened. This will only happen
-	 * once.
+	 * If enabled, the device is reset when first opened. <br>
+	 * This will only happen once. When the application is started, the device
+	 * state is unknown. If the device is not reset, read or write may result in
+	 * a {@link USBTimeoutException}.
 	 * 
 	 * @param enable
+	 *            true if the device should be reset when first opened
 	 */
 	public void setResetOnFirstOpen(boolean enable) {
 		resetOnFirstOpen = enable;
 	}
-
 }

@@ -1,5 +1,19 @@
 package ch.ntb.usb;
 
+/**
+ * This class represents the Java Native Interface to the LibUsbWin.dll.<br>
+ * <br>
+ * <h1>Project Description</h1>
+ * Java LibUsb-Win32 is a Java wrapper for the LibUsb-Win32 USB library. <a
+ * href="http://libusb-win32.sourceforge.net/">LibUsb-Win32</a> is a port of
+ * the USB library <a href="http://libusb.sourceforge.net/">libusb</a> to the
+ * Windows operating systems. The library allows user space applications to
+ * access any USB device on Windows in a generic way without writing any line of
+ * kernel driver code.
+ * 
+ * @author schlaepfer
+ * 
+ */
 public class LibusbWin {
 
 	// Core

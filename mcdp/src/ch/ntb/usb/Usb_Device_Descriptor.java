@@ -1,6 +1,43 @@
 package ch.ntb.usb;
 
 public class Usb_Device_Descriptor {
+	/*
+	 * Device and/or Interface Class codes
+	 */
+	public static final int USB_CLASS_PER_INTERFACE = 0;
+	public static final int USB_CLASS_AUDIO = 1;
+	public static final int USB_CLASS_COMM = 2;
+	public static final int USB_CLASS_HID = 3;
+	public static final int USB_CLASS_PRINTER = 7;
+	public static final int USB_CLASS_MASS_STORAGE = 8;
+	public static final int USB_CLASS_HUB = 9;
+	public static final int USB_CLASS_DATA = 10;
+	public static final int USB_CLASS_VENDOR_SPEC = 0xff;
+
+	/*
+	 * Descriptor types
+	 */
+	public static final int USB_DT_DEVICE = 0x01;
+	public static final int USB_DT_CONFIG = 0x02;
+	public static final int USB_DT_STRING = 0x03;
+	public static final int USB_DT_INTERFACE = 0x04;
+	public static final int USB_DT_ENDPOINT = 0x05;
+
+	public static final int USB_DT_HID = 0x21;
+	public static final int USB_DT_REPORT = 0x22;
+	public static final int USB_DT_PHYSICAL = 0x23;
+	public static final int USB_DT_HUB = 0x29;
+
+	/*
+	 * Descriptor sizes per descriptor type
+	 */
+	public static final int USB_DT_DEVICE_SIZE = 18;
+	public static final int USB_DT_CONFIG_SIZE = 9;
+	public static final int USB_DT_INTERFACE_SIZE = 9;
+	public static final int USB_DT_ENDPOINT_SIZE = 7;
+	public static final int USB_DT_ENDPOINT_AUDIO_SIZE = 9; /* Audio extension */
+	public static final int USB_DT_HUB_NONVAR_SIZE = 7;
+
 	public byte bLength;
 
 	public byte bDescriptorType;

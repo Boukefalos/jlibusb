@@ -1,6 +1,8 @@
 package ch.ntb.usb;
 
 public class Usb_Interface_Descriptor {
+	public static final int USB_MAXINTERFACES = 32;
+
 	public byte bLength;
 
 	public byte bDescriptorType;

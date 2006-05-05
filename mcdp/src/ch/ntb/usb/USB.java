@@ -32,7 +32,7 @@ public class USB {
 
 	/**
 	 * Create a new device an register it in a device queue or get an already
-	 * created device.
+	 * created device.<br>
 	 * 
 	 * @param idVendor
 	 *            the vendor id of the USB device
@@ -55,7 +55,7 @@ public class USB {
 	}
 
 	/**
-	 * Get an already registered device or null if the device does not exist.
+	 * Get an already registered device or null if the device does not exist.<br>
 	 * 
 	 * @param idVendor
 	 *            the vendor id of the USB device

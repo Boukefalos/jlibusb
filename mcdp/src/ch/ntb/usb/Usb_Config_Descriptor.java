@@ -1,6 +1,8 @@
 package ch.ntb.usb;
 
 public class Usb_Config_Descriptor {
+	public static final int USB_MAXCONFIG = 8;
+
 	public byte bLength;
 
 	public byte bDescriptorType;
