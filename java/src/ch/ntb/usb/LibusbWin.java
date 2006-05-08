@@ -16,6 +16,9 @@ package ch.ntb.usb;
  */
 public class LibusbWin {
 
+	private LibusbWin() {
+	}
+
 	// Core
 	/**
 	 * Just like the name implies, <code>usb_init</code> sets up some internal
@@ -70,7 +73,7 @@ public class LibusbWin {
 	 * 
 	 * @param dev_handle
 	 *            The handle to the device.
-	 * @return
+	 * @return 0 on success or < 0 on error.
 	 */
 	public static native int usb_close(int dev_handle);
 
