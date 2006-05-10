@@ -26,6 +26,8 @@ public class Device {
 
 	private boolean resetOnFirstOpen, resetDone;
 
+	private Usb_Device_Descriptor devDesc;
+
 	protected Device(short idVendor, short idProduct) {
 		resetOnFirstOpen = false;
 		resetDone = false;
@@ -78,10 +80,9 @@ public class Device {
 		while (bus != null) {
 			Usb_Device dev = bus.devices;
 			while (dev != null) {
-				// Usb_Device_Descriptor
-				Usb_Device_Descriptor defDesc = dev.descriptor;
-				if ((defDesc.idVendor == idVendor)
-						&& (defDesc.idProduct == idProduct)) {
+				devDesc = dev.descriptor;
+				if ((devDesc.idVendor == idVendor)
+						&& (devDesc.idProduct == idProduct)) {
 					logger.info("Open device: " + dev.filename);
 					int res = LibusbWin.usb_open(dev);
 					if (res <= 0) {
