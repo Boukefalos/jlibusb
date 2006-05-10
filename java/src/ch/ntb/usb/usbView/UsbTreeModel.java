@@ -267,6 +267,37 @@ public class UsbTreeModel implements TreeModel, TreeSelectionListener {
 			sb.append("\textralen: 0x" + Integer.toHexString(confDesc.extralen)
 					+ "\n");
 			sb.append("\textra: " + confDesc.extra + "\n");
+			// get device handle to retrieve string descriptors
+			Usb_Bus bus = rootBus;
+			while (bus != null) {
+				Usb_Device dev = bus.devices;
+				while (dev != null) {
+					Usb_Config_Descriptor[] tmpConfDesc = dev.config;
+					for (int i = 0; i < tmpConfDesc.length; i++) {
+						if ((tmpConfDesc.equals(confDesc))
+								&& (confDesc.iConfiguration > 0)) {
+							int handle = LibusbWin.usb_open(dev);
+							sb.append("\nString descriptors\n");
+							if (handle <= 0) {
+								sb.append("\terror opening the device\n");
+								break;
+							}
+							String configuration = LibusbWin
+									.usb_get_string_simple(handle,
+											confDesc.iConfiguration);
+							if (configuration == null)
+								configuration = "unable to fetch configuration string";
+							sb.append("\tiConfiguration: " + configuration
+									+ "\n");
+
+							LibusbWin.usb_close(handle);
+
+						}
+					}
+					dev = dev.next;
+				}
+				bus = bus.next;
+			}
 			textArea.setText(sb.toString());
 		} else if (component instanceof Usb_Interface) {
 			Usb_Interface int_ = (Usb_Interface) component;
@@ -302,6 +333,42 @@ public class UsbTreeModel implements TreeModel, TreeSelectionListener {
 			sb.append("\textralen: 0x" + Integer.toHexString(intDesc.extralen)
 					+ "\n");
 			sb.append("\textra: " + intDesc.extra + "\n");
+			// get device handle to retrieve string descriptors
+			Usb_Bus bus = rootBus;
+			while (bus != null) {
+				Usb_Device dev = bus.devices;
+				while (dev != null) {
+					Usb_Config_Descriptor[] confDescs = dev.config;
+					for (int i = 0; i < confDescs.length; i++) {
+						Usb_Interface[] ints = confDescs[i].interface_;
+						for (int j = 0; j < ints.length; j++) {
+							Usb_Interface_Descriptor[] tmpIntDescs = ints[j].altsetting;
+							for (int k = 0; k < ints.length; k++) {
+								if (tmpIntDescs[i].equals(intDesc)
+										&& (intDesc.iInterface > 0)) {
+									int handle = LibusbWin.usb_open(dev);
+									sb.append("\nString descriptors\n");
+									if (handle <= 0) {
+										sb
+												.append("\terror opening the device\n");
+										break;
+									}
+									String interface_ = LibusbWin
+											.usb_get_string_simple(handle,
+													intDesc.iInterface);
+									if (interface_ == null)
+										interface_ = "unable to fetch interface string";
+									sb.append("\tiInterface: " + interface_
+											+ "\n");
+									LibusbWin.usb_close(handle);
+								}
+							}
+						}
+					}
+					dev = dev.next;
+				}
+				bus = bus.next;
+			}
 			textArea.setText(sb.toString());
 		} else if (component instanceof Usb_Endpoint_Descriptor) {
 			Usb_Endpoint_Descriptor epDesc = (Usb_Endpoint_Descriptor) component;

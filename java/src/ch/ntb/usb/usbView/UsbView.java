@@ -1,7 +1,6 @@
 package ch.ntb.usb.usbView;
 
 import java.awt.BorderLayout;
-import java.awt.Event;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -21,7 +20,6 @@ import ch.ntb.usb.Usb_Bus;
 
 public class UsbView extends JFrame {
 
-	private static final int NOF_COLUMS = 20;
 	private static final int APP_WIDTH = 600, APP_HIGHT = 800;
 
 	private JPanel jContentPane = null;
