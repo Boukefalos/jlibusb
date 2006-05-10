@@ -1,7 +1,8 @@
 package ch.ntb.usb;
 
 /**
- * This class represents the Java Native Interface to the LibUsbWin.dll.<br>
+ * This class represents the Java Native Interface to the LibUsbWin.dll which is
+ * (with some exceptions) a one-to-one representation of the libusb API.<br>
  * <br>
  * <h1>Project Description</h1>
  * Java LibUsb-Win32 is a Java wrapper for the LibUsb-Win32 USB library. <a
@@ -9,9 +10,13 @@ package ch.ntb.usb;
  * the USB library <a href="http://libusb.sourceforge.net/">libusb</a> to the
  * Windows operating systems. The library allows user space applications to
  * access any USB device on Windows in a generic way without writing any line of
- * kernel driver code.
+ * kernel driver code.<br>
+ * <br>
+ * The API description of this class has been copied from the <a
+ * href="http://libusb.sourceforge.net/documentation.html">libusb documentation</a>.<br>
  * 
  * @author schlaepfer
+ * @version DLL: 00.02.00
  * 
  */
 public class LibusbWin {
@@ -184,12 +189,10 @@ public class LibusbWin {
 	 *            The handle to the device.
 	 * @param index
 	 * @param langid
-	 * @param buf
-	 * @param buflen
-	 * @return the number of bytes returned in buf or < 0 on error.
+	 * @return the descriptor String or null
 	 */
-	public static native int usb_get_string(int dev_handle, int index,
-			int langid, String buf, int buflen);
+	public static native String usb_get_string(int dev_handle, int index,
+			int langid);
 
 	/**
 	 * <code>usb_get_string_simple</code> is a wrapper around
@@ -199,30 +202,28 @@ public class LibusbWin {
 	 * @param dev_handle
 	 *            The handle to the device.
 	 * @param index
-	 * @param buf
-	 * @param buflen
-	 * @return the number of bytes returned in buf or < 0 on error.
+	 * @return the descriptor String or null
 	 */
-	public static native int usb_get_string_simple(int dev_handle, int index,
-			String buf, int buflen);
+	public static native String usb_get_string_simple(int dev_handle, int index);
 
 	/**
 	 * Retrieves a descriptor from the device identified by the type and index
 	 * of the descriptor from the default control pipe.<br>
 	 * <br>
-	 * See <code>usb_get_descriptor_by_endpoint</code> for a function that
-	 * allows the control endpoint to be specified.
+	 * See {@link #usb_get_descriptor_by_endpoint(int, int, byte, byte, int)}
+	 * for a function that allows the control endpoint to be specified.
 	 * 
 	 * @param dev_handle
 	 *            The handle to the device.
 	 * @param type
 	 * @param index
-	 * @param buf
 	 * @param size
-	 * @return the number of bytes read for the descriptor or < 0 on error.
+	 *            number of charactes which will be retrieved (the length of the
+	 *            resulting String)
+	 * @return the descriptor String or null
 	 */
-	public static native int usb_get_descriptor(int dev_handle, byte type,
-			byte index, String buf, int size);
+	public static native String usb_get_descriptor(int dev_handle, byte type,
+			byte index, int size);
 
 	/**
 	 * Retrieves a descriptor from the device identified by the type and index
@@ -233,12 +234,13 @@ public class LibusbWin {
 	 * @param ep
 	 * @param type
 	 * @param index
-	 * @param buf
 	 * @param size
-	 * @return the number of bytes read for the descriptor or < 0 on error.
+	 *            number of charactes which will be retrieved (the length of the
+	 *            resulting String)
+	 * @return the descriptor String or null
 	 */
-	public static native int usb_get_descriptor_by_endpoint(int dev_handle,
-			int ep, byte type, byte index, String buf, int size);
+	public static native String usb_get_descriptor_by_endpoint(int dev_handle,
+			int ep, byte type, byte index, int size);
 
 	// Bulk Transfers
 	/**

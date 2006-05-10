@@ -1,54 +1,102 @@
 package ch.ntb.usb;
 
-public class Usb_Endpoint_Descriptor {
+/**
+ * Represents the descriptor of a USB endpoint.<br>
+ * Endpoint descriptors are used to describe endpoints other than endpoint zero.
+ * Endpoint zero is always assumed to be a control endpoint and is configured
+ * before any descriptors are even requested. The host will use the information
+ * returned from these descriptors to determine the bandwidth requirements of
+ * the bus.<br>
+ * <br>
+ * The length of the configuration descriptor is
+ * {@link ch.ntb.usb.Usb_Descriptor#USB_DT_ENDPOINT_SIZE} and the type is
+ * {@link ch.ntb.usb.Usb_Descriptor#USB_DT_ENDPOINT}.
+ * 
+ * @author schlaepfer
+ * 
+ */
+public class Usb_Endpoint_Descriptor extends Usb_Descriptor {
+
+	/**
+	 * Maximum number of endpoints
+	 */
 	public static final int USB_MAXENDPOINTS = 32;
 
-	/* in bEndpointAddress */
-	public static final int USB_ENDPOINT_ADDRESS_MASK = 0x0f;
-	public static final int USB_ENDPOINT_DIR_MASK = 0x80;
+	/**
+	 * Endpoint address mask (in bEndpointAddress).
+	 */
+	public static final int USB_ENDPOINT_ADDRESS_MASK = 0x0f,
+			USB_ENDPOINT_DIR_MASK = 0x80;
 
-	/* in bmAttributes */
+	/**
+	 * Endpoint type mask (in bmAttributes).
+	 */
 	public static final int USB_ENDPOINT_TYPE_MASK = 0x03;
-	public static final int USB_ENDPOINT_TYPE_CONTROL = 0;
-	public static final int USB_ENDPOINT_TYPE_ISOCHRONOUS = 1;
-	public static final int USB_ENDPOINT_TYPE_BULK = 2;
-	public static final int USB_ENDPOINT_TYPE_INTERRUPT = 3;
+	
+	/**
+	 * Possible endpoint types (in bmAttributes).
+	 */
+	public static final int USB_ENDPOINT_TYPE_CONTROL = 0,
+			USB_ENDPOINT_TYPE_ISOCHRONOUS = 1, USB_ENDPOINT_TYPE_BULK = 2,
+			USB_ENDPOINT_TYPE_INTERRUPT = 3;
 
-	public byte bLength;
-
-	public byte bDescriptorType;
-
+	/**
+	 * Endpoint Address<br>
+	 * <br>
+	 * Bits 3..0: Endpoint number <br>
+	 * Bits 6..4: Reserved. Set to zero <br>
+	 * Bit 7: Direction. 0 = Out, 1 = In (ignored for control endpoints)<br>
+	 */
 	public byte bEndpointAddress;
 
+	/**
+	 * Bits 1..0: Transfer Type (see <i>USB_ENDPOINT_TYPE_XXX</i>).<br>
+	 * Bits 7..2: Reserved.<br>
+	 * 
+	 * <pre>
+	 * If isochronous endpoint:
+	 * 		Bits 3..2: Synchronisation type
+	 * 			00 = No synchronisation
+	 * 			01 = Asynchronous
+	 * 			10 = Adaptive
+	 * 			11 = Synchronous
+	 * 		Bits 5..4: Usage Type
+	 * 			00 = Data endpoint
+	 * 			01 = Feedback endpoint
+	 * 			10 = Explicit feedback data endpoint
+	 * 			11 = Reserved
+	 * </pre>
+	 */
 	public byte bmAttributes;
 
+	/**
+	 * Maximum packet size this endpoint is capable of sending or receiving
+	 */
 	public short wMaxPacketSize;
 
+	/**
+	 * Intervall for polling endpoint data transfers.<br>
+	 * Value in frame counts. Ignored for Bulk & Control eEndpoints. Isochronous
+	 * endpoints must equal 1 and field may range from 1 to 255 for interrupt
+	 * endpoints.
+	 */
 	public byte bInterval;
 
 	public byte bRefresh;
 
 	public byte bSynchAddress;
 
-	// TODO: Extra descriptors are not interpreted because of their unknown
-	// structure
+	/**
+	 * Extra descriptors are currently not interpreted because of their unknown
+	 * structure.
+	 */
 	public Usb_Endpoint_Descriptor extra; /* Extra descriptors */
+	// TODO
 
 	public int extralen;
 
 	public String toString() {
-		StringBuffer sb = new StringBuffer();
-		sb.append("**Usb_Endpoint_Descriptor**\n");
-		sb.append("\tblenght: " + bLength + "\n");
-		sb.append("\tbDescriptorType: " + bDescriptorType + "\n");
-		sb.append("\tbEndpointAddress: 0x"
-				+ Integer.toHexString(bEndpointAddress & 0xFF) + "\n");
-		sb.append("\tbmAttributes: 0x"
-				+ Integer.toHexString(bmAttributes & 0xFF) + "\n");
-		sb.append("\twMaxPacketSize: " + wMaxPacketSize + "\n");
-		sb.append("\tbInterval: " + bInterval + "\n");
-		sb.append("\tbRefresh: " + bRefresh + "\n");
-		sb.append("\tbSynchAddress: " + bSynchAddress + "\n");
-		return sb.toString();
+		return "Usb_Endpoint_Descriptor bEndpointAddress: 0x"
+				+ Integer.toHexString(bEndpointAddress);
 	}
 }
