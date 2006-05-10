@@ -4,6 +4,7 @@
  * Computer Science Laboratory, inf.ntb.ch
  * Andreas Schläpfer, aschlaepfer@ntb.ch
  * 
+ * Version 00.02.00
  */
 
 #include <jni.h>
@@ -586,51 +587,63 @@ JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbWin_usb_1control_1msg
 /*
  * Class:     ch_ntb_usb_LibusbWin
  * Method:    usb_get_string
- * Signature: (IIILjava/lang/String;I)I
+ * Signature: (III)Ljava/lang/String;
  */
-JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbWin_usb_1get_1string
-  (JNIEnv *env, jobject obj, jint dev_handle, jint index, jint langid, jstring jbuf, jint buflen)
+JNIEXPORT jstring JNICALL Java_ch_ntb_usb_LibusbWin_usb_1get_1string
+  (JNIEnv *env, jobject obj, jint dev_handle, jint index, jint langid)
   {
-	const jchar *buf = env->GetStringChars(jbuf, NULL);
- 	int retVal = usb_get_string((usb_dev_handle *) dev_handle, index, langid, (char *) buf, buflen);
- 	jbuf = env->NewString(buf, buflen);
- 	return retVal;
+	char string[256];
+ 	int retVal = usb_get_string((usb_dev_handle *) dev_handle, index, langid, string, 256);
+ 	if (retVal > 0)
+ 		return env->NewStringUTF(string);
+ 	return 0;
   }
 
 /*
  * Class:     ch_ntb_usb_LibusbWin
  * Method:    usb_get_string_simple
- * Signature: (IILjava/lang/String;I)I
+ * Signature: (II)Ljava/lang/String;
  */
-JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbWin_usb_1get_1string_1simple
-  (JNIEnv *env, jobject obj, jint dev_handle, jint index, jstring jbuf, jint buflen)
+JNIEXPORT jstring JNICALL Java_ch_ntb_usb_LibusbWin_usb_1get_1string_1simple
+  (JNIEnv *env, jobject obj, jint dev_handle, jint index)
   {
-	const jchar *buf = env->GetStringChars(jbuf, NULL);
- 	int retVal = usb_get_string_simple((usb_dev_handle *) dev_handle, index, (char *) buf, buflen);
- 	jbuf = env->NewString(buf, buflen);
- 	return retVal;
+	char string[256];
+ 	int retVal = usb_get_string_simple((usb_dev_handle *) dev_handle, index, string, 256);
+ 	if (retVal > 0)
+ 		return env->NewStringUTF(string);
+ 	return 0;
   }
 
 /*
  * Class:     ch_ntb_usb_LibusbWin
  * Method:    usb_get_descriptor
- * Signature: (IBBLjava/lang/String;I)I
+ * Signature: (IBBI)Ljava/lang/String;
  */
-JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbWin_usb_1get_1descriptor
-  (JNIEnv *env, jobject obj, jint dev_handle, jbyte type, jbyte index, jstring buf, jint size)
+JNIEXPORT jstring JNICALL Java_ch_ntb_usb_LibusbWin_usb_1get_1descriptor
+  (JNIEnv *env, jobject obj, jint dev_handle, jbyte type, jbyte index, jint size)
   {
- 	return usb_get_descriptor((usb_dev_handle *) dev_handle, (unsigned) type, (unsigned) index, buf, size);
+	char *string = (char *) malloc(size * sizeof(char));
+ 	int retVal = usb_get_descriptor((usb_dev_handle *) dev_handle, (unsigned) type,
+ 										(unsigned) index, string, size);
+ 	if (retVal > 0)
+ 		return env->NewStringUTF(string);
+ 	return 0;
   }
 
 /*
  * Class:     ch_ntb_usb_LibusbWin
  * Method:    usb_get_descriptor_by_endpoint
- * Signature: (IIBBLjava/lang/String;I)I
+ * Signature: (IIBBI)Ljava/lang/String;
  */
-JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbWin_usb_1get_1descriptor_1by_1endpoint
-  (JNIEnv *env, jobject obj, jint dev_handle, jint ep, jbyte type, jbyte index, jstring buf, jint size)
+JNIEXPORT jstring JNICALL Java_ch_ntb_usb_LibusbWin_usb_1get_1descriptor_1by_1endpoint
+  (JNIEnv *env, jobject obj, jint dev_handle, jint ep, jbyte type, jbyte index, jint size)
   {
- 	return usb_get_descriptor_by_endpoint((usb_dev_handle *) dev_handle, ep, (unsigned) type, (unsigned) index, buf, size);
+	char *string = (char *) malloc(size * sizeof(char));
+ 	int retVal = usb_get_descriptor_by_endpoint((usb_dev_handle *) dev_handle, ep, (unsigned) type,
+ 												(unsigned) index, string, size);
+ 	if (retVal > 0)
+ 		return env->NewStringUTF(string);
+ 	return 0;
   }
 
 /*

@@ -114,34 +114,34 @@ JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbWin_usb_1control_1msg
 /*
  * Class:     ch_ntb_usb_LibusbWin
  * Method:    usb_get_string
- * Signature: (IIILjava/lang/String;I)I
+ * Signature: (III)Ljava/lang/String;
  */
-JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbWin_usb_1get_1string
-  (JNIEnv *, jobject, jint, jint, jint, jstring, jint);
+JNIEXPORT jstring JNICALL Java_ch_ntb_usb_LibusbWin_usb_1get_1string
+  (JNIEnv *, jobject, jint, jint, jint);
 
 /*
  * Class:     ch_ntb_usb_LibusbWin
  * Method:    usb_get_string_simple
- * Signature: (IILjava/lang/String;I)I
+ * Signature: (II)Ljava/lang/String;
  */
-JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbWin_usb_1get_1string_1simple
-  (JNIEnv *, jobject, jint, jint, jstring, jint);
+JNIEXPORT jstring JNICALL Java_ch_ntb_usb_LibusbWin_usb_1get_1string_1simple
+  (JNIEnv *, jobject, jint, jint);
 
 /*
  * Class:     ch_ntb_usb_LibusbWin
  * Method:    usb_get_descriptor
- * Signature: (IBBLjava/lang/String;I)I
+ * Signature: (IBBI)Ljava/lang/String;
  */
-JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbWin_usb_1get_1descriptor
-  (JNIEnv *, jobject, jint, jbyte, jbyte, jstring, jint);
+JNIEXPORT jstring JNICALL Java_ch_ntb_usb_LibusbWin_usb_1get_1descriptor
+  (JNIEnv *, jobject, jint, jbyte, jbyte, jint);
 
 /*
  * Class:     ch_ntb_usb_LibusbWin
  * Method:    usb_get_descriptor_by_endpoint
- * Signature: (IIBBLjava/lang/String;I)I
+ * Signature: (IIBBI)Ljava/lang/String;
  */
-JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbWin_usb_1get_1descriptor_1by_1endpoint
-  (JNIEnv *, jobject, jint, jint, jbyte, jbyte, jstring, jint);
+JNIEXPORT jstring JNICALL Java_ch_ntb_usb_LibusbWin_usb_1get_1descriptor_1by_1endpoint
+  (JNIEnv *, jobject, jint, jint, jbyte, jbyte, jint);
 
 /*
  * Class:     ch_ntb_usb_LibusbWin
