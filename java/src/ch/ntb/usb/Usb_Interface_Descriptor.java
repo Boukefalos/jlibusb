@@ -20,7 +20,7 @@ public class Usb_Interface_Descriptor extends Usb_Descriptor {
 	public static final int USB_MAXINTERFACES = 32;
 
 	/**
-	 * Number of interface
+	 * Number (identifier) of interface
 	 */
 	public byte bInterfaceNumber;
 

@@ -30,12 +30,12 @@ public class Usb_Descriptor {
 			USB_DT_HUB_NONVAR_SIZE = 7;
 
 	/**
-	 * Size of descriptor in bytes.
+	 * Size of descriptor in bytes
 	 */
 	public byte bLength;
 
 	/**
-	 * Type of descriptor.
+	 * Type of descriptor
 	 */
 	public byte bDescriptorType;
 
