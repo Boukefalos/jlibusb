@@ -7,10 +7,11 @@ import ch.ntb.usb.Device;
 import ch.ntb.usb.USB;
 import ch.ntb.usb.USBException;
 import ch.ntb.usb.Usb_Bus;
+import ch.ntb.usb.logger.LogUtil;
 
 public class TestImplementation {
 
-	private static Logger logger = Logger.getLogger("ch.ntb.usb.test");
+	private static Logger logger = LogUtil.ch_ntb_usb_test;
 
 	static Usb_Bus bus;
 

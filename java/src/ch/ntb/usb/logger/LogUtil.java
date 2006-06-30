@@ -6,11 +6,12 @@ import java.util.logging.Level;
 
 public class LogUtil {
 
-	public static UsbLogger ch_ntb_usb;
+	public static UsbLogger ch_ntb_usb, ch_ntb_usb_test;
 
 	static {
 		// set all loglevels here
 		ch_ntb_usb = getLogger("ch.ntb.usb", LogLevel.OFF);
+		ch_ntb_usb_test = getLogger("ch.ntb.usb.test", LogLevel.ALL);
 	}
 
 	public static void setLevel(UsbLogger logger, Level loglevel) {
