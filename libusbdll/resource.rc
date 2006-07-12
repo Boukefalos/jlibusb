@@ -1,0 +1,8 @@
+#define RC_FILE_TYPE      VFT_DLL
+#define RC_FILE_SUB_TYPE  VFT2_UNKNOWN
+#define RC_PRODUCT_STR    "Java LibUsb-Win32 wrapper - DLL"
+#define RC_FILE_NAME_STR  "LibusbWin.dll"
+
+#include "common.rc"
+
+

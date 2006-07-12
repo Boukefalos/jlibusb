@@ -2,6 +2,7 @@
 #define __USB_H__
 
 #include <stdlib.h>
+#include <windows.h>
 
 /* 
  * 'interface' is defined somewhere in the Windows header files. This macro 
@@ -284,7 +285,10 @@ struct usb_dev_handle;
 typedef struct usb_dev_handle usb_dev_handle;
 
 /* Variables */
-extern struct usb_bus *usb_busses;
+#ifndef __USB_C__
+#define usb_busses usb_get_busses()
+#endif
+
 
 
 #include <poppack.h>
@@ -345,13 +349,27 @@ extern "C" {
 
   #define LIBUSB_HAS_INSTALL_SERVICE_NP 1
   int usb_install_service_np(void);
-
+  void CALLBACK usb_install_service_np_rundll(HWND wnd, HINSTANCE instance,
+                                              LPSTR cmd_line, int cmd_show);
+  
   #define LIBUSB_HAS_UNINSTALL_SERVICE_NP 1
   int usb_uninstall_service_np(void);
+  void CALLBACK usb_uninstall_service_np_rundll(HWND wnd, HINSTANCE instance,
+                                                LPSTR cmd_line, int cmd_show);
 
   #define LIBUSB_HAS_INSTALL_DRIVER_NP 1
   int usb_install_driver_np(const char *inf_file);
-  
+  void CALLBACK usb_install_driver_np_rundll(HWND wnd, HINSTANCE instance,
+                                             LPSTR cmd_line, int cmd_show);
+
+  #define LIBUSB_HAS_TOUCH_INF_FILE_NP 1
+  int usb_touch_inf_file_np(const char *inf_file);
+  void CALLBACK usb_touch_inf_file_np_rundll(HWND wnd, HINSTANCE instance,
+                                             LPSTR cmd_line, int cmd_show);
+
+  #define LIBUSB_HAS_INSTALL_NEEDS_RESTART_NP 1
+  int usb_install_needs_restart_np(void);
+
   const struct usb_version *usb_get_version(void);
 
   int usb_isochronous_setup_async(usb_dev_handle *dev, void **context,
@@ -363,6 +381,8 @@ extern "C" {
 
   int usb_submit_async(void *context, char *bytes, int size);
   int usb_reap_async(void *context, int timeout);
+  int usb_reap_async_nocancel(void *context, int timeout);
+  int usb_cancel_async(void *context);
   int usb_free_async(void **context);
 
 
