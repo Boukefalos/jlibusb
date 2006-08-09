@@ -6,32 +6,29 @@ import java.util.logging.Logger;
 import ch.ntb.usb.Device;
 import ch.ntb.usb.USB;
 import ch.ntb.usb.USBException;
-import ch.ntb.usb.Usb_Bus;
 import ch.ntb.usb.logger.LogUtil;
 
 public class TestImplementation {
 
 	private static Logger logger = LogUtil.ch_ntb_usb_test;
 
-	static Usb_Bus bus;
+	public static String sendData = "0x5b 0x02 0x01 0x00 0x03 0x03 0xf0 0xf0 0x1f";
 
-	static int usb_dev_handle = 0;
+	public static short IdVendor = (short) 0x8235;
 
-	static short IdVendor = 0x04B4;
+	public static short IdProduct = 0x0200;
 
-	static short IdProduct = (short) 0x1004;
+	public static int TIMEOUT = 2000;
 
-	static int TIMEOUT = 1000;
+	public static int CONFIGURATION = 1;
 
-	static int CONFIGURATION = 1;
+	public static int INTERFACE = 0;
 
-	static int INTERFACE = 0;
+	public static int ALTINTERFACE = 0;
 
-	static int ALTINTERFACE = 0;
+	public static int OUT_ENDPOINT = 0x01;
 
-	static int OUT_ENDPOINT = 0x02;
-
-	static int IN_ENDPOINT = 0x86;
+	public static int IN_ENDPOINT = 0x82;
 
 	private static Device dev = null;
 

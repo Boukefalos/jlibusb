@@ -14,7 +14,7 @@ import org.eclipse.swt.widgets.Text;
 public class TestGUI {
 
 	private static final int HEX_WIDTH = 5;
-	private Shell rootShell = null;  //  @jve:decl-index=0:visual-constraint="10,10"
+	private Shell rootShell = null; // @jve:decl-index=0:visual-constraint="10,10"
 	private Group vendorIDGroup = null;
 	private Text vendorID = null;
 	private Group productIDGroup = null;
@@ -45,28 +45,28 @@ public class TestGUI {
 	private Group dataFieldGoup = null;
 	private Text dataField = null;
 	private Button resetButton = null;
-	/**
-	 * This method initializes sShell
-	 */
-	private int parseInt(String s){
-		if (s == "") return 0;
+
+	private int parseInt(String s) {
+		if (s == "")
+			return 0;
 		if (s.indexOf('x') > 0) {
 			// is hex number
-			if (s.length() <= 2){	// exception for "0x"
+			if (s.length() <= 2) { // exception for "0x"
 				return 0;
 			}
-			return Integer.parseInt(s.substring(s.indexOf('x') + 1, s.length()), 16);			
+			return Integer.parseInt(
+					s.substring(s.indexOf('x') + 1, s.length()), 16);
 		} else {
 			// is decimal number
 			return Integer.parseInt(s);
 		}
 	}
-	
-	private byte[] parseByteArray(String s){
+
+	private byte[] parseByteArray(String s) {
 		StringBuffer sb = new StringBuffer();
 		int stringIndex = 0, spaceIndex = 0;
 		String ss;
-		while (stringIndex + 3 < s.length()){
+		while (stringIndex + 3 < s.length()) {
 			ss = s.substring(spaceIndex, spaceIndex + 4);
 			spaceIndex = s.indexOf(' ', stringIndex) + 1;
 			sb.append((char) parseInt(ss));
@@ -74,7 +74,7 @@ public class TestGUI {
 		}
 		return sb.toString().getBytes();
 	}
-	
+
 	private void createSShell() {
 		RowLayout rowLayout = new RowLayout();
 		rowLayout.type = org.eclipse.swt.SWT.VERTICAL;
@@ -85,99 +85,113 @@ public class TestGUI {
 		rootShell.setLayout(rowLayout);
 		createDeviceGroup();
 		createDataGroup();
-		rootShell.setSize(new org.eclipse.swt.graphics.Point(466,315));
+		rootShell.setSize(new org.eclipse.swt.graphics.Point(466, 315));
 	}
 
 	/**
-	 * This method initializes vendorIDGroup	
-	 *
+	 * This method initializes vendorIDGroup
+	 * 
 	 */
 	private void createVendorIDGroup() {
 		vendorIDGroup = new Group(deviceGroup2, SWT.NONE);
 		vendorIDGroup.setText("VendorID");
 		vendorID = new Text(vendorIDGroup, SWT.BORDER | SWT.RIGHT);
-		vendorID.setBounds(new org.eclipse.swt.graphics.Rectangle(7,23,76,19));
-		vendorID.setText("0x8235");
+		vendorID
+				.setBounds(new org.eclipse.swt.graphics.Rectangle(7, 23, 76, 19));
+		vendorID.setText("0x"
+				+ Integer.toHexString(TestImplementation.IdVendor & 0xffff));
 		TestImplementation.IdVendor = (short) parseInt(vendorID.getText());
 		vendorID.addModifyListener(new org.eclipse.swt.events.ModifyListener() {
 			public void modifyText(org.eclipse.swt.events.ModifyEvent e) {
-					TestImplementation.IdVendor = (short) parseInt(vendorID.getText());			
+				TestImplementation.IdVendor = (short) parseInt(vendorID
+						.getText());
 			}
 		});
 	}
 
 	/**
-	 * This method initializes productIDGroup	
-	 *
+	 * This method initializes productIDGroup
+	 * 
 	 */
 	private void createProductIDGroup() {
 		productIDGroup = new Group(deviceGroup2, SWT.NONE);
 		productIDGroup.setText("ProductID");
 		productID = new Text(productIDGroup, SWT.BORDER | SWT.RIGHT);
-		productID.setBounds(new org.eclipse.swt.graphics.Rectangle(4,24,76,19));
-		productID.setText("0x0100");
-		TestImplementation.IdProduct = (short) parseInt(productID.getText());			
-		productID.addModifyListener(new org.eclipse.swt.events.ModifyListener() {
-			public void modifyText(org.eclipse.swt.events.ModifyEvent e) {
-				TestImplementation.IdProduct = (short) parseInt(productID.getText());			
-			}
-		});
+		productID.setBounds(new org.eclipse.swt.graphics.Rectangle(4, 24, 76,
+				19));
+		productID.setText("0x"
+				+ Integer.toHexString(TestImplementation.IdProduct & 0xffff));
+		TestImplementation.IdProduct = (short) parseInt(productID.getText());
+		productID
+				.addModifyListener(new org.eclipse.swt.events.ModifyListener() {
+					public void modifyText(org.eclipse.swt.events.ModifyEvent e) {
+						TestImplementation.IdProduct = (short) parseInt(productID
+								.getText());
+					}
+				});
 	}
 
 	/**
-	 * This method initializes group	
-	 *
+	 * This method initializes group
+	 * 
 	 */
 	private void createGroup() {
 		configGroup = new Group(deviceGroup2, SWT.NONE);
 		configGroup.setText("Configuration");
 		configuration = new Text(configGroup, SWT.BORDER | SWT.RIGHT);
-		configuration.setBounds(new org.eclipse.swt.graphics.Rectangle(4,24,75,19));
-		configuration.setText("1");
-		configuration.addModifyListener(new org.eclipse.swt.events.ModifyListener() {
-			public void modifyText(org.eclipse.swt.events.ModifyEvent e) {
-				TestImplementation.CONFIGURATION = parseInt(configuration.getText());			
-			}
-		});
+		configuration.setBounds(new org.eclipse.swt.graphics.Rectangle(4, 24,
+				75, 19));
+		configuration.setText(Integer
+				.toString(TestImplementation.CONFIGURATION));
+		configuration
+				.addModifyListener(new org.eclipse.swt.events.ModifyListener() {
+					public void modifyText(org.eclipse.swt.events.ModifyEvent e) {
+						TestImplementation.CONFIGURATION = parseInt(configuration
+								.getText());
+					}
+				});
 	}
 
 	/**
-	 * This method initializes group	
-	 *
+	 * This method initializes group
+	 * 
 	 */
 	private void createGroup2() {
 		interfaceGroup = new Group(deviceGroup2, SWT.NONE);
 		interfaceGroup.setText("Interface");
 		interface_ = new Text(interfaceGroup, SWT.BORDER | SWT.RIGHT);
-		interface_.setBounds(new org.eclipse.swt.graphics.Rectangle(4,24,57,19));
-		interface_.setText("0");
-		interface_.addModifyListener(new org.eclipse.swt.events.ModifyListener() {
-			public void modifyText(org.eclipse.swt.events.ModifyEvent e) {
-				TestImplementation.INTERFACE = parseInt(interface_.getText());			
-			}
-		});
+		interface_.setBounds(new org.eclipse.swt.graphics.Rectangle(4, 24, 57,
+				19));
+		interface_.setText(Integer.toString(TestImplementation.INTERFACE));
+		interface_
+				.addModifyListener(new org.eclipse.swt.events.ModifyListener() {
+					public void modifyText(org.eclipse.swt.events.ModifyEvent e) {
+						TestImplementation.INTERFACE = parseInt(interface_
+								.getText());
+					}
+				});
 	}
 
 	/**
-	 * This method initializes group	
-	 *
+	 * This method initializes group
+	 * 
 	 */
 	private void createGroup3() {
 		altIntGroup = new Group(deviceGroup2, SWT.NONE);
 		altIntGroup.setText("Alternative Int");
 		altInt = new Text(altIntGroup, SWT.BORDER | SWT.RIGHT);
 		altInt.setBounds(new Rectangle(4, 24, 76, 19));
-		altInt.setText("0");
+		altInt.setText(Integer.toString(TestImplementation.ALTINTERFACE));
 		altInt.addModifyListener(new org.eclipse.swt.events.ModifyListener() {
 			public void modifyText(org.eclipse.swt.events.ModifyEvent e) {
-				TestImplementation.ALTINTERFACE = parseInt(altInt.getText());			
+				TestImplementation.ALTINTERFACE = parseInt(altInt.getText());
 			}
 		});
 	}
 
 	/**
-	 * This method initializes deviceGroup	
-	 *
+	 * This method initializes deviceGroup
+	 * 
 	 */
 	private void createDeviceGroup() {
 		RowLayout rowLayout1 = new RowLayout();
@@ -191,8 +205,8 @@ public class TestGUI {
 	}
 
 	/**
-	 * This method initializes endpointGroup	
-	 *
+	 * This method initializes endpointGroup
+	 * 
 	 */
 	private void createEndpointGroup() {
 		endpointGroup = new Group(devComp, SWT.NONE);
@@ -203,8 +217,8 @@ public class TestGUI {
 	}
 
 	/**
-	 * This method initializes deviceGroup2	
-	 *
+	 * This method initializes deviceGroup2
+	 * 
 	 */
 	private void createDeviceGroup2() {
 		deviceGroup2 = new Group(deviceGroup, SWT.NONE);
@@ -217,59 +231,62 @@ public class TestGUI {
 	}
 
 	/**
-	 * This method initializes group	
-	 *
+	 * This method initializes group
+	 * 
 	 */
 	private void createGroup4() {
 		outEPGroup = new Group(endpointGroup, SWT.NONE);
 		outEPGroup.setText("OUT EP");
 		outEP = new Text(outEPGroup, SWT.BORDER | SWT.RIGHT);
-		outEP.setBounds(new org.eclipse.swt.graphics.Rectangle(4,24,46,19));
-		outEP.setText("0x02");
+		outEP.setBounds(new org.eclipse.swt.graphics.Rectangle(4, 24, 46, 19));
+		outEP.setText("0x"
+				+ Integer.toHexString(TestImplementation.OUT_ENDPOINT));
 		outEP.addModifyListener(new org.eclipse.swt.events.ModifyListener() {
 			public void modifyText(org.eclipse.swt.events.ModifyEvent e) {
-				TestImplementation.OUT_ENDPOINT = parseInt(outEP.getText());			
+				TestImplementation.OUT_ENDPOINT = parseInt(outEP.getText());
 			}
 		});
 	}
 
 	/**
-	 * This method initializes group	
-	 *
+	 * This method initializes group
+	 * 
 	 */
 	private void createGroup5() {
 		inEPGroup = new Group(endpointGroup, SWT.NONE);
 		inEPGroup.setText("IN EP");
 		inEP = new Text(inEPGroup, SWT.BORDER | SWT.RIGHT);
-		inEP.setBounds(new org.eclipse.swt.graphics.Rectangle(4,24,46,19));
-		inEP.setText("0x86");
+		inEP.setBounds(new org.eclipse.swt.graphics.Rectangle(4, 24, 46, 19));
+		inEP
+				.setText("0x"
+						+ Integer.toHexString(TestImplementation.IN_ENDPOINT));
 		inEP.addModifyListener(new org.eclipse.swt.events.ModifyListener() {
 			public void modifyText(org.eclipse.swt.events.ModifyEvent e) {
-				TestImplementation.IN_ENDPOINT = parseInt(inEP.getText());			
+				TestImplementation.IN_ENDPOINT = parseInt(inEP.getText());
 			}
 		});
 	}
 
 	/**
-	 * This method initializes group	
-	 *
+	 * This method initializes group
+	 * 
 	 */
 	private void createGroup6() {
 		timeoutGroup = new Group(endpointGroup, SWT.NONE);
 		timeoutGroup.setText("Timeout");
 		timeout = new Text(timeoutGroup, SWT.BORDER | SWT.RIGHT);
 		timeout.setBounds(new Rectangle(4, 24, 46, 19));
-		timeout.setText("2000");
+		timeout.setText(Integer.toString(TestImplementation.TIMEOUT));
 		timeout.addModifyListener(new org.eclipse.swt.events.ModifyListener() {
 			public void modifyText(org.eclipse.swt.events.ModifyEvent e) {
-				TestImplementation.TIMEOUT = parseInt(timeout.getText());			
+				TestImplementation.TIMEOUT = parseInt(timeout.getText());
 			}
 		});
 	}
 
 	/**
-	 * This method initializes dataGroup	
-	 *
+	 * This method initializes dataGroup
+	 * 
 	 */
 	private void createDataGroup() {
 		RowLayout rowLayout5 = new RowLayout();
@@ -283,8 +300,8 @@ public class TestGUI {
 	}
 
 	/**
-	 * This method initializes buttonComp	
-	 *
+	 * This method initializes buttonComp
+	 * 
 	 */
 	private void createButtonComp() {
 		RowLayout rowLayout3 = new RowLayout();
@@ -294,25 +311,31 @@ public class TestGUI {
 		dataButtonComp = new Composite(dataGroup, SWT.NONE);
 		sendButton = new Button(dataButtonComp, SWT.NONE);
 		sendButton.setText("Send");
-		sendButton.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
-			public void widgetSelected(org.eclipse.swt.events.SelectionEvent e) {
-				byte[] b = parseByteArray(dataField.getText());
-				TestImplementation.write(b, b.length);
-			}
-		});
+		sendButton
+				.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
+					@Override
+					public void widgetSelected(
+							org.eclipse.swt.events.SelectionEvent e) {
+						byte[] b = parseByteArray(dataField.getText());
+						TestImplementation.write(b, b.length);
+					}
+				});
 		recButton = new Button(dataButtonComp, SWT.NONE);
 		dataButtonComp.setLayout(rowLayout3);
 		recButton.setText("Receive");
-		recButton.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
-			public void widgetSelected(org.eclipse.swt.events.SelectionEvent e) {
-				TestImplementation.read();
-			}
-		});
+		recButton
+				.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
+					@Override
+					public void widgetSelected(
+							org.eclipse.swt.events.SelectionEvent e) {
+						TestImplementation.read();
+					}
+				});
 	}
 
 	/**
-	 * This method initializes devComp	
-	 *
+	 * This method initializes devComp
+	 * 
 	 */
 	private void createDevComp() {
 		RowLayout rowLayout4 = new RowLayout();
@@ -325,8 +348,8 @@ public class TestGUI {
 	}
 
 	/**
-	 * This method initializes devButtonComp	
-	 *
+	 * This method initializes devButtonComp
+	 * 
 	 */
 	private void createDevButtonComp() {
 		RowLayout rowLayout2 = new RowLayout();
@@ -338,7 +361,9 @@ public class TestGUI {
 		devOpenButton.setText("Open Device");
 		devOpenButton
 				.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
-					public void widgetSelected(org.eclipse.swt.events.SelectionEvent e) {
+					@Override
+					public void widgetSelected(
+							org.eclipse.swt.events.SelectionEvent e) {
 						TestImplementation.openUsbDevice();
 					}
 				});
@@ -346,22 +371,27 @@ public class TestGUI {
 		devCloseButton.setText("Close Device");
 		resetButton = new Button(devButtonComp, SWT.NONE);
 		resetButton.setText("Reset");
-		resetButton.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
-			public void widgetSelected(org.eclipse.swt.events.SelectionEvent e) {
-				TestImplementation.resetUsbDevice();
-			}
-		});
+		resetButton
+				.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
+					@Override
+					public void widgetSelected(
+							org.eclipse.swt.events.SelectionEvent e) {
+						TestImplementation.resetUsbDevice();
+					}
+				});
 		devCloseButton
 				.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
-					public void widgetSelected(org.eclipse.swt.events.SelectionEvent e) {
+					@Override
+					public void widgetSelected(
+							org.eclipse.swt.events.SelectionEvent e) {
 						TestImplementation.closeUsbDevice();
 					}
 				});
 	}
 
 	/**
-	 * This method initializes dataFieldGoup	
-	 *
+	 * This method initializes dataFieldGoup
+	 * 
 	 */
 	private void createDataFieldGoup() {
 		RowData rowData = new org.eclipse.swt.layout.RowData();
@@ -374,20 +404,19 @@ public class TestGUI {
 		dataFieldGoup.setText("Data to send [hex]");
 		dataFieldGoup.setLayout(rowLayout6);
 		dataField = new Text(dataFieldGoup, SWT.BORDER);
-		// 33 5B 02 01 00 05 01 03 07 0F 7F 1F
-		dataField.setText("0x5B 0x02 0x01 0x00 0x05 0x01 0x03 0x07 0x0F 0x7F 0x1F");
+		dataField.setText(TestImplementation.sendData);
 		dataField.setLayoutData(rowData);
 	}
-	
+
 	public static void main(String[] args) {
 		TestGUI app = new TestGUI();
 		app.createSShell();
 		app.rootShell.open();
-		
+
 		Display display = app.rootShell.getDisplay();
-		
+
 		while (!app.rootShell.isDisposed()) {
-			if(!display.readAndDispatch()) {
+			if (!display.readAndDispatch()) {
 				display.sleep();
 			}
 		}
