@@ -174,15 +174,19 @@ public class UsbTreeModel implements TreeModel, TreeSelectionListener {
 					+ "\n");
 			sb.append("\tbDescriptorType: 0x"
 					+ Integer.toHexString(devDesc.bDescriptorType) + "\n");
-			sb.append("\tbcdUSB: 0x" + Integer.toHexString(devDesc.bcdUSB)
-					+ "\n");
+			sb.append("\tbcdUSB: 0x"
+					+ Integer.toHexString(devDesc.bcdUSB & 0xFFFF) + "\n");
 			sb.append("\tbDeviceClass: 0x"
-					+ Integer.toHexString(devDesc.bDeviceClass) + "\n");
+					+ Integer.toHexString(devDesc.bDeviceClass & 0xFF) + "\n");
 			sb.append("\tbDeviceSubClass: 0x"
-					+ Integer.toHexString(devDesc.bDeviceSubClass) + "\n");
+					+ Integer.toHexString(devDesc.bDeviceSubClass & 0xFF)
+					+ "\n");
 			sb.append("\tbDeviceProtocol: 0x"
-					+ Integer.toHexString(devDesc.bDeviceProtocol) + "\n");
-			sb.append("\tbMaxPacketSize0: " + devDesc.bMaxPacketSize0 + "\n");
+					+ Integer.toHexString(devDesc.bDeviceProtocol & 0xFF)
+					+ "\n");
+			sb.append("\tbMaxPacketSize0: 0x"
+					+ Integer.toHexString(devDesc.bMaxPacketSize0 & 0xFF)
+					+ " (" + devDesc.bMaxPacketSize0 + ")\n");
 			sb.append("\tidVendor: 0x"
 					+ Integer.toHexString(devDesc.idVendor & 0xFFFF) + "\n");
 			sb.append("\tidProduct: 0x"
@@ -263,7 +267,8 @@ public class UsbTreeModel implements TreeModel, TreeSelectionListener {
 			sb.append("\tbmAttributes: 0x"
 					+ Integer.toHexString(confDesc.bmAttributes & 0xFF) + "\n");
 			sb.append("\tMaxPower [mA]: 0x"
-					+ Integer.toHexString(confDesc.MaxPower) + "\n");
+					+ Integer.toHexString(confDesc.MaxPower & 0xFF) + " ("
+					+ confDesc.MaxPower + ")\n");
 			sb.append("\textralen: 0x" + Integer.toHexString(confDesc.extralen)
 					+ "\n");
 			sb.append("\textra: " + confDesc.extra + "\n");
@@ -383,7 +388,8 @@ public class UsbTreeModel implements TreeModel, TreeSelectionListener {
 			sb.append("\tbmAttributes: 0x"
 					+ Integer.toHexString(epDesc.bmAttributes & 0xFF) + "\n");
 			sb.append("\twMaxPacketSize: 0x"
-					+ Integer.toHexString(epDesc.wMaxPacketSize) + "\n");
+					+ Integer.toHexString(epDesc.wMaxPacketSize & 0xFFFF) + " ("
+					+ epDesc.wMaxPacketSize + ")\n");
 			sb.append("\tbInterval: 0x" + Integer.toHexString(epDesc.bInterval)
 					+ "\n");
 			sb.append("\tbRefresh: 0x" + Integer.toHexString(epDesc.bRefresh)
