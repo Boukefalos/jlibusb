@@ -32,6 +32,7 @@ public class Usb_Bus {
 
 	public Usb_Device root_dev;
 
+	@Override
 	public String toString() {
 		return "Usb_Bus " + dirname;
 	}

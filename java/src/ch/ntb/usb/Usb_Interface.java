@@ -24,6 +24,7 @@ public class Usb_Interface {
 	 */
 	public int num_altsetting;
 
+	@Override
 	public String toString() {
 		return "Usb_Interface num_altsetting: 0x"
 				+ Integer.toHexString(num_altsetting);

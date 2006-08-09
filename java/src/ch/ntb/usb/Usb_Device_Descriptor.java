@@ -95,6 +95,7 @@ public class Usb_Device_Descriptor extends Usb_Descriptor {
 	 */
 	public byte bNumConfigurations;
 
+	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		sb.append("Usb_Device_Descriptor idVendor: 0x"
@@ -102,4 +103,4 @@ public class Usb_Device_Descriptor extends Usb_Descriptor {
 				+ Integer.toHexString(idProduct & 0xFFFF));
 		return sb.toString();
 	}
-};
+}

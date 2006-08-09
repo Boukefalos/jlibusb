@@ -95,6 +95,7 @@ public class Usb_Endpoint_Descriptor extends Usb_Descriptor {
 
 	public int extralen;
 
+	@Override
 	public String toString() {
 		return "Usb_Endpoint_Descriptor bEndpointAddress: 0x"
 				+ Integer.toHexString(bEndpointAddress & 0xFF);

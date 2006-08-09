@@ -50,6 +50,7 @@ public class Usb_Device {
 	 */
 	public Usb_Device children;
 
+	@Override
 	public String toString() {
 		return "Usb_Device " + filename;
 	}

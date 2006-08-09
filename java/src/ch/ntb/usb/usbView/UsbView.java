@@ -20,6 +20,8 @@ import ch.ntb.usb.Usb_Bus;
 
 public class UsbView extends JFrame {
 
+	private static final long serialVersionUID = 4693554326612734263L;
+
 	private static final int APP_WIDTH = 600, APP_HIGHT = 800;
 
 	private JPanel jContentPane = null;
@@ -52,6 +54,7 @@ public class UsbView extends JFrame {
 		this.setContentPane(getJContentPane());
 		this.setTitle("USB View");
 		this.addWindowListener(new java.awt.event.WindowAdapter() {
+			@Override
 			public void windowClosing(java.awt.event.WindowEvent e) {
 				System.exit(0);
 			}

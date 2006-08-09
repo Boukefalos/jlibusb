@@ -71,6 +71,7 @@ public class Usb_Config_Descriptor extends Usb_Descriptor {
 
 	public int extralen;
 
+	@Override
 	public String toString() {
 		return "Usb_Config_Descriptor bNumInterfaces: 0x"
 				+ Integer.toHexString(bNumInterfaces);
