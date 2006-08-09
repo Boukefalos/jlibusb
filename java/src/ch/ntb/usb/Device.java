@@ -146,11 +146,9 @@ public class Device {
 		}
 		release_interface(usb_dev_handle, interface_);
 		if (LibusbWin.usb_close(usb_dev_handle) < 0) {
-			usb_dev_handle = 0;
 			throw new USBException("LibusbWin.usb_close: "
 					+ LibusbWin.usb_strerror());
 		}
-		usb_dev_handle = 0;
 		maxPacketSize = -1;
 		logger.info("device closed");
 	}
@@ -167,6 +165,7 @@ public class Device {
 			throw new USBException("invalid device handle");
 		}
 		if (LibusbWin.usb_reset(usb_dev_handle) < 0) {
+			usb_dev_handle = 0;
 			throw new USBException("LibusbWin.usb_reset: "
 					+ LibusbWin.usb_strerror());
 		}
@@ -342,6 +341,7 @@ public class Device {
 	private void release_interface(int dev_handle, int interface_)
 			throws USBException {
 		if (LibusbWin.usb_release_interface(dev_handle, interface_) < 0) {
+			usb_dev_handle = 0;
 			throw new USBException("LibusbWin.usb_release_interface: "
 					+ LibusbWin.usb_strerror());
 		}
