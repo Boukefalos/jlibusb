@@ -31,8 +31,8 @@ public class USB {
 	private static LinkedList<Device> devices = new LinkedList<Device>();
 
 	/**
-	 * Create a new device an register it in a device queue or get an already
-	 * created device.<br>
+	 * Create a new device an register it in a device queue. If the device is
+	 * already registered, a reference to it will be returned.<br>
 	 * 
 	 * @param idVendor
 	 *            the vendor id of the USB device

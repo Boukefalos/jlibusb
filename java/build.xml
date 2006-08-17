@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="ch.ntb.usb" basedir=".">
+	<description>
+		Ant tasks for creating the javadoc (ch.ntb.usb)
+	</description>
+
+	<!-- javadoc properties  -->
+	<!-- 
+	<property name="javadoc.destination" value="doc" />
+	-->
+	<property name="javadoc.destination" value="W:\inf\infoportalExternalDocs\projects\libusbWinJava\doc" />
+
+	<!-- build javadoc -->
+	<target name="javadoc">
+		<echo message="creating javadoc (\\www-server\web must be mapped to W:)" />
+		<javadoc destdir="${javadoc.destination}">
+			<fileset dir="src" defaultexcludes="yes">
+			</fileset>
+		</javadoc>
+	</target>
+</project>

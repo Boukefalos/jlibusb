@@ -22,7 +22,7 @@ public class Device {
 
 	private int idVendor, idProduct, configuration, interface_, altinterface;
 
-	private int usb_dev_handle;
+	private int usbDevHandle;
 
 	private boolean resetOnFirstOpen, resetDone;
 
@@ -44,11 +44,11 @@ public class Device {
 	 * endpoints are found in the descriptors an exception is thrown.
 	 * 
 	 * @param configuration
-	 *            the desired configuration
+	 *            the configuration
 	 * @param interface_
-	 *            the desired interface
+	 *            the interface
 	 * @param altinterface
-	 *            the desired alternative interface
+	 *            the alternative interface
 	 * @throws USBException
 	 */
 	public void open(int configuration, int interface_, int altinterface)
@@ -59,7 +59,7 @@ public class Device {
 
 		Usb_Bus bus;
 
-		if (usb_dev_handle > 0) {
+		if (usbDevHandle > 0) {
 			throw new USBException("device opened, close or reset first");
 		}
 
@@ -88,41 +88,40 @@ public class Device {
 					if (res <= 0) {
 						throw new USBException("LibusbWin.usb_open: "
 								+ LibusbWin.usb_strerror());
-					} else {
-						usb_dev_handle = res;
-						// get endpoint wMaxPacketSize
-						Usb_Config_Descriptor[] confDesc = dev.config;
-						for (int i = 0; i < confDesc.length; i++) {
-							Usb_Interface[] int_ = confDesc[i].interface_;
-							for (int j = 0; j < int_.length; j++) {
-								Usb_Interface_Descriptor[] intDesc = int_[j].altsetting;
-								for (int k = 0; k < intDesc.length; k++) {
-									Usb_Endpoint_Descriptor[] epDesc = intDesc[k].endpoint;
-									for (int l = 0; l < epDesc.length; l++) {
-										maxPacketSize = Math.max(
-												epDesc[l].wMaxPacketSize,
-												maxPacketSize);
-									}
+					}
+					usbDevHandle = res;
+					// get endpoint wMaxPacketSize
+					Usb_Config_Descriptor[] confDesc = dev.config;
+					for (int i = 0; i < confDesc.length; i++) {
+						Usb_Interface[] int_ = confDesc[i].interface_;
+						for (int j = 0; j < int_.length; j++) {
+							Usb_Interface_Descriptor[] intDesc = int_[j].altsetting;
+							for (int k = 0; k < intDesc.length; k++) {
+								Usb_Endpoint_Descriptor[] epDesc = intDesc[k].endpoint;
+								for (int l = 0; l < epDesc.length; l++) {
+									maxPacketSize = Math.max(
+											epDesc[l].wMaxPacketSize,
+											maxPacketSize);
 								}
 							}
 						}
-						if (maxPacketSize <= 0) {
-							throw new USBException(
-									"No USB endpoints found. Check the device configuration");
-						}
+					}
+					if (maxPacketSize <= 0) {
+						throw new USBException(
+								"No USB endpoints found. Check the device configuration");
 					}
 				}
 				dev = dev.next;
 			}
 			bus = bus.next;
 		}
-		if (usb_dev_handle <= 0) {
+		if (usbDevHandle <= 0) {
 			throw new USBException("USB device with idVendor 0x"
 					+ Integer.toHexString(idVendor & 0xFFFF)
 					+ " and idProduct 0x"
 					+ Integer.toHexString(idProduct & 0xFFFF) + " not found");
 		}
-		claim_interface(usb_dev_handle, configuration, interface_, altinterface);
+		claim_interface(usbDevHandle, configuration, interface_, altinterface);
 		if (resetOnFirstOpen & !resetDone) {
 			logger.info("reset on first open");
 			resetDone = true;
@@ -130,6 +129,7 @@ public class Device {
 			try {
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {
+				//
 			}
 			open(configuration, interface_, altinterface);
 		}
@@ -141,11 +141,11 @@ public class Device {
 	 * @throws USBException
 	 */
 	public void close() throws USBException {
-		if (usb_dev_handle <= 0) {
+		if (usbDevHandle <= 0) {
 			throw new USBException("invalid device handle");
 		}
-		release_interface(usb_dev_handle, interface_);
-		if (LibusbWin.usb_close(usb_dev_handle) < 0) {
+		release_interface(usbDevHandle, interface_);
+		if (LibusbWin.usb_close(usbDevHandle) < 0) {
 			throw new USBException("LibusbWin.usb_close: "
 					+ LibusbWin.usb_strerror());
 		}
@@ -161,15 +161,15 @@ public class Device {
 	 * @throws USBException
 	 */
 	public void reset() throws USBException {
-		if (usb_dev_handle <= 0) {
+		if (usbDevHandle <= 0) {
 			throw new USBException("invalid device handle");
 		}
-		if (LibusbWin.usb_reset(usb_dev_handle) < 0) {
-			usb_dev_handle = 0;
+		if (LibusbWin.usb_reset(usbDevHandle) < 0) {
+			usbDevHandle = 0;
 			throw new USBException("LibusbWin.usb_reset: "
 					+ LibusbWin.usb_strerror());
 		}
-		usb_dev_handle = 0;
+		usbDevHandle = 0;
 		logger.info("device reset");
 	}
 
@@ -193,7 +193,7 @@ public class Device {
 	 */
 	public int bulkwrite(int out_ep_address, byte[] data, int length,
 			int timeout, boolean reopenOnTimeout) throws USBException {
-		if (usb_dev_handle <= 0) {
+		if (usbDevHandle <= 0) {
 			throw new USBException("invalid device handle");
 		}
 		if (data == null) {
@@ -202,8 +202,8 @@ public class Device {
 		if (length <= 0) {
 			throw new USBException("size must be > 0");
 		}
-		int lenWritten = LibusbWin.usb_bulk_write(usb_dev_handle,
-				out_ep_address, data, length, timeout);
+		int lenWritten = LibusbWin.usb_bulk_write(usbDevHandle, out_ep_address,
+				data, length, timeout);
 		if (lenWritten < 0) {
 			if (lenWritten == TIMEOUT_ERROR_CODE) {
 				// try to reopen the device and send the data again
@@ -253,7 +253,7 @@ public class Device {
 	 */
 	public int bulkread(int in_ep_address, byte[] data, int size, int timeout,
 			boolean reopenOnTimeout) throws USBException {
-		if (usb_dev_handle <= 0) {
+		if (usbDevHandle <= 0) {
 			throw new USBException("invalid device handle");
 		}
 		if (data == null) {
@@ -262,7 +262,7 @@ public class Device {
 		if (size <= 0) {
 			throw new USBException("size must be > 0");
 		}
-		int lenRead = LibusbWin.usb_bulk_read(usb_dev_handle, in_ep_address,
+		int lenRead = LibusbWin.usb_bulk_read(usbDevHandle, in_ep_address,
 				data, size, timeout);
 		if (lenRead < 0) {
 			if (lenRead == TIMEOUT_ERROR_CODE) {
@@ -341,7 +341,7 @@ public class Device {
 	private void release_interface(int dev_handle, int interface_)
 			throws USBException {
 		if (LibusbWin.usb_release_interface(dev_handle, interface_) < 0) {
-			usb_dev_handle = 0;
+			usbDevHandle = 0;
 			throw new USBException("LibusbWin.usb_release_interface: "
 					+ LibusbWin.usb_strerror());
 		}
@@ -349,6 +349,8 @@ public class Device {
 	}
 
 	/**
+	 * Returns the product ID of the device.<br>
+	 * 
 	 * @return the product ID of the device.
 	 */
 	public int getIdProduct() {
@@ -356,6 +358,8 @@ public class Device {
 	}
 
 	/**
+	 * Returns the vendor ID of the device.<br>
+	 * 
 	 * @return the vendor ID of the device.
 	 */
 	public int getIdVendor() {
@@ -363,6 +367,9 @@ public class Device {
 	}
 
 	/**
+	 * Returns the alternative interface. This value is only valid after opening
+	 * the device.<br>
+	 * 
 	 * @return the alternative interface. This value is only valid after opening
 	 *         the device.
 	 */
@@ -371,6 +378,9 @@ public class Device {
 	}
 
 	/**
+	 * Returns the current configuration used. This value is only valid after
+	 * opening the device.<br>
+	 * 
 	 * @return the current configuration used. This value is only valid after
 	 *         opening the device.
 	 */
@@ -379,6 +389,9 @@ public class Device {
 	}
 
 	/**
+	 * Returns the current interface. This value is only valid after opening the
+	 * device.<br>
+	 * 
 	 * @return the current interface. This value is only valid after opening the
 	 *         device.
 	 */
@@ -387,11 +400,14 @@ public class Device {
 	}
 
 	/**
+	 * Returns the current device handle. This value is only valid after opening
+	 * the device.<br>
+	 * 
 	 * @return the current device handle. This value is only valid after opening
 	 *         the device.
 	 */
-	public int getUsb_dev_handle() {
-		return usb_dev_handle;
+	public int getUsbDevHandle() {
+		return usbDevHandle;
 	}
 
 	/**
