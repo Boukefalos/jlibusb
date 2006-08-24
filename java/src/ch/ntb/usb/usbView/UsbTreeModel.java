@@ -23,10 +23,19 @@ import ch.ntb.usb.Usb_Interface_Descriptor;
 public class UsbTreeModel implements TreeModel, TreeSelectionListener {
 
 	private Usb_Bus rootBus;
+
 	private JTextArea textArea;
 
 	private Vector<TreeModelListener> treeModelListeners = new Vector<TreeModelListener>();
 
+	/**
+	 * Default constructor.<br>
+	 * 
+	 * @param rootBus
+	 *            the root bus from which the data is read
+	 * @param textArea
+	 *            the text area to which the data is written
+	 */
 	public UsbTreeModel(Usb_Bus rootBus, JTextArea textArea) {
 		this.rootBus = rootBus;
 		this.textArea = textArea;
@@ -142,12 +151,12 @@ public class UsbTreeModel implements TreeModel, TreeSelectionListener {
 	 * The only event raised by this model is TreeStructureChanged with the root
 	 * as path, i.e. the whole tree has changed.
 	 */
-	protected void fireTreeStructureChanged(Usb_Bus oldRootBus) {
+	protected void fireTreeStructureChanged(Usb_Bus newRootBus) {
+		rootBus = newRootBus;
 		int len = treeModelListeners.size();
-		TreeModelEvent e = new TreeModelEvent(this, new Object[] { oldRootBus });
+		TreeModelEvent e = new TreeModelEvent(this, new Object[] { newRootBus });
 		for (int i = 0; i < len; i++) {
-			((TreeModelListener) treeModelListeners.elementAt(i))
-					.treeStructureChanged(e);
+			treeModelListeners.elementAt(i).treeStructureChanged(e);
 		}
 	}
 
@@ -388,8 +397,8 @@ public class UsbTreeModel implements TreeModel, TreeSelectionListener {
 			sb.append("\tbmAttributes: 0x"
 					+ Integer.toHexString(epDesc.bmAttributes & 0xFF) + "\n");
 			sb.append("\twMaxPacketSize: 0x"
-					+ Integer.toHexString(epDesc.wMaxPacketSize & 0xFFFF) + " ("
-					+ epDesc.wMaxPacketSize + ")\n");
+					+ Integer.toHexString(epDesc.wMaxPacketSize & 0xFFFF)
+					+ " (" + epDesc.wMaxPacketSize + ")\n");
 			sb.append("\tbInterval: 0x" + Integer.toHexString(epDesc.bInterval)
 					+ "\n");
 			sb.append("\tbRefresh: 0x" + Integer.toHexString(epDesc.bRefresh)

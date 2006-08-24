@@ -33,6 +33,8 @@ public class UsbView extends JFrame {
 	private JSplitPane jSplitPane = null;
 
 	private JTextArea jPropertiesArea = null;
+	
+	UsbTreeModel treeModel;
 
 	/**
 	 * This is the default constructor
@@ -97,7 +99,7 @@ public class UsbView extends JFrame {
 		if (commandsMenu == null) {
 			commandsMenu = new JMenu();
 			commandsMenu.setText("Commands");
-			commandsMenu.add(getSaveMenuItem());
+			commandsMenu.add(getUpdateMenuItem());
 			commandsMenu.add(getExitMenuItem());
 		}
 		return commandsMenu;
@@ -126,7 +128,7 @@ public class UsbView extends JFrame {
 	 * 
 	 * @return javax.swing.JMenuItem
 	 */
-	private JMenuItem getSaveMenuItem() {
+	private JMenuItem getUpdateMenuItem() {
 		if (updateMenuItem == null) {
 			updateMenuItem = new JMenuItem();
 			updateMenuItem.setText("Update");
@@ -142,10 +144,7 @@ public class UsbView extends JFrame {
 
 							Usb_Bus bus = LibusbWin.usb_get_busses();
 							if (bus != null) {
-								UsbTreeModel treeModel = new UsbTreeModel(bus,
-										jPropertiesArea);
-								usbTree.setModel(treeModel);
-								usbTree.addTreeSelectionListener(treeModel);
+								treeModel.fireTreeStructureChanged(bus);
 							}
 						}
 					});
@@ -167,7 +166,7 @@ public class UsbView extends JFrame {
 
 			Usb_Bus bus = LibusbWin.usb_get_busses();
 
-			UsbTreeModel treeModel = new UsbTreeModel(bus, jPropertiesArea);
+			treeModel = new UsbTreeModel(bus, jPropertiesArea);
 			usbTree = new JTree(treeModel);
 			usbTree.addTreeSelectionListener(treeModel);
 		}
