@@ -2,10 +2,6 @@ package ch.ntb.usb;
 
 public class USBException extends Exception{
 
-	public class USBTimeoutException {
-
-	}
-
 	public USBException(String string) {
 		super(string);
 	}
