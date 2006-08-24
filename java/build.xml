@@ -1,21 +1,62 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project name="ch.ntb.usb" basedir=".">
+<?xml version="1.0"?>
+<!-- ====================================================================== 
+     23.08.2006 08:03:24                                                        
+
+     ch.ntb.usb 
+     Ant tasks for ch.ntb.usb
+
+	 NOTE: for distribution, \\www-server\web must be mapped to W:
+
+     schlaepfer                                                                
+     ====================================================================== -->
+<project name="ch.ntb.usb" basedir="." default="javadoc">
 	<description>
-		Ant tasks for creating the javadoc (ch.ntb.usb)
+		Ant tasks for ch.ntb.usb
 	</description>
 
-	<!-- javadoc properties  -->
-	<!-- 
-	<property name="javadoc.destination" value="doc" />
-	-->
-	<property name="javadoc.destination" value="W:\inf\infoportalExternalDocs\projects\libusbWinJava\doc" />
+	<tstamp />
+	<property file="project.properties" />
+	<property file="version.properties" />
 
-	<!-- build javadoc -->
-	<target name="javadoc">
-		<echo message="creating javadoc (\\www-server\web must be mapped to W:)" />
-		<javadoc destdir="${javadoc.destination}">
-			<fileset dir="src" defaultexcludes="yes">
-			</fileset>
+	<target name="clean" description="--> Clean all folders">
+		<delete dir="${project.dir.bin}" />
+		<delete dir="${project.dir.doc}" />
+		<delete dir="${project.dir.lib}" />
+	</target>
+
+	<target name="compile" depends="clean" description="--> Compile Java files">
+		<mkdir dir="${project.dir.bin}" />
+		<javac srcdir="${project.dir.src}" destdir="${project.dir.bin}" debug="on" />
+	</target>
+
+	<target name="jar" depends="compile" description="--> Create Jar">
+		<mkdir dir="${project.dir.lib}" />
+		<jar destfile="${project.dir.lib}/${project.jarfile}" basedir="${project.dir.bin}">
+			<manifest>
+				<attribute name="Built-By" value="${user.name}" />
+				<section name="common">
+					<attribute name="Implementation-Title" value="${project.name}" />
+					<attribute name="Implementation-Version" value="${version.major}.${version.minor}.${version.release} ${TODAY}" />
+					<attribute name="Implementation-Vendor" value="${project.vendor}" />
+				</section>
+			</manifest>
+		</jar>
+	</target>
+
+	<target name="javadoc" depends="jar" description="--> Create Javadoc">
+		<javadoc destdir="${project.dir.doc}">
+			<fileset dir="${project.dir.src}" defaultexcludes="yes" />
 		</javadoc>
 	</target>
+
+	<target name="distribute" depends="javadoc" description="--> Distribute to server">
+		<echo message="\\www-server\web must be mapped to W:" />
+		<echo message="copy jar file to server" />
+		<copy file="${project.dir.lib}/${project.jarfile}" todir="${project.server.dir.bin}" />
+		<echo message="copy javadoc to server" />
+		<copy todir="${project.server.dir.doc}">
+			<fileset dir="${project.dir.doc}" />
+		</copy>
+	</target>
+
 </project>
