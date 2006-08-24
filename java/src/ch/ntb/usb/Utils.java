@@ -3,9 +3,10 @@ package ch.ntb.usb;
 public class Utils {
 
 	public static void logUsb(Usb_Bus bus) {
-		while (bus != null) {
-			System.out.println(bus.toString());
-			Usb_Device dev = bus.devices;
+		Usb_Bus usb_Bus = bus;
+		while (usb_Bus != null) {
+			System.out.println(usb_Bus.toString());
+			Usb_Device dev = usb_Bus.devices;
 			while (dev != null) {
 				System.out.println("\t" + dev.toString());
 				// Usb_Device_Descriptor
@@ -38,7 +39,7 @@ public class Utils {
 				}
 				dev = dev.next;
 			}
-			bus = bus.next;
+			usb_Bus = usb_Bus.next;
 		}
 	}
 }
