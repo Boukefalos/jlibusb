@@ -1,4 +1,4 @@
-package ch.ntb.usb.test;
+package ch.ntb.usb.testApp;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -67,7 +67,7 @@ public class TestImplementation {
 	static void write(byte[] data, int length) {
 		int lenWritten = 0;
 		try {
-			lenWritten = dev.bulkwrite(OUT_ENDPOINT, data, length, TIMEOUT,
+			lenWritten = dev.writeBulk(OUT_ENDPOINT, data, length, TIMEOUT,
 					false);
 			StringBuffer sb = new StringBuffer("write_bulkdata: " + lenWritten
 					+ " Bytes sent: ");
@@ -84,7 +84,7 @@ public class TestImplementation {
 		byte[] data = new byte[dev.getMaxPacketSize()];
 		int lenRead = 0;
 		try {
-			lenRead = dev.bulkread(IN_ENDPOINT, data, dev.getMaxPacketSize(),
+			lenRead = dev.readBulk(IN_ENDPOINT, data, dev.getMaxPacketSize(),
 					TIMEOUT, false);
 			StringBuffer sb = new StringBuffer("read_bulkdata: " + lenRead
 					+ " Bytes received: Data: ");

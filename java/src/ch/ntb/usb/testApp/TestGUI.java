@@ -1,4 +1,4 @@
-package ch.ntb.usb.test;
+package ch.ntb.usb.testApp;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Rectangle;
