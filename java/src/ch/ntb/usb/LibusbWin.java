@@ -21,9 +21,6 @@ package ch.ntb.usb;
  */
 public class LibusbWin {
 
-	private LibusbWin() {
-	}
-
 	// Core
 	/**
 	 * Just like the name implies, <code>usb_init</code> sets up some internal
