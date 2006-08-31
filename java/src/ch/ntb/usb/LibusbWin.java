@@ -13,7 +13,8 @@ package ch.ntb.usb;
  * kernel driver code.<br>
  * <br>
  * The API description of this class has been copied from the <a
- * href="http://libusb.sourceforge.net/documentation.html">libusb documentation</a>.<br>
+ * href="http://libusb.sourceforge.net/documentation.html">libusb documentation</a>
+ * and adapted where neccessary.<br>
  * 
  * @author schlaepfer
  * @version DLL: 00.02.00
@@ -47,13 +48,15 @@ public class LibusbWin {
 	public static native int usb_find_devices();
 
 	/**
-	 * <code>usb_get_busses</code> simply returns the value of the global
-	 * variable usb_busses. This was implemented for those languages that
-	 * support C calling convention and can use shared libraries, but don't
-	 * support C global variables (like Delphi).
+	 * <code>usb_get_busses</code> returns a tree of descriptor objects.<br>
+	 * The tree represents the bus structure with devices, configurations,
+	 * interfaces and endpoints. Note that this is only a copy. To refresh the
+	 * information, <code>usb_getbusses()</code> must be called again. The
+	 * name of the objects contained in the tree is starting with
+	 * <code>Usb_</code>.
 	 * 
-	 * @return the structure of all busses and devices. <b>Note:</b> The java
-	 *         objects are copies of the C structs.
+	 * @return the structure of all busses and devices. <code>Note:</code> The
+	 *         java objects are copies of the C structs.
 	 */
 	public static native Usb_Bus usb_get_busses();
 

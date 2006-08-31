@@ -27,7 +27,7 @@ public class Device {
 
 	private boolean resetOnFirstOpen, resetDone;
 
-	private Usb_Device_Descriptor devDesc;
+	private int resetTimeout = 1000;
 
 	protected Device(short idVendor, short idProduct) {
 		resetOnFirstOpen = false;
@@ -81,7 +81,7 @@ public class Device {
 		while (bus != null) {
 			Usb_Device dev = bus.devices;
 			while (dev != null) {
-				devDesc = dev.descriptor;
+				Usb_Device_Descriptor devDesc = dev.descriptor;
 				if ((devDesc.idVendor == idVendor)
 						&& (devDesc.idProduct == idProduct)) {
 					logger.info("Open device: " + dev.filename);
@@ -128,7 +128,7 @@ public class Device {
 			resetDone = true;
 			reset();
 			try {
-				Thread.sleep(1000);
+				Thread.sleep(resetTimeout);
 			} catch (InterruptedException e) {
 				//
 			}
@@ -545,12 +545,17 @@ public class Device {
 	 * If enabled, the device is reset when first opened. <br>
 	 * This will only happen once. When the application is started, the device
 	 * state is unknown. If the device is not reset, read or write may result in
-	 * a {@link USBTimeoutException}.
+	 * a {@link USBTimeoutException}.<br>
+	 * <br>
+	 * This feature is disabled by default.
 	 * 
 	 * @param enable
 	 *            true if the device should be reset when first opened
+	 * @param timeout
+	 *            the timeout between the reset and the reopening
 	 */
-	public void setResetOnFirstOpen(boolean enable) {
+	public void setResetOnFirstOpen(boolean enable, int timeout) {
 		resetOnFirstOpen = enable;
+		resetTimeout = timeout;
 	}
 }
