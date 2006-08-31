@@ -49,7 +49,7 @@
 		</javadoc>
 	</target>
 
-	<target name="distribute" depends="javadoc" description="--> Distribute to server">
+	<target name="distribute" depends="javadoc, jar" description="--> Distribute to server">
 		<echo message="\\www-server\web must be mapped to W:" />
 		<echo message="copy jar file to server" />
 		<copy file="${project.dir.lib}/${project.jarfile}" todir="${project.server.dir.bin}" />
