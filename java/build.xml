@@ -43,7 +43,7 @@
 		</jar>
 	</target>
 
-	<target name="javadoc" depends="jar" description="--> Create Javadoc">
+	<target name="javadoc" description="--> Create Javadoc">
 		<javadoc destdir="${project.dir.doc}">
 			<fileset dir="${project.dir.src}" defaultexcludes="yes" />
 		</javadoc>
