@@ -16,24 +16,24 @@ public class TestGUI {
 	private static final int HEX_WIDTH = 5;
 	private Shell rootShell = null; // @jve:decl-index=0:visual-constraint="10,10"
 	private Group vendorIDGroup = null;
-	private Text vendorID = null;
+	Text vendorID = null;
 	private Group productIDGroup = null;
-	private Text productID = null;
+	Text productID = null;
 	private Group configGroup = null;
-	private Text configuration = null;
+	Text configuration = null;
 	private Group interfaceGroup = null;
-	private Text interface_ = null;
+	Text interface_ = null;
 	private Group altIntGroup = null;
-	private Text altInt = null;
+	Text altInt = null;
 	private Group deviceGroup = null;
 	private Group endpointGroup = null;
 	private Group deviceGroup2 = null;
 	private Group outEPGroup = null;
-	private Text outEP = null;
+	Text outEP = null;
 	private Group inEPGroup = null;
-	private Text inEP = null;
+	Text inEP = null;
 	private Group timeoutGroup = null;
-	private Text timeout = null;
+	Text timeout = null;
 	private Group dataGroup = null;
 	private Composite dataButtonComp = null;
 	private Button sendButton = null;
@@ -43,10 +43,10 @@ public class TestGUI {
 	private Button devOpenButton = null;
 	private Button devCloseButton = null;
 	private Group dataFieldGoup = null;
-	private Text dataField = null;
+	Text dataField = null;
 	private Button resetButton = null;
 
-	private int parseInt(String s) {
+	int parseInt(String s) {
 		if (s == "")
 			return 0;
 		if (s.indexOf('x') > 0) {
@@ -56,13 +56,12 @@ public class TestGUI {
 			}
 			return Integer.parseInt(
 					s.substring(s.indexOf('x') + 1, s.length()), 16);
-		} else {
-			// is decimal number
-			return Integer.parseInt(s);
 		}
+		// is decimal number
+		return Integer.parseInt(s);
 	}
 
-	private byte[] parseByteArray(String s) {
+	byte[] parseByteArray(String s) {
 		StringBuffer sb = new StringBuffer();
 		int stringIndex = 0, spaceIndex = 0;
 		String ss;

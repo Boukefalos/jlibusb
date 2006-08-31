@@ -10,8 +10,8 @@ public class LogUtil {
 
 	static {
 		// set all loglevels here
-		ch_ntb_usb = getLogger("ch.ntb.usb", LogLevel.OFF);
-		ch_ntb_usb_test = getLogger("ch.ntb.usb.test", LogLevel.ALL);
+		ch_ntb_usb = getLogger("ch.ntb.usb", Level.OFF);
+		ch_ntb_usb_test = getLogger("ch.ntb.usb.test", Level.ALL);
 	}
 
 	public static void setLevel(UsbLogger logger, Level loglevel) {
