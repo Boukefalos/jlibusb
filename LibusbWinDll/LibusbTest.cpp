@@ -10,18 +10,19 @@
 
 #define snprintf printf
 
-#define ID_PRODUCT 0x1004	//0x8613
-#define ID_VENDOR 0x04B4
+#define ID_PRODUCT 0x0222
+#define ID_VENDOR 0x8235
 
 #define CONFIGURATION 1
-#define INTERFACE 0
+#define INTERFACE_ 0
 #define ALTINTERFACE 0
-#define TIMEOUT 2000
+#define TIMEOUT 5000
 
-#define OUT_ENDPOINT 0x02
-#define IN_ENDPOINT 0x86
+#define OUT_ENDPOINT 0x01
+#define IN_ENDPOINT 0x82
 
 int verbose = 0;
+unsigned char first = true;
 
 void print_endpoint(struct usb_endpoint_descriptor *endpoint)
 {
@@ -141,13 +142,16 @@ int print_device(struct usb_device *dev, int level)
 
 int read(struct usb_dev_handle *handle)
 {
-	if (usb_claim_interface(handle, INTERFACE) < 0) {
+	if (usb_claim_interface(handle, INTERFACE_) < 0) {
 		printf("error on usb_claim_interface: %s\n", usb_strerror());
 		return -1;
 	}
 	printf("usb_claim_interface successful\n");
-	if (usb_set_altinterface(handle, ALTINTERFACE) < 0){
-		printf("usb_set_altinterface failed: %s\n", usb_strerror());
+	if (first) {
+		first = false;
+		if (usb_set_altinterface(handle, ALTINTERFACE) < 0){
+			printf("usb_set_altinterface failed: %s\n", usb_strerror());
+		}
 	}
 	
 	int size = 512, res;
@@ -162,7 +166,7 @@ int read(struct usb_dev_handle *handle)
 	}
 	printf("\n");
 	
-	usb_release_interface(handle, INTERFACE);
+	usb_release_interface(handle, INTERFACE_);
 }
 
 int write(struct usb_dev_handle *handle)
@@ -183,13 +187,16 @@ int write(struct usb_dev_handle *handle)
 	data[11] = 0x1F;
 	// data = {0x33, 0x5B, 0x02, 0x01, 0x00, 0x05, 0x01, 0x03, 0x07, 0x0F, 0x7F, 0x1F};
 
-	if (usb_claim_interface(handle, INTERFACE) < 0) {
+	if (usb_claim_interface(handle, INTERFACE_) < 0) {
 		printf("error on usb_claim_interface: %s\n", usb_strerror());
 		return -1;
 	}
 	printf("usb_claim_interface successful\n");
-	if (usb_set_altinterface(handle, ALTINTERFACE) < 0){
-		printf("usb_set_altinterface failed: %s\n", usb_strerror());
+	if (first) {
+		first = false;
+		if (usb_set_altinterface(handle, ALTINTERFACE) < 0){
+			printf("usb_set_altinterface failed: %s\n", usb_strerror());
+		}
 	}
 	printf("usb_bulk_write: writing %d bytes: ", size);
 	for (int i = 0; i < size; ++i) {
@@ -205,7 +212,128 @@ int write(struct usb_dev_handle *handle)
 	
 	printf("usb_bulk_write: %d bytes written\n", res);
 	
-	usb_release_interface(handle, INTERFACE);
+	usb_release_interface(handle, INTERFACE_);
+}
+
+int readWrite(struct usb_dev_handle *handle)
+{
+	
+	int size = 512;
+	char *data = (char *) malloc(size*sizeof(char));
+	
+	printf("type a string...\n");
+	scanf("%s", data);	// Get a string
+	
+	if (usb_claim_interface(handle, INTERFACE_) < 0) {
+		printf("error on usb_claim_interface: %s\n", usb_strerror());
+		system("PAUSE");
+		return -1;
+	}
+	printf("usb_claim_interface successful\n");
+	if (first) {
+		first = false;
+		if (usb_set_altinterface(handle, ALTINTERFACE) < 0){
+			printf("usb_set_altinterface failed: %s\n", usb_strerror());
+		}
+	}
+	
+	if (usb_bulk_write(handle, OUT_ENDPOINT, data, strlen(data), 3000) < 0){
+		printf("usb_bulk_write failed: %s\n", usb_strerror());
+		system("PAUSE");
+		return -1;
+	}
+	
+	strcpy(data, "12345678901234567890");
+	printf("%s\n", "read data");
+	if (usb_bulk_read(handle, IN_ENDPOINT, data, size, 3000) < 0){
+		printf("usb_bulk_read failed: %s\n", usb_strerror());
+	}
+	printf("output %d, %s\n", size, data);
+//	for (int i = 0; i < size; ++i) {
+//		printf("%4x ", data[i]);
+//	}
+	
+	usb_release_interface(handle, INTERFACE_);
+}
+
+int readWriteLoop(struct usb_dev_handle *handle)
+{
+	int NOF_LOOPS = 20;
+	int size = 12;
+	char *data = (char *) malloc(size*sizeof(char));
+	data[0] = 0x33;
+	data[1] = 0x5B;
+	data[2] = 0x02;
+	data[3] = 0x01;
+	data[4] = 0x00;
+	data[5] = 0x05;
+	data[6] = 0x01;
+	data[7] = 0x03;
+	data[8] = 0x07;
+	data[9] = 0x0F;
+	data[10] = 0x7F;
+	data[11] = 0x1F;
+	// data = {0x33, 0x5B, 0x02, 0x01, 0x00, 0x05, 0x01, 0x03, 0x07, 0x0F, 0x7F, 0x1F};
+
+	if (usb_claim_interface(handle, INTERFACE_) < 0) {
+		printf("error on usb_claim_interface: %s\n", usb_strerror());
+		return -1;
+	}
+	printf("usb_claim_interface successful\n");
+	if (first) {
+		first = false;
+		if (usb_set_altinterface(handle, ALTINTERFACE) < 0){
+			printf("usb_set_altinterface failed: %s\n", usb_strerror());
+		}
+	}
+
+	printf("usb_bulk_write: writing %d bytes: ", size);
+	for (int i = 0; i < size; ++i) {
+		printf("%3x ", data[i]);
+	}
+	printf("\n------------------------\n");
+	
+	for (int var = 0; var < NOF_LOOPS; ++var) {
+		
+		int res = usb_bulk_write(handle, OUT_ENDPOINT, data, size, TIMEOUT);
+		if (res < 0){
+			printf("usb_bulk_write failed: %s\n", usb_strerror());
+			return -1;
+		}
+		
+		printf("usb_bulk_write: %d bytes written\n", res);
+
+		int size = 64;
+		char *data = (char *) malloc(size*sizeof(char));
+		res = usb_bulk_read(handle, IN_ENDPOINT, data, size, TIMEOUT);
+		if (res < 0){
+			printf("usb_bulk_read failed: %s\n", usb_strerror());
+		}
+		printf("usb_bulk_read: %d bytes read: ", res);
+		for (int i = 0; i < res; ++i) {
+			printf("%3x ", data[i]);
+		}
+		printf("\n");
+	}
+	
+	usb_release_interface(handle, INTERFACE_);
+}
+
+void logDevices()
+{
+	struct usb_bus *bus;
+	
+	printf("log devices...\n");
+	for (bus = usb_get_busses(); bus; bus = bus->next) {
+		if (bus->root_dev && !verbose)
+			print_device(bus->root_dev, 0);
+		else {
+			struct usb_device *dev;
+	
+			for (dev = bus->devices; dev; dev = dev->next)
+			print_device(dev, 0);
+		}
+	}
 }
 
 int main(int argc, char *argv[])
@@ -216,50 +344,54 @@ int main(int argc, char *argv[])
   
 	bool run = true;
 
-//  if (argc > 1 && !strcmp(argv[1], "-v"))
-//    verbose = 1;
-
-	verbose = 1;
+	if (argc > 1 && !strcmp(argv[1], "-v"))
+		verbose = 1;
 
 	usb_set_debug(255);
 	
+	printf("initialize libraray, find busses and devices\n");
 	usb_init();
 
 	usb_find_busses();
 	usb_find_devices();
-
-//  for (bus = usb_get_busses(); bus; bus = bus->next) {
-//    if (bus->root_dev && !verbose)
-//      print_device(bus->root_dev, 0);
-//    else {
-//      struct usb_device *dev;
-//
-//      for (dev = bus->devices; dev; dev = dev->next)
-//        print_device(dev, 0);
-//    }
-//  }
+	
+	if (verbose)
+		logDevices();
 
 	int size = 512;
 	char *data = (char *) malloc(size*sizeof(char));
 
-
+	printf("Search for device with idVendor 0x%x and idProduct 0x%x\n", ID_VENDOR, ID_PRODUCT);
 	for (bus = usb_get_busses(); bus; bus = bus->next) {
+		if (verbose)
+			printf("Found bus %s\n", bus->dirname);
 		for (dev = bus->devices; dev; dev = dev->next) {
+			if (verbose)
+				printf("Found device with idVendor 0x%x and idProduct 0x%x\n", dev->descriptor.idVendor, dev->descriptor.idProduct);
 			if ((dev->descriptor.idProduct == ID_PRODUCT) && (dev->descriptor.idVendor == ID_VENDOR)){
-				printf("Device found\n");
+				printf("Device found -> open\n");
 				handle = usb_open(dev);
 				if (!handle) {
 					printf("invalid handle: %s\n", usb_strerror());
 					system("PAUSE");
 					return -1;
 				}
+				printf("Set configuration\n");
 				if (usb_set_configuration(handle, CONFIGURATION) < 0) {
 	  				printf("error on usb_set_configuration: %s\n", usb_strerror());
 	  				system("PAUSE");
 	  				return -1;
 	  			}
+
+				printf("Set altinterface\n");
+				if (first) {
+					first = false;
+					if (usb_set_altinterface(handle, ALTINTERFACE) < 0){
+						printf("usb_set_altinterface failed: %s\n", usb_strerror());
+					}
+				}
 	  			
-	  			printf("w=write, r=read, x=exit, t=write+read:\n");
+	  			printf("w=write, r=read, x=exit, t=write+read, u=write+read(2), l=r/w loop, z=reset and open\n");
 	
 	 			while (run) {
 		  			scanf("%s", data);
@@ -279,43 +411,22 @@ int main(int argc, char *argv[])
 								read(handle);
 							}
 							break;
+						case 'u':	// write + read
+							readWrite(handle);
+							break;
+						case 'l':	// loop
+							readWriteLoop(handle);
+							break;
+						case 's':	// reset first flag (set_altinterface())
+							first = true;
+							break;
+						case 'z':	// reset and open
+							usb_reset(handle);
+							handle = usb_open(dev);
+							break;
 						default:
 							break;
 					}
-	
-	//	  			printf("type a string...\n");
-	//	    		scanf("%s", data);	// Get a string
-		    		
-	//	  			if (usb_claim_interface(handle, INTERFACE) < 0) {
-	//	  				printf("error on usb_claim_interface: %s\n", usb_strerror());
-	//	  				system("PAUSE");
-	//	  				return -1;
-	//	  			}
-	//	  			printf("usb_claim_interface successful\n");
-	//	  			if (usb_set_altinterface(handle, ALTINTERFACE) < 0){
-	//	  				printf("usb_set_altinterface failed: %s\n", usb_strerror());
-	//	  			}
-	//	 			
-	//	  			if (usb_bulk_write(handle, OUT_ENDPOINT, data, strlen(data), 3000) < 0){
-	//	   				printf("usb_bulk_write failed: %s\n", usb_strerror());
-	//	   				system("PAUSE");
-	//	  				return -1;
-	//	 			}
-	//	 			
-	//	    		strcpy(data, "12345678901234567890");
-	//	    		printf("%s\n", "read data");
-	//	 			if (usb_bulk_read(handle, IN_ENDPOINT, data, size, 3000) < 0){
-	//	   				printf("usb_bulk_read failed: %s\n", usb_strerror());
-	//				}
-	//				printf("output %d, %s\n", size, data);
-	//	//			for (int i = 0; i < size; ++i) {
-	//	//				printf("%4x ", data[i]);
-	//	//			}
-	//	  			
-	//	  			usb_release_interface(handle, INTERFACE);
-	// 			}
-	//
-	//  			usb_close(handle);
 		  		}
 		  		printf("\ndone\n");
 		  	}

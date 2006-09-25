@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<!-- ====================================================================== 
+     25.09.2006 14:33:58                                                        
+
+     LibusbWin Dll    
+     Build file for LibusbWin Dll
+     
+     REQUIREMENTS:
+     	gcc and make must be on your PATH
+
+     schlaepfer                                                                
+     ====================================================================== -->
+<project name="LibusbWinDll" default="dll">
+    <description>
+            Build file for LibusbWin Dll
+    </description>
+
+    <target name="clean" description="--> Clean LibusbWin Dll">    	
+    	<exec executable="make">
+    		<arg value="clean"/>
+    	</exec>
+    </target>
+
+    <target name="dll" description="--> Build LibusbWin Dll">    	
+    	<exec executable="make">
+    		<arg value="dll"/>
+    	</exec>
+    </target>
+
+</project>

@@ -28,6 +28,7 @@ $(DDLNAME).dll: $(SOURCENAME).cpp
 clean:
 	$(RM) $(DDLNAME).dll
 	$(RM) *.o
+	$(RM) *.exe
 
 testExe: $(EXENAME).exe
 $(EXENAME).exe: $(EXENAME).cpp
