@@ -147,9 +147,11 @@ public class Device {
 		}
 		release_interface(usbDevHandle, dev_interface);
 		if (LibusbWin.usb_close(usbDevHandle) < 0) {
+			usbDevHandle = 0;
 			throw new USBException("LibusbWin.usb_close: "
 					+ LibusbWin.usb_strerror());
 		}
+		usbDevHandle = 0;
 		maxPacketSize = -1;
 		logger.info("device closed");
 	}
