@@ -51,8 +51,8 @@ public class LibusbWin {
 	 * <code>usb_get_busses</code> returns a tree of descriptor objects.<br>
 	 * The tree represents the bus structure with devices, configurations,
 	 * interfaces and endpoints. Note that this is only a copy. To refresh the
-	 * information, <code>usb_getbusses()</code> must be called again. The
-	 * name of the objects contained in the tree is starting with
+	 * information, <code>usb_get_busses()</code> must be called again.<br>
+	 * The name of the objects contained in the tree is starting with
 	 * <code>Usb_</code>.
 	 * 
 	 * @return the structure of all busses and devices. <code>Note:</code> The
