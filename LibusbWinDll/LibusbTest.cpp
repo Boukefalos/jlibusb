@@ -10,7 +10,7 @@
 
 #define snprintf printf
 
-#define ID_PRODUCT 0x0222
+#define ID_PRODUCT 0x0200
 #define ID_VENDOR 0x8235
 
 #define CONFIGURATION 1
@@ -20,6 +20,8 @@
 
 #define OUT_ENDPOINT 0x01
 #define IN_ENDPOINT 0x82
+
+// #define SET_ALTINTERFACE_ONCE
 
 int verbose = 0;
 unsigned char first = true;
@@ -147,12 +149,16 @@ int read(struct usb_dev_handle *handle)
 		return -1;
 	}
 	printf("usb_claim_interface successful\n");
+#ifdef SET_ALTINTERFACE_ONCE
 	if (first) {
 		first = false;
+#endif
 		if (usb_set_altinterface(handle, ALTINTERFACE) < 0){
 			printf("usb_set_altinterface failed: %s\n", usb_strerror());
 		}
+#ifdef SET_ALTINTERFACE_ONCE
 	}
+#endif
 	
 	int size = 512, res;
 	char *data = (char *) malloc(size*sizeof(char));
@@ -167,6 +173,7 @@ int read(struct usb_dev_handle *handle)
 	printf("\n");
 	
 	usb_release_interface(handle, INTERFACE_);
+	free(data);
 }
 
 int write(struct usb_dev_handle *handle)
@@ -192,12 +199,17 @@ int write(struct usb_dev_handle *handle)
 		return -1;
 	}
 	printf("usb_claim_interface successful\n");
+#ifdef SET_ALTINTERFACE_ONCE
 	if (first) {
 		first = false;
+#endif
 		if (usb_set_altinterface(handle, ALTINTERFACE) < 0){
 			printf("usb_set_altinterface failed: %s\n", usb_strerror());
 		}
+#ifdef SET_ALTINTERFACE_ONCE
 	}
+#endif
+
 	printf("usb_bulk_write: writing %d bytes: ", size);
 	for (int i = 0; i < size; ++i) {
 		printf("%3x ", data[i]);
@@ -213,6 +225,7 @@ int write(struct usb_dev_handle *handle)
 	printf("usb_bulk_write: %d bytes written\n", res);
 	
 	usb_release_interface(handle, INTERFACE_);
+	free(data);
 }
 
 int readWrite(struct usb_dev_handle *handle)
@@ -230,12 +243,16 @@ int readWrite(struct usb_dev_handle *handle)
 		return -1;
 	}
 	printf("usb_claim_interface successful\n");
+#ifdef SET_ALTINTERFACE_ONCE
 	if (first) {
 		first = false;
+#endif
 		if (usb_set_altinterface(handle, ALTINTERFACE) < 0){
 			printf("usb_set_altinterface failed: %s\n", usb_strerror());
 		}
+#ifdef SET_ALTINTERFACE_ONCE
 	}
+#endif
 	
 	if (usb_bulk_write(handle, OUT_ENDPOINT, data, strlen(data), 3000) < 0){
 		printf("usb_bulk_write failed: %s\n", usb_strerror());
@@ -254,6 +271,7 @@ int readWrite(struct usb_dev_handle *handle)
 //	}
 	
 	usb_release_interface(handle, INTERFACE_);
+	free(data);
 }
 
 int readWriteLoop(struct usb_dev_handle *handle)
@@ -280,12 +298,16 @@ int readWriteLoop(struct usb_dev_handle *handle)
 		return -1;
 	}
 	printf("usb_claim_interface successful\n");
+#ifdef SET_ALTINTERFACE_ONCE
 	if (first) {
 		first = false;
+#endif
 		if (usb_set_altinterface(handle, ALTINTERFACE) < 0){
 			printf("usb_set_altinterface failed: %s\n", usb_strerror());
 		}
+#ifdef SET_ALTINTERFACE_ONCE
 	}
+#endif
 
 	printf("usb_bulk_write: writing %d bytes: ", size);
 	for (int i = 0; i < size; ++i) {
@@ -317,6 +339,7 @@ int readWriteLoop(struct usb_dev_handle *handle)
 	}
 	
 	usb_release_interface(handle, INTERFACE_);
+	free(data);
 }
 
 void logDevices()
@@ -383,13 +406,17 @@ int main(int argc, char *argv[])
 	  				return -1;
 	  			}
 
-				printf("Set altinterface\n");
+				printf("Set altinterface (must failed)\n");
+#ifdef SET_ALTINTERFACE_ONCE
 				if (first) {
 					first = false;
+#endif
 					if (usb_set_altinterface(handle, ALTINTERFACE) < 0){
 						printf("usb_set_altinterface failed: %s\n", usb_strerror());
 					}
+#ifdef SET_ALTINTERFACE_ONCE
 				}
+#endif
 	  			
 	  			printf("w=write, r=read, x=exit, t=write+read, u=write+read(2), l=r/w loop, z=reset and open\n");
 	
@@ -432,6 +459,7 @@ int main(int argc, char *argv[])
 		  	}
 	  	}
 	}
+	free(data);
 	system("PAUSE");
 
 	return 1;
