@@ -2,9 +2,9 @@ package ch.ntb.usb;
 
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.logging.Logger;
 
 import ch.ntb.usb.logger.LogUtil;
-import ch.ntb.usb.logger.UsbLogger;
 
 /**
  * This class manages all USB devices and defines some USB specific constants.<br>
@@ -26,7 +26,7 @@ public class USB {
 	 */
 	public static int FULLSPEED_MAX_BULK_PACKET_SIZE = 64;
 
-	private static UsbLogger logger = LogUtil.ch_ntb_usb;
+	private static Logger logger = LogUtil.getLogger("ch.ntb.usb");
 
 	private static LinkedList<Device> devices = new LinkedList<Device>();
 

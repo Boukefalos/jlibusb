@@ -1,9 +1,9 @@
 package ch.ntb.usb;
 
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import ch.ntb.usb.logger.LogUtil;
-import ch.ntb.usb.logger.UsbLogger;
 
 /**
  * This class represents an USB device.<br>
@@ -14,7 +14,7 @@ import ch.ntb.usb.logger.UsbLogger;
  */
 public class Device {
 
-	private static UsbLogger logger = LogUtil.ch_ntb_usb;
+	private static Logger logger = LogUtil.getLogger("ch.ntb.usb");
 
 	private static final int TIMEOUT_ERROR_CODE = -116;
 
@@ -224,7 +224,8 @@ public class Device {
 					+ LibusbWin.usb_strerror());
 		}
 
-		if (logger.getLevel().intValue() <= Level.INFO.intValue()) {
+		logger.info("length written: " + lenWritten);
+		if (logger.getLevel().intValue() <= Level.FINEST.intValue()) {
 			StringBuffer sb = new StringBuffer("bulkwrite, ep 0x"
 					+ Integer.toHexString(out_ep_address) + ": " + lenWritten
 					+ " Bytes sent: ");
@@ -283,7 +284,8 @@ public class Device {
 					+ LibusbWin.usb_strerror());
 		}
 
-		if (logger.getLevel().intValue() <= Level.INFO.intValue()) {
+		logger.info("length read: " + lenRead);
+		if (logger.getLevel().intValue() <= Level.FINEST.intValue()) {
 			StringBuffer sb = new StringBuffer("bulkread, ep 0x"
 					+ Integer.toHexString(in_ep_address) + ": " + lenRead
 					+ " Bytes received: ");
@@ -343,7 +345,8 @@ public class Device {
 					+ LibusbWin.usb_strerror());
 		}
 
-		if (logger.getLevel().intValue() <= Level.INFO.intValue()) {
+		logger.info("length written: " + lenWritten);
+		if (logger.getLevel().intValue() <= Level.FINEST.intValue()) {
 			StringBuffer sb = new StringBuffer("bulkwrite, ep 0x"
 					+ Integer.toHexString(out_ep_address) + ": " + lenWritten
 					+ " Bytes sent: ");
@@ -403,7 +406,8 @@ public class Device {
 					+ LibusbWin.usb_strerror());
 		}
 
-		if (logger.getLevel().intValue() <= Level.INFO.intValue()) {
+		logger.info("length read: " + lenRead);
+		if (logger.getLevel().intValue() <= Level.FINEST.intValue()) {
 			StringBuffer sb = new StringBuffer("bulkread, ep 0x"
 					+ Integer.toHexString(in_ep_address) + ": " + lenRead
 					+ " Bytes received: ");

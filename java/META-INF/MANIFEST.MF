@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Inf USB Library
+Bundle-SymbolicName: ch.ntb.usb
+Bundle-Version: 1.0.0
+Bundle-Localization: plugin
+Bundle-Vendor: inf.ntb.ch
+Eclipse-LazyStart: false
+Require-Bundle: org.junit4,
+ org.eclipse.swt
+Export-Package: ch.ntb.usb,
+ ch.ntb.usb.testApp,
+ ch.ntb.usb.usbView
