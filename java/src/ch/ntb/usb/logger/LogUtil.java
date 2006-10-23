@@ -1,6 +1,7 @@
 package ch.ntb.usb.logger;
 
 import java.io.FileInputStream;
+import java.net.URL;
 import java.util.Properties;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Handler;
@@ -54,7 +55,8 @@ public class LogUtil {
 
 	private static void createLoggersFromProperties() {
 		try {
-			FileInputStream fis = new FileInputStream(PROPERTIES_FILE);
+			URL url = ClassLoader.getSystemResource(PROPERTIES_FILE);
+			FileInputStream fis = new FileInputStream(url.getFile());
 			Properties prop = new Properties();
 			prop.load(fis);
 			// get global debug enable flag
