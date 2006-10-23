@@ -26,7 +26,7 @@ public class USB {
 	 */
 	public static int FULLSPEED_MAX_BULK_PACKET_SIZE = 64;
 
-	private static Logger logger = LogUtil.getLogger("ch.ntb.usb");
+	private static final Logger logger = LogUtil.getLogger("ch.ntb.usb");
 
 	private static LinkedList<Device> devices = new LinkedList<Device>();
 

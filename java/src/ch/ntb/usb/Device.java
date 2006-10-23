@@ -14,7 +14,7 @@ import ch.ntb.usb.logger.LogUtil;
  */
 public class Device {
 
-	private static Logger logger = LogUtil.getLogger("ch.ntb.usb");
+	private static final Logger logger = LogUtil.getLogger("ch.ntb.usb");
 
 	private static final int TIMEOUT_ERROR_CODE = -116;
 
@@ -225,7 +225,7 @@ public class Device {
 		}
 
 		logger.info("length written: " + lenWritten);
-		if (logger.getLevel().intValue() <= Level.FINEST.intValue()) {
+		if (logger.isLoggable(Level.FINEST)) {
 			StringBuffer sb = new StringBuffer("bulkwrite, ep 0x"
 					+ Integer.toHexString(out_ep_address) + ": " + lenWritten
 					+ " Bytes sent: ");
@@ -285,7 +285,7 @@ public class Device {
 		}
 
 		logger.info("length read: " + lenRead);
-		if (logger.getLevel().intValue() <= Level.FINEST.intValue()) {
+		if (logger.isLoggable(Level.FINEST)) {
 			StringBuffer sb = new StringBuffer("bulkread, ep 0x"
 					+ Integer.toHexString(in_ep_address) + ": " + lenRead
 					+ " Bytes received: ");

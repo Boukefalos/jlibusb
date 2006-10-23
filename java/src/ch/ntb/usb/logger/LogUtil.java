@@ -33,6 +33,7 @@ public class LogUtil {
 		Logger logger = manager.getLogger(name);
 		if (logger == null) {
 			logger = Logger.getLogger(name);
+			initLevel(logger, Level.OFF);
 			manager.addLogger(logger);
 		}
 		logger.setLevel(null);
