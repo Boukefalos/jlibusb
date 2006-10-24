@@ -10,7 +10,7 @@ import ch.ntb.usb.logger.LogUtil;
 
 public class TestImplementation {
 
-	private static Logger logger = LogUtil.getLogger("ch.ntb.usb.test");
+	private static final Logger logger = LogUtil.getLogger("ch.ntb.usb.test");
 
 	public static String sendData = "0x5b 0x02 0x01 0x00 0x03 0x03 0xf0 0xf0 0x1f";
 
