@@ -18,6 +18,15 @@
 	<property file="project.properties" />
 	<property file="version.properties" />
 
+	<patternset id="classfiles">
+		<include name="**/usb/**/*.class" />
+		<exclude name="**/test/*" />
+	</patternset>
+	
+	<patternset id="configfiles">
+		<include name="**/*.configure"/>
+	</patternset>
+
 	<target name="clean" description="--> Clean all folders">
 		<delete dir="${project.dir.bin}" />
 		<delete dir="${project.dir.doc}" />
@@ -31,7 +40,14 @@
 
 	<target name="jar" depends="compile" description="--> Create Jar">
 		<mkdir dir="${project.dir.lib}" />
-		<jar destfile="${project.dir.lib}/${project.jarfile}" basedir="${project.dir.bin}">
+		<echo>Building Version ${version.major}.${version.minor}.${version.release}</echo>
+		<jar destfile="${project.dir.lib}/${project.jarfile}">
+			<fileset dir="${project.dir.bin}">
+				<patternset refid="classfiles" />
+			</fileset>
+			<fileset dir="${project.dir.src}">
+				<patternset refid="configfiles" />
+			</fileset>
 			<manifest>
 				<attribute name="Built-By" value="${user.name}" />
 				<section name="common">
