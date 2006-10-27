@@ -22,6 +22,17 @@ package ch.ntb.usb;
  */
 public class LibusbWin {
 
+	/**
+	 * Sets the debugging level of libusb.<br>
+	 * 
+	 * The range is from 0 to 255, where 0 disables debug output and 255 enables
+	 * all output. On application start, debugging is disabled (0)
+	 * 
+	 * @param level
+	 *            0 to 255
+	 */
+	public static native void usb_set_debug(int level);
+
 	// Core
 	/**
 	 * Just like the name implies, <code>usb_init</code> sets up some internal
