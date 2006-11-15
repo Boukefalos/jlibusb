@@ -346,7 +346,7 @@ public class Device {
 		}
 
 		logger.info("length written: " + lenWritten);
-		if (logger.getLevel().intValue() <= Level.FINEST.intValue()) {
+		if (logger.isLoggable(Level.FINEST)) {
 			StringBuffer sb = new StringBuffer("bulkwrite, ep 0x"
 					+ Integer.toHexString(out_ep_address) + ": " + lenWritten
 					+ " Bytes sent: ");
@@ -407,7 +407,7 @@ public class Device {
 		}
 
 		logger.info("length read: " + lenRead);
-		if (logger.getLevel().intValue() <= Level.FINEST.intValue()) {
+		if (logger.isLoggable(Level.FINEST)) {
 			StringBuffer sb = new StringBuffer("bulkread, ep 0x"
 					+ Integer.toHexString(in_ep_address) + ": " + lenRead
 					+ " Bytes received: ");
