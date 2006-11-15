@@ -7,198 +7,203 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import ch.ntb.usb.AbstractDeviceInfo.WriteMode;
+
 public class DeviceTest {
 
-	private static final short IdVendor = (short) 0x8235;
-
-	private static final short IdProduct = 0x0222;
-
-	private static final int Timeout = 20000;
-
-	private static final int Configuration = 1;
-
-	private static final int Interface = 0;
-
-	private static final int Altinterface = 0;
-
-	private static final int OUT_EP_BULK = 0x01;
-
-	private static int IN_EP_BULK = 0x82;
-
-	private static final int OUT_EP_INT = 0x03;
-
-	private static final int IN_EP_INT = 0x84;
-
-	private static final int Sleep_Timeout = 2000;
+	private static AbstractDeviceInfo devinfo;
 
 	private static byte[] testData;
 
 	private static byte[] readData;
 
-	private static enum WriteMode {
-		Bulk, Interrupt
-	}
-
-	private static WriteMode mode;
-
 	private static Device dev;
 
 	@BeforeClass
 	public static void setUp() throws Exception {
+		// select the device
+		devinfo = new AT90USB1287();
+		// devinfo = new CY7C68013A();
 		// setup test data
-		testData = new byte[USB.FULLSPEED_MAX_BULK_PACKET_SIZE];
+		testData = new byte[devinfo.getMaxDataSize()];
 		readData = new byte[testData.length];
 		// initialise the device
-		dev = USB.getDevice(IdVendor, IdProduct);
-		dev.open(Configuration, Interface, Altinterface);
-		dev.reset();
-		timeout();
-		mode = WriteMode.Bulk;
+		LibusbWin.usb_set_debug(255);
+		dev = USB.getDevice(devinfo.getIdVendor(), devinfo.getIdProduct());
 	}
 
-	@Test(expected=USBException.class)
+	@Test
+	public void initalReset() throws Exception {
+		doOpen();
+		dev.reset();
+		timeout();
+	}
+
+	@Test(expected = USBException.class)
 	public void testClose() throws Exception {
-		dev.open(Configuration, Interface, Altinterface);
-		dev.close();
+		doOpen();
+		doClose();
 		// this call must throw an exception, because the device is closed
-		dev.writeBulk(OUT_EP_BULK, testData, testData.length, Timeout, false);
+		dev.writeBulk(devinfo.getOUT_EP_BULK(), testData, testData.length,
+				devinfo.getTimeout(), false);
 	}
 
-	@Test
-	public void testReset() throws Exception {
-		dev.open(Configuration, Interface, Altinterface);
+	@Test(expected = USBException.class)
+	public void testReset1() throws Exception {
+		doOpen();
 		dev.reset();
-		try {
-			// this call must throw an exception, because the device is closed
-			dev.writeBulk(OUT_EP_BULK, testData, testData.length, Timeout,
-					false);
-			fail();
-		} catch (Exception e) {
-			// must throw an exception
-		}
-		try {
-			// this call must throw an exception, because the device can't be
-			// closed
-			dev.close();
-			fail();
-		} catch (Exception e) {
-			// must throw an exception
-		}
-	}
-
-	@Test
-	public void testBulk() throws Exception {
-		mode = WriteMode.Bulk;
 		timeout();
-		testOpenWriteClose();
+		// this call must throw an exception, because the device is closed
+		dev.writeBulk(devinfo.getOUT_EP_BULK(), testData, testData.length,
+				devinfo.getTimeout(), false);
+	}
+
+	@Test(expected = USBException.class)
+	public void testReset2() throws Exception {
+		doOpen();
+		dev.reset();
+		timeout();
+		// this call must throw an exception, because the device can't be closed
+		doClose();
 	}
 
 	@Test
-	public void testBulkMultiple() throws Exception {
-		final int NumberOfIterations = 20;
-		
-		try {
-			timeout();
-			dev.open(Configuration, Interface, Altinterface);
-			for (int i = 0; i < NumberOfIterations; i++) {
-				initTestData();
-				dev.writeBulk(OUT_EP_BULK, testData, testData.length, Timeout, true);
-				dev.readBulk(IN_EP_BULK, readData, readData.length, Timeout, true);
-				compare(testData, readData);
-			}
-			dev.close();
-		} catch (USBException e) {
-			dev.close();
-			throw new USBException(e.getMessage());
+	public void bulkWriteRead() throws Exception {
+		devinfo.setMode(WriteMode.Bulk);
+		doOpenWriteReadClose();
+	}
+
+	@Test
+	public void interruptWriteRead() throws Exception {
+		devinfo.setMode(WriteMode.Interrupt);
+		doOpenWriteReadClose();
+	}
+
+	@Test
+	public void bulkWriteReadMultiple() throws Exception {
+		final int NumberOfIterations = 100;
+
+		devinfo.setMode(WriteMode.Bulk);
+		doOpen();
+		for (int i = 0; i < NumberOfIterations; i++) {
+			initTestData();
+			doWriteRead();
+			compare(testData, readData);
+		}
+		doClose();
+	}
+
+	@Test
+	public void multipleOpenCloseWithBulkWrite() throws Exception {
+		devinfo.setMode(WriteMode.Bulk);
+		for (int i = 0; i < 5; i++) {
+			doOpen();
+			doClose();
+		}
+		doOpenWriteReadClose();
+		for (int i = 0; i < 10; i++) {
+			doOpen();
+			doWriteRead();
+			doClose();
+		}
+		doOpenWriteReadClose();
+		for (int i = 0; i < 5; i++) {
+			doOpen();
+			doClose();
 		}
 	}
 
 	@Test
-	public void testInterrupt() throws Exception {
-		mode = WriteMode.Interrupt;
-		testOpenWriteClose();
-	}
-
-	@Test
-	public void testBulkAndInterrupt() throws Exception {
-		timeout();
-		dev.open(Configuration, Interface, Altinterface);
+	public void bulkAndInterrupt() throws Exception {
+		doOpen();
 		// BULK
-		initTestData();
-		dev.writeBulk(OUT_EP_BULK, testData, testData.length, Timeout, false);
-		dev.readBulk(IN_EP_BULK, readData, readData.length, Timeout, false);
-		compare(testData, readData);
+		devinfo.setMode(WriteMode.Bulk);
+		doWriteRead();
 		// INTERRUPT
-		initTestData();
-		dev.writeInterrupt(OUT_EP_INT, testData, testData.length, Timeout,
-				false);
-		// TODO change to readInterrupt
-		dev.readBulk(IN_EP_INT, readData, readData.length, Timeout, false);
-		compare(testData, readData);
-		dev.close();
+		devinfo.setMode(WriteMode.Interrupt);
+		doWriteRead();
+		doClose();
 	}
 
 	@Test
-	public void testBulkAndInterruptMultiple() {
-		mode = WriteMode.Bulk;
-		timeout();
+	public void bulkAndInterruptMultiple() throws Exception {
+		for (int i = 0; i < 20; i++) {
+			devinfo.setMode(WriteMode.Bulk);
+			doOpenWriteReadClose();
+			devinfo.setMode(WriteMode.Interrupt);
+			doOpenWriteReadClose();
+		}
 	}
 
 	@Test
 	public void testGetIdProduct() {
-		Assert.assertTrue(dev.getIdProduct() == IdProduct);
+		Assert.assertEquals(dev.getIdProduct(), devinfo.getIdProduct());
 	}
 
 	@Test
 	public void testGetIdVendor() {
-		Assert.assertTrue(dev.getIdVendor() == IdVendor);
+		Assert.assertEquals(dev.getIdVendor(), devinfo.getIdVendor());
 	}
 
 	@Test
 	public void testGetAltinterface() {
-		Assert.assertTrue(dev.getAltinterface() == Altinterface);
+		Assert.assertEquals(dev.getAltinterface(), devinfo.getAltinterface());
 	}
 
 	@Test
 	public void testGetConfiguration() {
-		Assert.assertTrue(dev.getConfiguration() == Configuration);
+		Assert.assertEquals(dev.getConfiguration(), devinfo.getConfiguration());
 	}
 
 	@Test
 	public void testGetInterface() {
-		Assert.assertTrue(dev.getInterface() == Interface);
+		Assert.assertEquals(dev.getInterface(), devinfo.getInterface());
 	}
 
 	@Test
-	public void testGetMaxPacketSize() {
-		Assert
-				.assertTrue(dev.getMaxPacketSize() == USB.FULLSPEED_MAX_BULK_PACKET_SIZE);
+	public void testGetMaxPacketSize() throws USBException {
+		doOpen();
+		Assert.assertEquals(dev.getMaxPacketSize(), devinfo.getMaxDataSize());
+		doClose();
 	}
 
 	@AfterClass
-	public static void tearDown() {
-		try {
+	public static void tearDown() throws Exception {
+		if (dev.isOpen()) {
 			dev.close();
-		} catch (USBException e) {
-			// ignore Exceptions
 		}
 	}
 
-	private void testOpenWriteClose() throws Exception {
-		dev.open(Configuration, Interface, Altinterface);
+	private void doOpen() throws USBException {
+		dev.open(devinfo.getConfiguration(), devinfo.getInterface(), devinfo
+				.getAltinterface());
+	}
+
+	private void doClose() throws USBException {
+		dev.close();
+	}
+
+	private void doOpenWriteReadClose() throws Exception {
+		doOpen();
+		doWriteRead();
+		compare(testData, readData);
+		doClose();
+	}
+
+	private void doWriteRead() throws Exception {
 		initTestData();
-		if (mode == WriteMode.Bulk) {
-			dev.writeBulk(OUT_EP_BULK, testData, testData.length, Timeout,
-					false);
-			dev.readBulk(IN_EP_BULK, readData, readData.length, Timeout, false);
-		} else if (mode == WriteMode.Interrupt) {
-			dev.writeInterrupt(OUT_EP_INT, testData, testData.length, Timeout,
-					false);
-			// TODO change to readInterrupt
-			dev.readBulk(IN_EP_INT, readData, readData.length, Timeout, false);
+		if (devinfo.getMode().equals(WriteMode.Bulk)) {
+			dev.writeBulk(devinfo.getOUT_EP_BULK(), testData, testData.length,
+					devinfo.getTimeout(), false);
+			dev.readBulk(devinfo.getIN_EP_BULK(), readData, readData.length,
+					devinfo.getTimeout(), false);
+		} else if (devinfo.getMode().equals(WriteMode.Interrupt)) {
+			dev.writeInterrupt(devinfo.getOUT_EP_INT(), testData,
+					testData.length, devinfo.getTimeout(), false);
+			dev.readInterrupt(devinfo.getIN_EP_INT(), readData,
+					readData.length, devinfo.getTimeout(), false);
 		}
 		compare(testData, readData);
-		dev.close();
 	}
 
 	private static void compare(byte[] d1, byte[] d2) {
@@ -211,7 +216,7 @@ public class DeviceTest {
 
 	private static void timeout() {
 		try {
-			Thread.sleep(Sleep_Timeout);
+			Thread.sleep(devinfo.getSleepTimeout());
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -223,5 +228,4 @@ public class DeviceTest {
 			readData[i] = 0;
 		}
 	}
-
 }
