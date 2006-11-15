@@ -705,7 +705,7 @@ JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbWin_usb_1interrupt_1read
   (JNIEnv *env, jclass obj, jint dev_handle, jint ep, jbyteArray jbytes, jint size, jint timeout)
   {
   	char *bytes = (char *) malloc(size * sizeof(char));
- 	int retVal = usb_interrupt_write((usb_dev_handle *) dev_handle, ep, bytes, size, timeout);
+ 	int retVal = usb_interrupt_read((usb_dev_handle *) dev_handle, ep, bytes, size, timeout);
   	if (!bytes) { return retVal; }
   	env->SetByteArrayRegion(jbytes, 0, size, (jbyte *) bytes);
   	free(bytes);
