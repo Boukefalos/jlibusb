@@ -1,6 +1,11 @@
 package ch.ntb.usb;
 
 import static org.junit.Assert.fail;
+
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.util.Properties;
+
 import junit.framework.Assert;
 
 import org.junit.AfterClass;
@@ -10,6 +15,10 @@ import org.junit.Test;
 import ch.ntb.usb.AbstractDeviceInfo.WriteMode;
 
 public class DeviceTest {
+
+	private static final String testdevicePropertiesFile = "testdevice.properties";
+
+	private static final String deviceInfoKey = "testdeviceInfo";
 
 	private static AbstractDeviceInfo devinfo;
 
@@ -21,8 +30,19 @@ public class DeviceTest {
 
 	@BeforeClass
 	public static void setUp() throws Exception {
-		// select the device
-		devinfo = new AT90USB1287();
+		// load the device info class with the key
+		// from 'testdevice.properties'
+		InputStream propInputStream = new FileInputStream(
+				testdevicePropertiesFile);
+		Properties devInfoProp = new Properties();
+		devInfoProp.load(propInputStream);
+		String devInfoClazzName = devInfoProp.getProperty(deviceInfoKey);
+		if (devInfoClazzName == null) {
+			throw new IllegalArgumentException("property " + deviceInfoKey
+					+ "not found in file " + testdevicePropertiesFile);
+		}
+		Class devInfoClazz = Class.forName(devInfoClazzName);
+		devinfo = (AbstractDeviceInfo) devInfoClazz.newInstance();
 		// devinfo = new CY7C68013A();
 		// setup test data
 		testData = new byte[devinfo.getMaxDataSize()];
@@ -169,7 +189,7 @@ public class DeviceTest {
 
 	@AfterClass
 	public static void tearDown() throws Exception {
-		if (dev.isOpen()) {
+		if (dev != null && dev.isOpen()) {
 			dev.close();
 		}
 	}
