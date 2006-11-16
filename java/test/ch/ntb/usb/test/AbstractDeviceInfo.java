@@ -1,4 +1,4 @@
-package ch.ntb.usb;
+package ch.ntb.usb.test;
 
 public abstract class AbstractDeviceInfo {
 

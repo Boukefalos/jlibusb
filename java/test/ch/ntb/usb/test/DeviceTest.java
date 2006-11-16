@@ -1,4 +1,4 @@
-package ch.ntb.usb;
+package ch.ntb.usb.test;
 
 import static org.junit.Assert.fail;
 
@@ -12,7 +12,11 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import ch.ntb.usb.AbstractDeviceInfo.WriteMode;
+import ch.ntb.usb.Device;
+import ch.ntb.usb.LibusbWin;
+import ch.ntb.usb.USB;
+import ch.ntb.usb.USBException;
+import ch.ntb.usb.test.AbstractDeviceInfo.WriteMode;
 
 public class DeviceTest {
 

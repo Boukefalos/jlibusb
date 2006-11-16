@@ -8,6 +8,4 @@ Bundle-Vendor: inf.ntb.ch
 Eclipse-LazyStart: false
 Require-Bundle: org.junit4,
  org.eclipse.swt
-Export-Package: ch.ntb.usb,
- ch.ntb.usb.testApp,
- ch.ntb.usb.usbView
+Export-Package: ch.ntb.usb
