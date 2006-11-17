@@ -1,9 +1,6 @@
 package ch.ntb.usb.logger;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.net.URL;
-import java.net.URLDecoder;
+import java.io.InputStream;
 import java.util.Properties;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Handler;
@@ -57,14 +54,11 @@ public class LogUtil {
 
 	private static void createLoggersFromProperties() {
 		try {
-			URL url = ClassLoader.getSystemResource(PROPERTIES_FILE);
-			if (url == null)
-				throw new FileNotFoundException(PROPERTIES_FILE
-						+ " not found -> file must be on classpath");
-			String filename = URLDecoder.decode(url.getPath(), "UTF-8");
-			FileInputStream fis = new FileInputStream(filename);
+			InputStream is = LogUtil.class.getClassLoader()
+					.getResourceAsStream(PROPERTIES_FILE);
+			// FileInputStream fis = new FileInputStream();
 			Properties prop = new Properties();
-			prop.load(fis);
+			prop.load(is);
 			// get global debug enable flag
 			debugEnabled = Boolean.parseBoolean(prop.getProperty(PLUGIN_ID
 					+ "/debug"));

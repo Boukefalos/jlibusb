@@ -43,7 +43,7 @@ public class DeviceTest {
 		String devInfoClazzName = devInfoProp.getProperty(deviceInfoKey);
 		if (devInfoClazzName == null) {
 			throw new IllegalArgumentException("property " + deviceInfoKey
-					+ "not found in file " + testdevicePropertiesFile);
+					+ " not found in file " + testdevicePropertiesFile);
 		}
 		Class devInfoClazz = Class.forName(devInfoClazzName);
 		devinfo = (AbstractDeviceInfo) devInfoClazz.newInstance();
