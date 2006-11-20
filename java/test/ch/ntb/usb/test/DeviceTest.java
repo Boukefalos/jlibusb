@@ -1,6 +1,7 @@
 package ch.ntb.usb.test;
 
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -16,6 +17,8 @@ import ch.ntb.usb.Device;
 import ch.ntb.usb.LibusbWin;
 import ch.ntb.usb.USB;
 import ch.ntb.usb.USBException;
+import ch.ntb.usb.Usb_Config_Descriptor;
+import ch.ntb.usb.Usb_Device_Descriptor;
 import ch.ntb.usb.test.AbstractDeviceInfo.WriteMode;
 
 public class DeviceTest {
@@ -32,6 +35,7 @@ public class DeviceTest {
 
 	private static Device dev;
 
+	@SuppressWarnings("unchecked")
 	@BeforeClass
 	public static void setUp() throws Exception {
 		// load the device info class with the key
@@ -54,6 +58,19 @@ public class DeviceTest {
 		// initialise the device
 		LibusbWin.usb_set_debug(255);
 		dev = USB.getDevice(devinfo.getIdVendor(), devinfo.getIdProduct());
+	}
+
+	@SuppressWarnings("null")
+	@Test
+	public void getDescriptors() throws Exception {
+		dev.updateDescriptors();
+		Usb_Device_Descriptor devDescriptor = dev.getDeviceDescriptor();
+		assertTrue(devDescriptor != null);
+		assertEquals(devinfo.getIdProduct(), devDescriptor.idProduct);
+		assertEquals(devinfo.getIdVendor(), devDescriptor.idVendor);
+		Usb_Config_Descriptor confDescriptors[] = dev.getConfigDescriptors();
+		assertTrue(confDescriptors != null);
+		assertTrue(confDescriptors[0].interface_.length > 0);
 	}
 
 	@Test
@@ -233,8 +250,7 @@ public class DeviceTest {
 	private static void compare(byte[] d1, byte[] d2) {
 		int minLength = Math.min(d1.length, d2.length);
 		for (int i = 0; i < minLength; i++) {
-			if (d1[i] != d2[i])
-				fail("received data not equal to sent data");
+			assertEquals(d1[i], d2[i]);
 		}
 	}
 

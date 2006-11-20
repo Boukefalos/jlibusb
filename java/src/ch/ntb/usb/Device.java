@@ -26,14 +26,124 @@ public class Device {
 
 	private boolean resetOnFirstOpen, resetDone;
 
-	private int resetTimeout = 1000;
+	private int resetTimeout = 2000;
+
+	private Usb_Device dev;
+
+	private boolean initUSBDone;
 
 	protected Device(short idVendor, short idProduct) {
+		initUSBDone = false;
 		resetOnFirstOpen = false;
 		resetDone = false;
 		maxPacketSize = -1;
 		this.idVendor = idVendor;
 		this.idProduct = idProduct;
+	}
+
+	private void initUSB() {
+		LibusbWin.usb_init();
+		initUSBDone = true;
+	}
+
+	private Usb_Bus initBus() throws USBException {
+		LibusbWin.usb_find_busses();
+		LibusbWin.usb_find_devices();
+
+		Usb_Bus bus = LibusbWin.usb_get_busses();
+		if (bus == null) {
+			throw new USBException("LibusbWin.usb_get_busses(): "
+					+ LibusbWin.usb_strerror());
+		}
+
+		return bus;
+	}
+
+	private void updateMaxPacketSize(Usb_Device device) throws USBException {
+		maxPacketSize = -1;
+		Usb_Config_Descriptor[] confDesc = device.config;
+		for (int i = 0; i < confDesc.length; i++) {
+			Usb_Interface[] int_ = confDesc[i].interface_;
+			for (int j = 0; j < int_.length; j++) {
+				Usb_Interface_Descriptor[] intDesc = int_[j].altsetting;
+				for (int k = 0; k < intDesc.length; k++) {
+					Usb_Endpoint_Descriptor[] epDesc = intDesc[k].endpoint;
+					for (int l = 0; l < epDesc.length; l++) {
+						maxPacketSize = Math.max(epDesc[l].wMaxPacketSize,
+								maxPacketSize);
+					}
+				}
+			}
+		}
+		if (maxPacketSize <= 0) {
+			throw new USBException(
+					"No USB endpoints found. Check the device configuration");
+		}
+	}
+
+	private Usb_Device initDevice() throws USBException {
+		Usb_Bus bus = initBus();
+
+		Usb_Device device = null;
+		// search for device
+		while (bus != null) {
+			device = bus.devices;
+			while (device != null) {
+				Usb_Device_Descriptor devDesc = device.descriptor;
+				if ((devDesc.idVendor == idVendor)
+						&& (devDesc.idProduct == idProduct)) {
+					logger.info("Device found: " + device.filename);
+					updateMaxPacketSize(device);
+					return device;
+				}
+				device = device.next;
+			}
+			bus = bus.next;
+		}
+		return null;
+	}
+
+	/**
+	 * Updates the device and descriptor information from the bus.<br>
+	 * The descriptors can be read with {@link #getDeviceDescriptor()} and
+	 * {@link #getConfigDescriptors()}.
+	 * 
+	 * @throws USBException
+	 */
+	public void updateDescriptors() throws USBException {
+		if (!initUSBDone)
+			initUSB();
+		dev = initDevice();
+	}
+
+	/**
+	 * Returns the device descriptor associated with this device.<br>
+	 * The descriptor is updated by calling {@link #updateDescriptors()} or
+	 * {@link #open(int, int, int)}.
+	 * 
+	 * @return the device descriptor associated with this device or
+	 *         <code>null</code>
+	 */
+	public Usb_Device_Descriptor getDeviceDescriptor() {
+		if (dev == null) {
+			return null;
+		}
+		return dev.descriptor;
+	}
+
+	/**
+	 * Returns the configuration descriptors associated with this device.<br>
+	 * The descriptors are updated by calling {@link #updateDescriptors()} or
+	 * {@link #open(int, int, int)}.
+	 * 
+	 * @return the configuration descriptors associated with this device or
+	 *         <code>null</code>
+	 */
+	public Usb_Config_Descriptor[] getConfigDescriptors() {
+		if (dev == null) {
+			return null;
+		}
+		return dev.config;
 	}
 
 	/**
@@ -58,65 +168,24 @@ public class Device {
 		this.dev_interface = interface_;
 		this.dev_altinterface = altinterface;
 
-		Usb_Bus bus;
-
 		if (usbDevHandle > 0) {
 			throw new USBException("device opened, close or reset first");
 		}
 
-		// open bus
-		LibusbWin.usb_init();
-		LibusbWin.usb_find_busses();
-		LibusbWin.usb_find_devices();
+		initUSB();
 
-		bus = LibusbWin.usb_get_busses();
-		if (bus == null) {
-			throw new USBException("LibusbWin.usb_get_busses(): "
-					+ LibusbWin.usb_strerror());
-		}
+		dev = initDevice();
 
-		maxPacketSize = -1;
-
-		// search for device
-		while (bus != null) {
-			Usb_Device dev = bus.devices;
-			while (dev != null) {
-				Usb_Device_Descriptor devDesc = dev.descriptor;
-				if ((devDesc.idVendor == idVendor)
-						&& (devDesc.idProduct == idProduct)) {
-					logger.info("Open device: " + dev.filename);
-					int res = LibusbWin.usb_open(dev);
-					if (res <= 0) {
-						throw new USBException("LibusbWin.usb_open: "
-								+ LibusbWin.usb_strerror());
-					}
-					usbDevHandle = res;
-					// get endpoint wMaxPacketSize
-					Usb_Config_Descriptor[] confDesc = dev.config;
-					for (int i = 0; i < confDesc.length; i++) {
-						Usb_Interface[] int_ = confDesc[i].interface_;
-						for (int j = 0; j < int_.length; j++) {
-							Usb_Interface_Descriptor[] intDesc = int_[j].altsetting;
-							for (int k = 0; k < intDesc.length; k++) {
-								Usb_Endpoint_Descriptor[] epDesc = intDesc[k].endpoint;
-								for (int l = 0; l < epDesc.length; l++) {
-									maxPacketSize = Math.max(
-											epDesc[l].wMaxPacketSize,
-											maxPacketSize);
-								}
-							}
-						}
-					}
-					if (maxPacketSize <= 0) {
-						throw new USBException(
-								"No USB endpoints found. Check the device configuration");
-					}
-				}
-				dev = dev.next;
+		if (dev != null) {
+			int res = LibusbWin.usb_open(dev);
+			if (res <= 0) {
+				throw new USBException("LibusbWin.usb_open: "
+						+ LibusbWin.usb_strerror());
 			}
-			bus = bus.next;
+			usbDevHandle = res;
 		}
-		if (usbDevHandle <= 0) {
+
+		if (dev == null || usbDevHandle <= 0) {
 			throw new USBException("USB device with idVendor 0x"
 					+ Integer.toHexString(idVendor & 0xFFFF)
 					+ " and idProduct 0x"
@@ -492,8 +561,8 @@ public class Device {
 	}
 
 	/**
-	 * Returns the alternative interface. This value is only valid after opening
-	 * the device.<br>
+	 * Returns the alternative interface.<br>
+	 * This value is only valid after opening the device.
 	 * 
 	 * @return the alternative interface. This value is only valid after opening
 	 *         the device.
@@ -503,8 +572,8 @@ public class Device {
 	}
 
 	/**
-	 * Returns the current configuration used. This value is only valid after
-	 * opening the device.<br>
+	 * Returns the current configuration used.<br>
+	 * This value is only valid after opening the device.
 	 * 
 	 * @return the current configuration used. This value is only valid after
 	 *         opening the device.
@@ -514,25 +583,14 @@ public class Device {
 	}
 
 	/**
-	 * Returns the current interface. This value is only valid after opening the
-	 * device.<br>
+	 * Returns the current interface.<br>
+	 * This value is only valid after opening the device.
 	 * 
 	 * @return the current interface. This value is only valid after opening the
 	 *         device.
 	 */
 	public int getInterface() {
 		return dev_interface;
-	}
-
-	/**
-	 * Returns the current device handle. This value is only valid after opening
-	 * the device.<br>
-	 * 
-	 * @return the current device handle. This value is only valid after opening
-	 *         the device.
-	 */
-	public int getUsbDevHandle() {
-		return usbDevHandle;
 	}
 
 	/**
