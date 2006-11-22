@@ -1,3 +1,9 @@
+/* 
+ * Java LibUsb-Win32 wrapper
+ * Copyright (c) 2005-2006 Andreas Schläpfer <inf.ntb.ch>
+ *
+ * This library is covered by the LGPL, read LGPL.txt for details.
+ */
 package ch.ntb.usb.logger;
 
 import java.io.InputStream;
