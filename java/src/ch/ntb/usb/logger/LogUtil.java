@@ -18,6 +18,9 @@ public class LogUtil {
 
 	private static final String PLUGIN_ID = "ch.ntb.usb";
 	private static final String PROPERTIES_FILE = ".configure";
+	private static final String LOGGER_WARNING = "Warning in class "
+			+ LogUtil.class.getName()
+			+ ": could not load the logger properties file " + PROPERTIES_FILE;
 
 	private static boolean debugEnabled;
 
@@ -62,37 +65,40 @@ public class LogUtil {
 		try {
 			InputStream is = LogUtil.class.getClassLoader()
 					.getResourceAsStream(PROPERTIES_FILE);
-			// FileInputStream fis = new FileInputStream();
-			Properties prop = new Properties();
-			prop.load(is);
-			// get global debug enable flag
-			debugEnabled = Boolean.parseBoolean(prop.getProperty(PLUGIN_ID
-					+ "/debug"));
-			// get and configure loggers
-			boolean moreLoggers = true;
-			int loggerCount = 0;
-			while (moreLoggers) {
-				String loggerProp = prop.getProperty(PLUGIN_ID
-						+ "/debug/logger" + loggerCount);
-				loggerCount++;
-				if (loggerProp != null) {
-					// parse string and get logger name and log level
-					int slashIndex = loggerProp.indexOf('/');
-					String loggerName = loggerProp.substring(0, slashIndex)
-							.trim();
-					String logLevel = loggerProp.substring(slashIndex + 1,
-							loggerProp.length());
-					// register logger
-					Level level;
-					if (debugEnabled) {
-						level = Level.parse(logLevel);
+			if (is == null) {
+				System.err.println(LOGGER_WARNING);
+			} else {
+				Properties prop = new Properties();
+				prop.load(is);
+				// get global debug enable flag
+				debugEnabled = Boolean.parseBoolean(prop.getProperty(PLUGIN_ID
+						+ "/debug"));
+				// get and configure loggers
+				boolean moreLoggers = true;
+				int loggerCount = 0;
+				while (moreLoggers) {
+					String loggerProp = prop.getProperty(PLUGIN_ID
+							+ "/debug/logger" + loggerCount);
+					loggerCount++;
+					if (loggerProp != null) {
+						// parse string and get logger name and log level
+						int slashIndex = loggerProp.indexOf('/');
+						String loggerName = loggerProp.substring(0, slashIndex)
+								.trim();
+						String logLevel = loggerProp.substring(slashIndex + 1,
+								loggerProp.length());
+						// register logger
+						Level level;
+						if (debugEnabled) {
+							level = Level.parse(logLevel);
+						} else {
+							level = Level.OFF;
+						}
+						Logger logger = getLogger(loggerName);
+						initLevel(logger, level);
 					} else {
-						level = Level.OFF;
+						moreLoggers = false;
 					}
-					Logger logger = getLogger(loggerName);
-					initLevel(logger, level);
-				} else {
-					moreLoggers = false;
 				}
 			}
 		} catch (Exception e) {
