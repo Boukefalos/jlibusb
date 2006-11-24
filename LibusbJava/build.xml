@@ -25,7 +25,7 @@
 	<patternset id="buildfiles">
 		<include name="**/*.o" />
 		<include name="**/*.dll" />
-		<include name="**/*.so" />
+		<include name="**/*.so.*" />
 	</patternset>
 
 	<target name="clean" description="--> Clean build files">
@@ -47,7 +47,7 @@
 			<arg value="-DRC_VERSION_STR=&apos;\&quot;${version.str}\&quot;&apos;" />
 		</exec>
 		-->
-		<echo level="warning" message="WARNING: If the version has changed -> change the RC_VERSION_STR define in resource.rc to &quot;${version.str}&quot;" />
+		<echo level="warning" message="WARNING: If the version has changed -> change the RC_VERSION_STR define in resource.rc to &quot;${version.win.str}&quot;" />
 		<exec dir="." executable="${build.win.windres}">
 			<arg value="-o${build.win.resource.obj}" />
 			<arg value="${build.win.resource.rc}" />
@@ -68,7 +68,7 @@
 	</target>
 
 	<target name="linux" depends="clean" description="--> Build ${build.shlib.linux.shlibname}">
-		<exec dir="." executable="${build.win.compiler}">
+		<exec dir="." executable="${build.linux.compiler}">
 			<arg value="-shared" />
 			<arg value="-Wl,-soname,${build.shlib.linux.shlibname}" />
 			<arg value="-I${build.linux.includes}" />
