@@ -1,7 +1,7 @@
 Project description
 -------------------
 Java LibUsb-Win32 is a Java wrapper for the  LibUsb-Win32 USB library. LibUsb-Win32
-is a port of the USB library libusb  to the Windows operating systems. The library
+is a port of the USB library libusb to the Windows operating systems. The library
 allows user space applications to access any USB device on Windows in a generic way
 without writing any line of kernel driver code.
 
@@ -11,7 +11,13 @@ For more information about LibUsb-Win32 visit:
 
 For more information about Java LibUsb-Win32 wrapper visit:
 	http://inf.ntb.ch/infoportal/help/topic/ch.ntb.infoportal/projects.html
-	
+
+License
+-------
+The Java LibUsb-Win32 wrapper library is released under the LGPL. See LGPL.txt
+for more information.
+For licensing information about LibUsb-Win32 see http://libusb-win32.sourceforge.net/#license.
+
 Authors
 -------
 Andreas Schläpfer	<libusb@drip.ch>
