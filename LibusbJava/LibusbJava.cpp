@@ -2,7 +2,7 @@
  * 2005/2006
  * Interstate University of Applied Sciences of Technology Buchs NTB
  * Computer Science Laboratory, inf.ntb.ch
- * Andreas Schläpfer, aschlaepfer@ntb.ch
+ * Andreas Schlï¿½pfer, aschlaepfer@ntb.ch
  * 
  * Version 00.02.00
  */
@@ -11,8 +11,8 @@
 #include <stddef.h>
 #include <string.h>
 #include <locale.h>
+#include <usb.h>
 #include "LibusbJava.h"
-#include "usb.h"
 
 //#define DEBUGON
 

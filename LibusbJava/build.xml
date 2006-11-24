@@ -70,10 +70,10 @@
 	<target name="linux" depends="clean" description="--> Build ${build.shlib.linux.shlibname}">
 		<exec dir="." executable="${build.win.compiler}">
 			<arg value="-shared" />
-			<arg value="-Wl,-soname,lib${build.shlib.linux.shlibname}" />
+			<arg value="-Wl,-soname,${build.shlib.linux.shlibname}" />
 			<arg value="-I${build.linux.includes}" />
-			<arg value="-mwindows" />
 			<arg value="-shared" />
+			<arg value="${build.shlib.srcname}" />
 			<arg value="-o${build.shlib.linux.shlibname}.${version.linux}" />
 			<arg value="${build.linux.includes}/${build.lib.libusb}" />
 			<arg value="${build.linux.includes}/${build.lib.libusbpp}" />
