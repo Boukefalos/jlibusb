@@ -21,7 +21,7 @@ import javax.swing.JTextArea;
 import javax.swing.JTree;
 import javax.swing.KeyStroke;
 
-import ch.ntb.usb.LibusbWin;
+import ch.ntb.usb.LibusbJava;
 import ch.ntb.usb.Usb_Bus;
 
 public class UsbView extends JFrame {
@@ -144,11 +144,11 @@ public class UsbView extends JFrame {
 					.addActionListener(new java.awt.event.ActionListener() {
 						public void actionPerformed(java.awt.event.ActionEvent e) {
 							// open bus
-							LibusbWin.usb_init();
-							LibusbWin.usb_find_busses();
-							LibusbWin.usb_find_devices();
+							LibusbJava.usb_init();
+							LibusbJava.usb_find_busses();
+							LibusbJava.usb_find_devices();
 
-							Usb_Bus bus = LibusbWin.usb_get_busses();
+							Usb_Bus bus = LibusbJava.usb_get_busses();
 							if (bus != null) {
 								treeModel.fireTreeStructureChanged(bus);
 							}
@@ -166,11 +166,11 @@ public class UsbView extends JFrame {
 	private JTree getUsbTree() {
 		if (usbTree == null) {
 			// open bus
-			LibusbWin.usb_init();
-			LibusbWin.usb_find_busses();
-			LibusbWin.usb_find_devices();
+			LibusbJava.usb_init();
+			LibusbJava.usb_find_busses();
+			LibusbJava.usb_find_devices();
 
-			Usb_Bus bus = LibusbWin.usb_get_busses();
+			Usb_Bus bus = LibusbJava.usb_get_busses();
 
 			treeModel = new UsbTreeModel(bus, jPropertiesArea);
 			usbTree = new JTree(treeModel);

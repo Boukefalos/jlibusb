@@ -20,7 +20,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ch.ntb.usb.Device;
-import ch.ntb.usb.LibusbWin;
+import ch.ntb.usb.LibusbJava;
 import ch.ntb.usb.USB;
 import ch.ntb.usb.USBException;
 import ch.ntb.usb.Usb_Config_Descriptor;
@@ -52,7 +52,7 @@ public class DeviceTest {
 		devInfoProp.load(propInputStream);
 		String devInfoClazzName = devInfoProp.getProperty(deviceInfoKey);
 		if (devInfoClazzName == null) {
-			throw new IllegalArgumentException("property " + deviceInfoKey
+			throw new Exception("property " + deviceInfoKey
 					+ " not found in file " + testdevicePropertiesFile);
 		}
 		Class devInfoClazz = Class.forName(devInfoClazzName);
@@ -62,7 +62,7 @@ public class DeviceTest {
 		testData = new byte[devinfo.getMaxDataSize()];
 		readData = new byte[testData.length];
 		// initialise the device
-		LibusbWin.usb_set_debug(255);
+		LibusbJava.usb_set_debug(255);
 		dev = USB.getDevice(devinfo.getIdVendor(), devinfo.getIdProduct());
 	}
 

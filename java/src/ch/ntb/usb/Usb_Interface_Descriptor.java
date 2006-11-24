@@ -31,7 +31,7 @@ public class Usb_Interface_Descriptor extends Usb_Descriptor {
 	public byte bInterfaceNumber;
 
 	/**
-	 * Value used to select alternate setting ({@link LibusbWin#usb_set_altinterface(int, int)}).
+	 * Value used to select alternate setting ({@link LibusbJava#usb_set_altinterface(int, int)}).
 	 */
 	public byte bAlternateSetting;
 

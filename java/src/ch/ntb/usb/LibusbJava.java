@@ -23,10 +23,9 @@ package ch.ntb.usb;
  * and adapted where neccessary.<br>
  * 
  * @author schlaepfer
- * @version DLL: 00.02.00
  * 
  */
-public class LibusbWin {
+public class LibusbJava {
 
 	/**
 	 * Sets the debugging level of libusb.<br>
@@ -327,6 +326,11 @@ public class LibusbWin {
 	/** **************************************************************** */
 
 	static {
-		System.load(System.getenv("SystemRoot") + "/system32/LibusbWin.dll");
+		String os = System.getProperty("os.name");
+		if (os.contains("Windows")) {
+			System.loadLibrary("LibusbJava");
+		} else {
+			System.loadLibrary("usbJava");
+		}
 	}
 }

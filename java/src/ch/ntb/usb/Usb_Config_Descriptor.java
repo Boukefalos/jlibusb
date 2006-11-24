@@ -39,7 +39,7 @@ public class Usb_Config_Descriptor extends Usb_Descriptor {
 	public byte bNumInterfaces;
 
 	/**
-	 * Value to use as an argument to select this configuration ({@link LibusbWin#usb_set_configuration(int, int)}).
+	 * Value to use as an argument to select this configuration ({@link LibusbJava#usb_set_configuration(int, int)}).
 	 */
 	public byte bConfigurationValue;
 
