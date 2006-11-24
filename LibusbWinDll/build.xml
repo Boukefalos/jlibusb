@@ -6,25 +6,78 @@
      Build file for LibusbWin Dll
      
      REQUIREMENTS:
-     	gcc and make must be on your PATH
+     	winres
+     	g++
 
      schlaepfer                                                                
      ====================================================================== -->
-<project name="LibusbWinDll" default="dll">
-    <description>
-            Build file for LibusbWin Dll
+<project name="LibusbWinDll" basedir=".">
+	<description>
+            Build file for LibUsb-Win32 Java Wrapper
     </description>
 
-    <target name="clean" description="--> Clean LibusbWin Dll">    	
-    	<exec executable="make">
-    		<arg value="clean"/>
-    	</exec>
-    </target>
+	<property file="project.properties" />
+	<property file="version.properties" />
+	<property name="version.win.rc" value="${version.major},${version.minor},${version.micro},${version.nano}" />
+	<property name="version.win.str" value="${version.major}.${version.minor}.${version.micro}.${version.nano}" />
+	<property name="version.linux" value="${version.major}.${version.minor}.${version.micro}" />
 
-    <target name="dll" description="--> Build LibusbWin Dll">    	
-    	<exec executable="make">
-    		<arg value="dll"/>
-    	</exec>
-    </target>
+	<patternset id="buildfiles">
+		<include name="**/*.o" />
+		<include name="**/*.dll" />
+		<include name="**/*.so" />
+	</patternset>
+
+	<target name="clean" description="--> Clean build files">
+		<delete>
+			<fileset dir=".">
+				<patternset refid="buildfiles" />
+			</fileset>
+		</delete>
+	</target>
+
+	<target name="windows" description="--> Build ${build.shlib.win.shlibname}">
+		<!-- The RC_VERSION_STR string is not recognized by windres as command line argument.
+			I think this is a bug. The only (nasty) workaround I found is to write it directly to the file. -->
+		<!--
+		<exec dir="." executable="${build.win.windres}">
+			<arg value="-o${build.win.resource.obj}" />
+			<arg value="${build.win.resource.rc}" />
+			<arg value="-DRC_VERSION=${version.rc}" />
+			<arg value="-DRC_VERSION_STR=&apos;\&quot;${version.str}\&quot;&apos;" />
+		</exec>
+		-->
+		<echo level="warning" message="WARNING: If the version has changed -> change the RC_VERSION_STR define in resource.rc to &quot;${version.str}&quot;" />
+		<exec dir="." executable="${build.win.windres}">
+			<arg value="-o${build.win.resource.obj}" />
+			<arg value="${build.win.resource.rc}" />
+			<arg value="-DRC_VERSION=${version.win.rc}" />
+		</exec>
+		<exec executable="${build.win.compiler}">
+			<arg value="-Wall" />
+			<arg value="-D_JNI_IMPLEMENTATION_" />
+			<arg value="-Wl,--kill-at" />
+			<arg value="-mwindows" />
+			<arg value="-shared" />
+			<arg value="-I${user.dir}" />
+			<arg value="${build.shlib.srcname}" />
+			<arg value="-o${build.shlib.win.shlibname}" />
+			<arg value="${build.win.resource.obj}" />
+			<arg value="${build.lib.libusb}" />
+		</exec>
+	</target>
+
+	<target name="linux" depends="clean" description="--> Build ${build.shlib.linux.shlibname}">
+		<exec dir="." executable="${build.win.compiler}">
+			<arg value="-shared" />
+			<arg value="-Wl,-soname,lib${build.shlib.linux.shlibname}" />
+			<arg value="-I${build.linux.includes}" />
+			<arg value="-mwindows" />
+			<arg value="-shared" />
+			<arg value="-o${build.shlib.linux.shlibname}.${version.linux}" />
+			<arg value="${build.linux.includes}/${build.lib.libusb}" />
+			<arg value="${build.linux.includes}/${build.lib.libusbpp}" />
+		</exec>
+	</target>
 
 </project>

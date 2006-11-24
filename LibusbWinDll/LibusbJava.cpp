@@ -11,7 +11,7 @@
 #include <stddef.h>
 #include <string.h>
 #include <locale.h>
-#include "LibusbWin.h"
+#include "LibusbJava.h"
 #include "usb.h"
 
 //#define DEBUGON
@@ -68,54 +68,54 @@ jfieldID usb_epDescFID_bLength, usb_epDescFID_bDescriptorType, \
 		 usb_epDescFID_extralen;
 
 /*
- * Class:     ch_ntb_usb_LibusbWin
+ * Class:     ch_ntb_usb_LibusbJava
  * Method:    usb_set_debug
  * Signature: (B)V
  */
-JNIEXPORT void JNICALL Java_ch_ntb_usb_LibusbWin_usb_1set_1debug
+JNIEXPORT void JNICALL Java_ch_ntb_usb_LibusbJava_usb_1set_1debug
   (JNIEnv *env, jclass obj, jint level)
   {
   	usb_set_debug(level);
   }
 /*
- * Class:     ch_ntb_usb_LibusbWin
+ * Class:     ch_ntb_usb_LibusbJava
  * Method:    usb_init
  * Signature: ()V
  */
-JNIEXPORT void JNICALL Java_ch_ntb_usb_LibusbWin_usb_1init
+JNIEXPORT void JNICALL Java_ch_ntb_usb_LibusbJava_usb_1init
   (JNIEnv *env, jclass obj)
   {
   	usb_init();
   }
 
 /*
- * Class:     ch_ntb_usb_LibusbWin
+ * Class:     ch_ntb_usb_LibusbJava
  * Method:    usb_find_busses
  * Signature: ()I
  */
-JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbWin_usb_1find_1busses
+JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbJava_usb_1find_1busses
   (JNIEnv *env, jclass obj)
   {
   	return usb_find_busses();
   }
 
 /*
- * Class:     ch_ntb_usb_LibusbWin
+ * Class:     ch_ntb_usb_LibusbJava
  * Method:    usb_find_devices
  * Signature: ()I
  */
-JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbWin_usb_1find_1devices
+JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbJava_usb_1find_1devices
   (JNIEnv *env, jclass obj)
   {
   	return usb_find_devices();
   }
 
 /*
- * Class:     ch_ntb_usb_LibusbWin
+ * Class:     ch_ntb_usb_LibusbJava
  * Method:    usb_get_busses
  * Signature: ()Lch/ntb/usb/Usb_Bus;
  */
-JNIEXPORT jobject JNICALL Java_ch_ntb_usb_LibusbWin_usb_1get_1busses
+JNIEXPORT jobject JNICALL Java_ch_ntb_usb_LibusbJava_usb_1get_1busses
   (JNIEnv *env, jclass obj)
   {
 	
@@ -339,7 +339,7 @@ JNIEXPORT jobject JNICALL Java_ch_ntb_usb_LibusbWin_usb_1get_1busses
 			env->SetObjectField(usb_devObj, usb_devFID_descriptor, usb_devDescObj);
 			// configuration descriptor
 			// Loop through all of the configurations
-			usb_confDescObjArray = env->NewObjectArray(dev->descriptor.bNumConfigurations, usb_confDescClazz, NULL);
+			usb_confDescObjArray = (jobjectArray) env->NewObjectArray(dev->descriptor.bNumConfigurations, usb_confDescClazz, NULL);
 			if (!usb_confDescObjArray)	{ printf("Error NewObject 6\n"); return NULL;	}
 			for (int c = 0; c < dev->descriptor.bNumConfigurations; c++){
 #ifdef DEBUGON
@@ -370,7 +370,7 @@ JNIEXPORT jobject JNICALL Java_ch_ntb_usb_LibusbWin_usb_1get_1busses
 					printf("Extra descriptors are not passed to java!\n");
 				}
 				// interface
-				usb_intObjArray = env->NewObjectArray(dev->config[c].bNumInterfaces, usb_intClazz, NULL);
+				usb_intObjArray = (jobjectArray) env->NewObjectArray(dev->config[c].bNumInterfaces, usb_intClazz, NULL);
 				if (!usb_intObjArray)	{ printf("Error NewObject (usb_intObjArray)\n"); return NULL;	}
 				for (int i = 0; i < dev->config[c].bNumInterfaces; i++){
 #ifdef DEBUGON
@@ -387,7 +387,7 @@ JNIEXPORT jobject JNICALL Java_ch_ntb_usb_LibusbWin_usb_1get_1busses
 					env->SetObjectArrayElement(usb_intObjArray, i, usb_intObj);
 					env->SetIntField(usb_intObj, usb_intFID_num_altsetting, dev->config[c].interface[i].num_altsetting);
 					// interface descriptor
-					usb_intDescObjArray = env->NewObjectArray(dev->config[c].interface[i].num_altsetting, usb_intDescClazz, NULL);
+					usb_intDescObjArray = (jobjectArray) env->NewObjectArray(dev->config[c].interface[i].num_altsetting, usb_intDescClazz, NULL);
 					if (!usb_intDescObjArray)	{ printf("Error NewObject (usb_intDescObjArray)\n"); return NULL;	}
 					for (int a = 0; a < dev->config[c].interface[i].num_altsetting; a++){
 #ifdef DEBUGON
@@ -419,7 +419,7 @@ JNIEXPORT jobject JNICALL Java_ch_ntb_usb_LibusbWin_usb_1get_1busses
 						}
 						env->SetObjectField(usb_intDescObj, usb_intDescFID_extra, NULL);
 						// endpoint descriptor
-						usb_epDescObjArray = env->NewObjectArray(dev->config[c].interface[i].altsetting[a].bNumEndpoints, usb_epDescClazz, NULL);
+						usb_epDescObjArray = (jobjectArray) env->NewObjectArray(dev->config[c].interface[i].altsetting[a].bNumEndpoints, usb_epDescClazz, NULL);
 						if (!usb_epDescObjArray)	{ printf("Error NewObject (usb_epDescObjArray)\n"); return NULL;	}
 						for (int e = 0; e < dev->config[c].interface[i].altsetting[a].bNumEndpoints; e++){
 #ifdef DEBUGON
@@ -478,11 +478,11 @@ JNIEXPORT jobject JNICALL Java_ch_ntb_usb_LibusbWin_usb_1get_1busses
   }
 
 /*
- * Class:     ch_ntb_usb_LibusbWin
+ * Class:     ch_ntb_usb_LibusbJava
  * Method:    usb_open
  * Signature: (Lch/ntb/usb/Usb_Device;)I
  */
-JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbWin_usb_1open
+JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbJava_usb_1open
   (JNIEnv *env, jclass obj, jobject dev)
   {
   	if (busses == NULL) {	return -1; 	}
@@ -502,88 +502,88 @@ JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbWin_usb_1open
   }
 
 /*
- * Class:     ch_ntb_usb_LibusbWin
+ * Class:     ch_ntb_usb_LibusbJava
  * Method:    usb_close
  * Signature: (I)I
  */
-JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbWin_usb_1close
+JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbJava_usb_1close
   (JNIEnv *env, jclass obj, jint dev_handle)
   {
 	return (jint) usb_close((usb_dev_handle *) dev_handle);
   }
 
 /*
- * Class:     ch_ntb_usb_LibusbWin
+ * Class:     ch_ntb_usb_LibusbJava
  * Method:    usb_set_configuration
  * Signature: (II)I
  */
-JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbWin_usb_1set_1configuration
+JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbJava_usb_1set_1configuration
   (JNIEnv *env, jclass obj, jint dev_handle, jint configuration)
   {
  	return usb_set_configuration((usb_dev_handle *) dev_handle, configuration);
   }
 
 /*
- * Class:     ch_ntb_usb_LibusbWin
+ * Class:     ch_ntb_usb_LibusbJava
  * Method:    usb_set_altinterface
  * Signature: (II)I
  */
-JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbWin_usb_1set_1altinterface
+JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbJava_usb_1set_1altinterface
   (JNIEnv *env, jclass obj, jint dev_handle, jint alternate)
   {
  	return usb_set_altinterface((usb_dev_handle *) dev_handle, alternate);
   }
 
 /*
- * Class:     ch_ntb_usb_LibusbWin
+ * Class:     ch_ntb_usb_LibusbJava
  * Method:    usb_clear_halt
  * Signature: (II)I
  */
-JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbWin_usb_1clear_1halt
+JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbJava_usb_1clear_1halt
   (JNIEnv *env, jclass obj, jint dev_handle, jint ep)
   {
  	return usb_clear_halt((usb_dev_handle *) dev_handle, (unsigned) ep);
   }
 
 /*
- * Class:     ch_ntb_usb_LibusbWin
+ * Class:     ch_ntb_usb_LibusbJava
  * Method:    usb_reset
  * Signature: (I)I
  */
-JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbWin_usb_1reset
+JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbJava_usb_1reset
   (JNIEnv *env, jclass obj, jint dev_handle)
   {
  	return usb_reset((usb_dev_handle *) dev_handle);
   }
 
 /*
- * Class:     ch_ntb_usb_LibusbWin
+ * Class:     ch_ntb_usb_LibusbJava
  * Method:    usb_claim_interface
  * Signature: (II)I
  */
-JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbWin_usb_1claim_1interface
+JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbJava_usb_1claim_1interface
   (JNIEnv *env, jclass obj, jint dev_handle, jint interface)
   {
  	return usb_claim_interface((usb_dev_handle *) dev_handle, interface);
   }
 
 /*
- * Class:     ch_ntb_usb_LibusbWin
+ * Class:     ch_ntb_usb_LibusbJava
  * Method:    usb_release_interface
  * Signature: (II)I
  */
-JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbWin_usb_1release_1interface
+JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbJava_usb_1release_1interface
   (JNIEnv *env, jclass obj, jint dev_handle, jint interface)
   {
  	return usb_release_interface((usb_dev_handle *) dev_handle, interface);
   }
 
 /*
- * Class:     ch_ntb_usb_LibusbWin
+ * Class:     ch_ntb_usb_LibusbJava
  * Method:    usb_control_msg
  * Signature: (IIIII[BII)I
  */
-JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbWin_usb_1control_1msg
+JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbJava_usb_1control_1msg
   (JNIEnv *env, jclass obj, jint dev_handle, jint requesttype, jint request, jint value, jint index, jbyteArray jbytes, jint size, jint timeout)
   {
   	jbyte *bytes = env->GetByteArrayElements(jbytes, NULL);
@@ -595,11 +595,11 @@ JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbWin_usb_1control_1msg
   }
 
 /*
- * Class:     ch_ntb_usb_LibusbWin
+ * Class:     ch_ntb_usb_LibusbJava
  * Method:    usb_get_string
  * Signature: (III)Ljava/lang/String;
  */
-JNIEXPORT jstring JNICALL Java_ch_ntb_usb_LibusbWin_usb_1get_1string
+JNIEXPORT jstring JNICALL Java_ch_ntb_usb_LibusbJava_usb_1get_1string
   (JNIEnv *env, jclass obj, jint dev_handle, jint index, jint langid)
   {
 	char string[256];
@@ -610,11 +610,11 @@ JNIEXPORT jstring JNICALL Java_ch_ntb_usb_LibusbWin_usb_1get_1string
   }
 
 /*
- * Class:     ch_ntb_usb_LibusbWin
+ * Class:     ch_ntb_usb_LibusbJava
  * Method:    usb_get_string_simple
  * Signature: (II)Ljava/lang/String;
  */
-JNIEXPORT jstring JNICALL Java_ch_ntb_usb_LibusbWin_usb_1get_1string_1simple
+JNIEXPORT jstring JNICALL Java_ch_ntb_usb_LibusbJava_usb_1get_1string_1simple
   (JNIEnv *env, jclass obj, jint dev_handle, jint index)
   {
 	char string[256];
@@ -625,11 +625,11 @@ JNIEXPORT jstring JNICALL Java_ch_ntb_usb_LibusbWin_usb_1get_1string_1simple
   }
 
 /*
- * Class:     ch_ntb_usb_LibusbWin
+ * Class:     ch_ntb_usb_LibusbJava
  * Method:    usb_get_descriptor
  * Signature: (IBBI)Ljava/lang/String;
  */
-JNIEXPORT jstring JNICALL Java_ch_ntb_usb_LibusbWin_usb_1get_1descriptor
+JNIEXPORT jstring JNICALL Java_ch_ntb_usb_LibusbJava_usb_1get_1descriptor
   (JNIEnv *env, jclass obj, jint dev_handle, jbyte type, jbyte index, jint size)
   {
 	char *string = (char *) malloc(size * sizeof(char));
@@ -641,11 +641,11 @@ JNIEXPORT jstring JNICALL Java_ch_ntb_usb_LibusbWin_usb_1get_1descriptor
   }
 
 /*
- * Class:     ch_ntb_usb_LibusbWin
+ * Class:     ch_ntb_usb_LibusbJava
  * Method:    usb_get_descriptor_by_endpoint
  * Signature: (IIBBI)Ljava/lang/String;
  */
-JNIEXPORT jstring JNICALL Java_ch_ntb_usb_LibusbWin_usb_1get_1descriptor_1by_1endpoint
+JNIEXPORT jstring JNICALL Java_ch_ntb_usb_LibusbJava_usb_1get_1descriptor_1by_1endpoint
   (JNIEnv *env, jclass obj, jint dev_handle, jint ep, jbyte type, jbyte index, jint size)
   {
 	char *string = (char *) malloc(size * sizeof(char));
@@ -657,11 +657,11 @@ JNIEXPORT jstring JNICALL Java_ch_ntb_usb_LibusbWin_usb_1get_1descriptor_1by_1en
   }
 
 /*
- * Class:     ch_ntb_usb_LibusbWin
+ * Class:     ch_ntb_usb_LibusbJava
  * Method:    usb_bulk_write
  * Signature: (II[BII)I
  */
-JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbWin_usb_1bulk_1write
+JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbJava_usb_1bulk_1write
   (JNIEnv *env, jclass obj, jint dev_handle, jint ep, jbyteArray jbytes, jint size, jint timeout)
   {
   	jbyte *bytes = env->GetByteArrayElements(jbytes, NULL);
@@ -669,11 +669,11 @@ JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbWin_usb_1bulk_1write
   }
 
 /*
- * Class:     ch_ntb_usb_LibusbWin
+ * Class:     ch_ntb_usb_LibusbJava
  * Method:    usb_bulk_read
  * Signature: (II[BII)I
  */
-JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbWin_usb_1bulk_1read
+JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbJava_usb_1bulk_1read
   (JNIEnv *env, jclass obj, jint dev_handle, jint ep, jbyteArray jbytes, jint size, jint timeout)
   {
   	char *bytes = (char *) malloc(size * sizeof(char));
@@ -685,11 +685,11 @@ JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbWin_usb_1bulk_1read
   }
 
 /*
- * Class:     ch_ntb_usb_LibusbWin
+ * Class:     ch_ntb_usb_LibusbJava
  * Method:    usb_interrupt_write
  * Signature: (II[BII)I
  */
-JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbWin_usb_1interrupt_1write
+JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbJava_usb_1interrupt_1write
   (JNIEnv *env, jclass obj, jint dev_handle, jint ep, jbyteArray jbytes, jint size, jint timeout)
   {
   	jbyte *bytes = env->GetByteArrayElements(jbytes, NULL);
@@ -697,11 +697,11 @@ JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbWin_usb_1interrupt_1write
   }
 
 /*
- * Class:     ch_ntb_usb_LibusbWin
+ * Class:     ch_ntb_usb_LibusbJava
  * Method:    usb_interrupt_read
  * Signature: (II[BII)I
  */
-JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbWin_usb_1interrupt_1read
+JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbJava_usb_1interrupt_1read
   (JNIEnv *env, jclass obj, jint dev_handle, jint ep, jbyteArray jbytes, jint size, jint timeout)
   {
   	char *bytes = (char *) malloc(size * sizeof(char));
@@ -713,11 +713,11 @@ JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbWin_usb_1interrupt_1read
   }
 
 /*
- * Class:     ch_ntb_usb_LibusbWin
+ * Class:     ch_ntb_usb_LibusbJava
  * Method:    usb_strerror
  * Signature: ()Ljava/lang/String;
  */
-JNIEXPORT jstring JNICALL Java_ch_ntb_usb_LibusbWin_usb_1strerror
+JNIEXPORT jstring JNICALL Java_ch_ntb_usb_LibusbJava_usb_1strerror
   (JNIEnv *env, jclass obj){
   	
   	char *str = usb_strerror();
