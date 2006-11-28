@@ -51,13 +51,13 @@
 			<arg value="${build.win.resource.rc}" />
 			<arg value="-DRC_VERSION=${version.win.rc}" />
 		</exec>
-		<exec executable="${build.win.compiler}">
+		<exec dir="." executable="${build.win.compiler}">
 			<arg value="-Wall" />
 			<arg value="-D_JNI_IMPLEMENTATION_" />
 			<arg value="-Wl,--kill-at" />
 			<arg value="-mwindows" />
 			<arg value="-shared" />
-			<arg value="-I${user.dir}" />
+			<arg value="-I${basedir}" />
 			<arg value="${build.shlib.srcname}" />
 			<arg value="-o${build.shlib.win.shlibname}" />
 			<arg value="${build.win.resource.obj}" />
