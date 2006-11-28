@@ -22,9 +22,9 @@
 		<include name="**/usb/**/*.class" />
 		<exclude name="**/test/*" />
 	</patternset>
-	
+
 	<patternset id="configfiles">
-		<include name="**/*.configure"/>
+		<include name="**/*.configure" />
 	</patternset>
 
 	<target name="clean" description="--> Clean all folders">
@@ -50,6 +50,7 @@
 			</fileset>
 			<manifest>
 				<attribute name="Built-By" value="${user.name}" />
+				<attribute name="Main-Class" value="${project.manifest.mainclass}" />
 				<section name="common">
 					<attribute name="Implementation-Title" value="${project.name}" />
 					<attribute name="Implementation-Version" value="${version.major}.${version.minor}.${version.release} ${TODAY}" />
