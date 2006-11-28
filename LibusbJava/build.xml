@@ -1,12 +1,10 @@
 <?xml version="1.0"?>
 <!-- ====================================================================== 
-     25.09.2006 14:33:58                                                        
 
-     LibusbWin Dll    
-     Build file for LibusbWin Dll
+     Build file for LibusbJava Shared Library
      
      REQUIREMENTS:
-     	winres
+     	winres (only on windows)
      	g++
 
      schlaepfer                                                                
