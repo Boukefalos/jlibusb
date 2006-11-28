@@ -7,12 +7,16 @@
 package ch.ntb.usb;
 
 /**
- * This class represents the Java Native Interface to the LibUsbWin.dll which is
- * (with some exceptions) a one-to-one representation of the libusb API.<br>
+ * This class represents the Java Native Interface to the shared library which
+ * is (with some exceptions) a one-to-one representation of the libusb API.<br>
  * <br>
  * <h1>Project Description</h1>
- * Java LibUsb-Win32 is a Java wrapper for the LibUsb-Win32 USB library. <a
- * href="http://libusb-win32.sourceforge.net/">LibUsb-Win32</a> is a port of
+ * Java libusb is a Java wrapper for the libusb and libusb-win32 USB library.
+ * 
+ * <a href="http://libusb.sourceforge.net/">libusb</a> aim is to create a
+ * library for use by user level applications to access USB devices regardless
+ * of OS.<br>
+ * <a href="http://libusb-win32.sourceforge.net/">Libusb-win32</a> is a port of
  * the USB library <a href="http://libusb.sourceforge.net/">libusb</a> to the
  * Windows operating systems. The library allows user space applications to
  * access any USB device on Windows in a generic way without writing any line of
@@ -31,7 +35,7 @@ public class LibusbJava {
 	 * Sets the debugging level of libusb.<br>
 	 * 
 	 * The range is from 0 to 255, where 0 disables debug output and 255 enables
-	 * all output. On application start, debugging is disabled (0)
+	 * all output. On application start, debugging is disabled (0).
 	 * 
 	 * @param level
 	 *            0 to 255
