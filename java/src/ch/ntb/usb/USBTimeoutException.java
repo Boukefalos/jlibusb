@@ -1,5 +1,5 @@
 /* 
- * Java LibUsb-Win32 wrapper
+ * Java libusb wrapper
  * Copyright (c) 2005-2006 Andreas Schläpfer <libusb@drip.ch>
  *
  * This library is covered by the LGPL, read LGPL.txt for details.
