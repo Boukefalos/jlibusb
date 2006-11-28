@@ -9,9 +9,9 @@
 
      schlaepfer                                                                
      ====================================================================== -->
-<project name="LibusbWinDll" basedir=".">
+<project name="LibusbJava" basedir=".">
 	<description>
-            Build file for LibUsb-Win32 Java Wrapper
+            Build file for LibusbJava Shared Library
     </description>
 
 	<property file="project.properties" />
