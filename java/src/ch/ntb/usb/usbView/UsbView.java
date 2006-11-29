@@ -7,6 +7,7 @@
 package ch.ntb.usb.usbView;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -16,6 +17,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 import javax.swing.JTree;
@@ -35,11 +37,11 @@ public class UsbView extends JFrame {
 	private JMenu commandsMenu = null;
 	private JMenuItem exitMenuItem = null;
 	private JMenuItem updateMenuItem = null;
-	private JTree usbTree = null;
+	JTree usbTree = null;
 	private JSplitPane jSplitPane = null;
 
 	private JTextArea jPropertiesArea = null;
-	
+
 	UsbTreeModel treeModel;
 
 	/**
@@ -151,6 +153,7 @@ public class UsbView extends JFrame {
 							Usb_Bus bus = LibusbJava.usb_get_busses();
 							if (bus != null) {
 								treeModel.fireTreeStructureChanged(bus);
+								expandAll(usbTree);
 							}
 						}
 					});
@@ -174,6 +177,7 @@ public class UsbView extends JFrame {
 
 			treeModel = new UsbTreeModel(bus, jPropertiesArea);
 			usbTree = new JTree(treeModel);
+			expandAll(usbTree);
 			usbTree.addTreeSelectionListener(treeModel);
 		}
 		return usbTree;
@@ -190,8 +194,9 @@ public class UsbView extends JFrame {
 			jSplitPane.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
 			jSplitPane.setContinuousLayout(true);
 			jSplitPane.setDividerLocation(APP_HIGHT / 2);
-			jSplitPane.setBottomComponent(getJPropertiesArea());
-			jSplitPane.setTopComponent(getUsbTree());
+			jSplitPane
+					.setBottomComponent(createScrollPane(getJPropertiesArea()));
+			jSplitPane.setTopComponent(createScrollPane(getUsbTree()));
 		}
 		return jSplitPane;
 	}
@@ -208,6 +213,11 @@ public class UsbView extends JFrame {
 		return jPropertiesArea;
 	}
 
+	private JScrollPane createScrollPane(Component view) {
+		JScrollPane scrollPane = new JScrollPane(view);
+		return scrollPane;
+	}
+
 	/**
 	 * Launches this application
 	 */
@@ -216,4 +226,11 @@ public class UsbView extends JFrame {
 		application.setVisible(true);
 	}
 
+	void expandAll(JTree tree) {
+		int row = 0;
+		while (row < tree.getRowCount()) {
+			tree.expandRow(row);
+			row++;
+		}
+	}
 }
