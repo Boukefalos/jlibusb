@@ -35,14 +35,26 @@ public class Usb_Descriptor {
 			USB_DT_ENDPOINT_AUDIO_SIZE = 9 /* Audio extension */,
 			USB_DT_HUB_NONVAR_SIZE = 7;
 
-	/**
-	 * Size of descriptor in bytes
-	 */
-	public byte bLength;
+	private byte bLength;
+
+	private byte bDescriptorType;
 
 	/**
-	 * Type of descriptor
+	 * Get the type of this descriptor.<br>
+	 * 
+	 * @return the type of this descriptor
 	 */
-	public byte bDescriptorType;
+	public byte getBDescriptorType() {
+		return bDescriptorType;
+	}
+
+	/**
+	 * Get the size of this descriptor in bytes.<br>
+	 * 
+	 * @return the size of this descriptor in bytes
+	 */
+	public byte getBLength() {
+		return bLength;
+	}
 
 }

@@ -7,7 +7,7 @@
 package ch.ntb.usb;
 
 /**
- * Represents the descriptor of a USB endpoint.<br>
+ * Represents the descriptor of an USB endpoint.<br>
  * Endpoint descriptors are used to describe endpoints other than endpoint zero.
  * Endpoint zero is always assumed to be a control endpoint and is configured
  * before any descriptors are even requested. The host will use the information
@@ -38,7 +38,7 @@ public class Usb_Endpoint_Descriptor extends Usb_Descriptor {
 	 * Endpoint type mask (in bmAttributes).
 	 */
 	public static final int USB_ENDPOINT_TYPE_MASK = 0x03;
-	
+
 	/**
 	 * Possible endpoint types (in bmAttributes).
 	 */
@@ -46,60 +46,110 @@ public class Usb_Endpoint_Descriptor extends Usb_Descriptor {
 			USB_ENDPOINT_TYPE_ISOCHRONOUS = 1, USB_ENDPOINT_TYPE_BULK = 2,
 			USB_ENDPOINT_TYPE_INTERRUPT = 3;
 
+	private byte bEndpointAddress;
+
+	private byte bmAttributes;
+
+	private short wMaxPacketSize;
+
+	private byte bInterval;
+
+	private byte bRefresh;
+
+	private byte bSynchAddress;
+
+	private Usb_Endpoint_Descriptor extra; /* Extra descriptors */
+
+	private int extralen;
+
 	/**
-	 * Endpoint Address<br>
+	 * Returns the endpoint address.<br>
 	 * <br>
 	 * Bits 3..0: Endpoint number <br>
 	 * Bits 6..4: Reserved. Set to zero <br>
 	 * Bit 7: Direction. 0 = Out, 1 = In (ignored for control endpoints)<br>
+	 * 
+	 * @return the endpoint address
 	 */
-	public byte bEndpointAddress;
+	public byte getBEndpointAddress() {
+		return bEndpointAddress;
+	}
 
 	/**
+	 * Returns the intervall for polling endpoint data transfers.<br>
+	 * Value in frame counts. Ignored for Bulk & Control eEndpoints. Isochronous
+	 * endpoints must equal 1 and field may range from 1 to 255 for interrupt
+	 * endpoints.
+	 * 
+	 * @return the intervall for polling endpoint data transfers
+	 */
+	public byte getBInterval() {
+		return bInterval;
+	}
+
+	/**
+	 * Returns the attributes of this endpoint.<br>
+	 * 
 	 * Bits 1..0: Transfer Type (see <i>USB_ENDPOINT_TYPE_XXX</i>).<br>
 	 * Bits 7..2: Reserved.<br>
 	 * 
 	 * <pre>
-	 * If isochronous endpoint:
+	 * 	If isochronous endpoint:
 	 * 		Bits 3..2: Synchronisation type
-	 * 			00 = No synchronisation
+	 *  		00 = No synchronisation
 	 * 			01 = Asynchronous
-	 * 			10 = Adaptive
-	 * 			11 = Synchronous
-	 * 		Bits 5..4: Usage Type
-	 * 			00 = Data endpoint
-	 * 			01 = Feedback endpoint
-	 * 			10 = Explicit feedback data endpoint
-	 * 			11 = Reserved
+	 *          10 = Adaptive
+	 *          11 = Synchronous
+	 *     	Bits 5..4: Usage Type
+	 *      	00 = Data endpoint
+	 *      	01 = Feedback endpoint
+	 *      	10 = Explicit feedback data endpoint
+	 *      	11 = Reserved
 	 * </pre>
+	 * 
+	 * @return the attributes of this endpoint
 	 */
-	public byte bmAttributes;
+	public byte getBmAttributes() {
+		return bmAttributes;
+	}
 
-	/**
-	 * Maximum packet size this endpoint is capable of sending or receiving
-	 */
-	public short wMaxPacketSize;
+	public byte getBRefresh() {
+		return bRefresh;
+	}
 
-	/**
-	 * Intervall for polling endpoint data transfers.<br>
-	 * Value in frame counts. Ignored for Bulk & Control eEndpoints. Isochronous
-	 * endpoints must equal 1 and field may range from 1 to 255 for interrupt
-	 * endpoints.
-	 */
-	public byte bInterval;
-
-	public byte bRefresh;
-
-	public byte bSynchAddress;
+	public byte getBSynchAddress() {
+		return bSynchAddress;
+	}
 
 	/**
 	 * Extra descriptors are currently not interpreted because of their unknown
 	 * structure.
+	 * 
+	 * @return null
 	 */
-	public Usb_Endpoint_Descriptor extra; /* Extra descriptors */
-	// TODO
+	// TODO: implementation
+	public Usb_Endpoint_Descriptor getExtra() {
+		return extra;
+	}
 
-	public int extralen;
+	/**
+	 * Returns the number of bytes of the extra descriptor.<br>
+	 * 
+	 * @return the number of bytes of the extra descriptor
+	 */
+	public int getExtralen() {
+		return extralen;
+	}
+
+	/**
+	 * Returns the maximum packet size of this endpoint is capable of sending or
+	 * receiving.<br>
+	 * 
+	 * @return the maximum packet size
+	 */
+	public short getWMaxPacketSize() {
+		return wMaxPacketSize;
+	}
 
 	@Override
 	public String toString() {

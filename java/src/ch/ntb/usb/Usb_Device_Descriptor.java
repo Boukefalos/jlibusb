@@ -27,79 +27,158 @@ public class Usb_Device_Descriptor extends Usb_Descriptor {
 			USB_CLASS_MASS_STORAGE = 8, USB_CLASS_HUB = 9, USB_CLASS_DATA = 10,
 			USB_CLASS_VENDOR_SPEC = 0xff;
 
+	private short bcdUSB;
+
+	private byte bDeviceClass;
+
+	private byte bDeviceSubClass;
+
+	private byte bDeviceProtocol;
+
+	private byte bMaxPacketSize0;
+
+	private short idVendor;
+
+	private short idProduct;
+
+	private short bcdDevice;
+
+	private byte iManufacturer;
+
+	private byte iProduct;
+
+	private byte iSerialNumber;
+
+	private byte bNumConfigurations;
+
 	/**
-	 * USB Specification number to which the device complies to.<br>
+	 * Returns the device release number.<br>
+	 * Assigned by the manufacturer of the device.
+	 * 
+	 * @return the device release number
+	 */
+	public short getBcdDevice() {
+		return bcdDevice;
+	}
+
+	/**
+	 * Returns the USB specification number to which the device complies to.<br>
 	 * This field reports the highest version of USB the device supports. The
 	 * value is in binary coded decimal with a format of 0xJJMN where JJ is the
 	 * major version number, M is the minor version number and N is the sub
 	 * minor version number.<br>
 	 * Examples: USB 2.0 is reported as 0x0200, USB 1.1 as 0x0110 and USB 1.0 as
 	 * 0x100
+	 * 
+	 * @return the USB specification number to which the device complies to
 	 */
-	public short bcdUSB;
+	public short getBcdUSB() {
+		return bcdUSB;
+	}
 
 	/**
-	 * Class code (Assigned by <a href="http://www.usb.org">www.usb.org</a>)<br>
+	 * Returns the class code (Assigned by <a
+	 * href="http://www.usb.org">www.usb.org</a>)<br>
 	 * If equal to zero, each interface specifies it's own class code. If equal
 	 * to 0xFF, the class code is vendor specified. Otherwise the field is a
 	 * valid class code.
+	 * 
+	 * @return the class code
 	 */
-	public byte bDeviceClass;
+	public byte getBDeviceClass() {
+		return bDeviceClass;
+	}
 
 	/**
-	 * Subclass code (Assigned by <a href="http://www.usb.org">www.usb.org</a>)<br>
+	 * Returns the protocol code (Assigned by <a
+	 * href="http://www.usb.org">www.usb.org</a>)<br>
+	 * 
+	 * @return the protocol code
 	 */
-	public byte bDeviceSubClass;
+	public byte getBDeviceProtocol() {
+		return bDeviceProtocol;
+	}
 
 	/**
-	 * Protocol code (Assigned by <a href="http://www.usb.org">www.usb.org</a>)<br>
+	 * Returns the subclass code (Assigned by <a
+	 * href="http://www.usb.org">www.usb.org</a>)<br>
+	 * 
+	 * @return the subclass code
 	 */
-	public byte bDeviceProtocol;
+	public byte getBDeviceSubClass() {
+		return bDeviceSubClass;
+	}
 
 	/**
-	 * Maximum packet size for endpoint zero. <br>
+	 * Returns the maximum packet size for endpoint zero.<br>
 	 * Valid sizes are 8, 16, 32, 64.
+	 * 
+	 * @return the maximum packet size for endpoint zero
 	 */
-	public byte bMaxPacketSize0;
+	public byte getBMaxPacketSize0() {
+		return bMaxPacketSize0;
+	}
 
 	/**
-	 * Vendor ID (Assigned by <a href="http://www.usb.org">www.usb.org</a>)<br>
+	 * Returns the number of possible configurations supported at its current
+	 * speed.<br>
+	 * 
+	 * @return the number of possible configurations supported at its current
+	 *         speed
 	 */
-	public short idVendor;
+	public byte getBNumConfigurations() {
+		return bNumConfigurations;
+	}
 
 	/**
-	 * Product ID (Assigned by <a href="http://www.usb.org">www.usb.org</a>)<br>
+	 * Returns the product ID (Assigned by <a
+	 * href="http://www.usb.org">www.usb.org</a>)<br>
+	 * 
+	 * @return the product ID
 	 */
-	public short idProduct;
+	public short getIdProduct() {
+		return idProduct;
+	}
 
 	/**
-	 * Device release number<br>
-	 * Assigned by the manufacturer of the device.
+	 * Returns the Vendor ID (Assigned by <a
+	 * href="http://www.usb.org">www.usb.org</a>)<br>
+	 * 
+	 * @return the Vendor ID
 	 */
-	public short bcdDevice;
+	public short getIdVendor() {
+		return idVendor;
+	}
 
 	/**
-	 * Index of manufacturer string descriptor<br>
+	 * Returns the index of the manufacturer string descriptor.<br>
 	 * If this value is 0, no string descriptor is used.
+	 * 
+	 * @return the index of the manufacturer string descriptor
 	 */
-	public byte iManufacturer;
+	public byte getIManufacturer() {
+		return iManufacturer;
+	}
 
 	/**
-	 * Index of product string descriptor<br>
+	 * Returns the index of the product string descriptor.<br>
 	 * If this value is 0, no string descriptor is used.
+	 * 
+	 * @return the index of the product string descriptor
 	 */
-	public byte iProduct;
+	public byte getIProduct() {
+		return iProduct;
+	}
 
 	/**
-	 * Index of serial number string descriptor<br>
+	 * Returns the index of serial number string descriptor.<br>
 	 * If this value is 0, no string descriptor is used.
+	 * 
+	 * @return the index of serial number string descriptor
 	 */
-	public byte iSerialNumber;
-
-	/**
-	 * Number of possible configurations supported at its current speed
-	 */
-	public byte bNumConfigurations;
+	public byte getISerialNumber() {
+		return iSerialNumber;
+	}
 
 	@Override
 	public String toString() {

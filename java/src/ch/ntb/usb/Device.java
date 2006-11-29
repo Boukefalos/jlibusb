@@ -61,21 +61,20 @@ public class Device {
 			throw new USBException("LibusbWin.usb_get_busses(): "
 					+ LibusbJava.usb_strerror());
 		}
-
 		return bus;
 	}
 
 	private void updateMaxPacketSize(Usb_Device device) throws USBException {
 		maxPacketSize = -1;
-		Usb_Config_Descriptor[] confDesc = device.config;
+		Usb_Config_Descriptor[] confDesc = device.getConfig();
 		for (int i = 0; i < confDesc.length; i++) {
-			Usb_Interface[] int_ = confDesc[i].interface_;
+			Usb_Interface[] int_ = confDesc[i].getInterface();
 			for (int j = 0; j < int_.length; j++) {
-				Usb_Interface_Descriptor[] intDesc = int_[j].altsetting;
+				Usb_Interface_Descriptor[] intDesc = int_[j].getAltsetting();
 				for (int k = 0; k < intDesc.length; k++) {
-					Usb_Endpoint_Descriptor[] epDesc = intDesc[k].endpoint;
+					Usb_Endpoint_Descriptor[] epDesc = intDesc[k].getEndpoint();
 					for (int l = 0; l < epDesc.length; l++) {
-						maxPacketSize = Math.max(epDesc[l].wMaxPacketSize,
+						maxPacketSize = Math.max(epDesc[l].getWMaxPacketSize(),
 								maxPacketSize);
 					}
 				}
@@ -93,18 +92,18 @@ public class Device {
 		Usb_Device device = null;
 		// search for device
 		while (bus != null) {
-			device = bus.devices;
+			device = bus.getDevices();
 			while (device != null) {
-				Usb_Device_Descriptor devDesc = device.descriptor;
-				if ((devDesc.idVendor == idVendor)
-						&& (devDesc.idProduct == idProduct)) {
-					logger.info("Device found: " + device.filename);
+				Usb_Device_Descriptor devDesc = device.getDescriptor();
+				if ((devDesc.getIdVendor() == idVendor)
+						&& (devDesc.getIdProduct() == idProduct)) {
+					logger.info("Device found: " + device.getFilename());
 					updateMaxPacketSize(device);
 					return device;
 				}
-				device = device.next;
+				device = device.getNext();
 			}
-			bus = bus.next;
+			bus = bus.getNext();
 		}
 		return null;
 	}
@@ -134,7 +133,7 @@ public class Device {
 		if (dev == null) {
 			return null;
 		}
-		return dev.descriptor;
+		return dev.getDescriptor();
 	}
 
 	/**
@@ -149,7 +148,7 @@ public class Device {
 		if (dev == null) {
 			return null;
 		}
-		return dev.config;
+		return dev.getConfig();
 	}
 
 	/**

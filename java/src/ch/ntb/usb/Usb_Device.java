@@ -16,49 +16,105 @@ package ch.ntb.usb;
  */
 public class Usb_Device {
 
-	/**
-	 * Pointers to the next and previous device
-	 */
-	public Usb_Device next, prev;
+	private Usb_Device next, prev;
+
+	private String filename;
+
+	private Usb_Bus bus;
+
+	private Usb_Device_Descriptor descriptor;
+
+	private Usb_Config_Descriptor[] config;
+
+	private byte devnum;
+
+	private byte num_children;
+
+	private Usb_Device children;
 
 	/**
-	 * Systems String representation
+	 * Returns the reference to the bus to which this device is connected.<br>
+	 * 
+	 * @return the reference to the bus to which this device is connected
 	 */
-	public String filename;
+	public Usb_Bus getBus() {
+		return bus;
+	}
 
 	/**
-	 * Reference to the bus to which this device is connected
+	 * Returns a reference to the first child.<br>
+	 * 
+	 * @return a reference to the first child
 	 */
-	public Usb_Bus bus;
+	public Usb_Device getChildren() {
+		return children;
+	}
 
 	/**
-	 * USB device descriptor
+	 * Returns the USB config descriptors.<br>
+	 * 
+	 * @return the USB config descriptors
 	 */
-	public Usb_Device_Descriptor descriptor;
+	public Usb_Config_Descriptor[] getConfig() {
+		return config;
+	}
 
 	/**
-	 * USB config descriptors
+	 * Returns the USB device descriptor.<br>
+	 * 
+	 * @return the USB device descriptor
 	 */
-	public Usb_Config_Descriptor[] config;
+	public Usb_Device_Descriptor getDescriptor() {
+		return descriptor;
+	}
 
 	/**
-	 * Number assigned to this device
+	 * Returns the number assigned to this device.<br>
+	 * 
+	 * @return the number assigned to this device
 	 */
-	public byte devnum;
+	public byte getDevnum() {
+		return devnum;
+	}
 
 	/**
-	 * Number of children of this device
+	 * Returns the systems String representation.<br>
+	 * 
+	 * @return the systems String representation
 	 */
-	public byte num_children;
+	public String getFilename() {
+		return filename;
+	}
 
 	/**
-	 * Reference to the first child
+	 * Returns the pointer to the next device.<br>
+	 * 
+	 * @return the pointer to the next device or null
 	 */
-	public Usb_Device children;
+	public Usb_Device getNext() {
+		return next;
+	}
+
+	/**
+	 * Returns the number of children of this device.<br>
+	 * 
+	 * @return the number of children of this device
+	 */
+	public byte getNumChildren() {
+		return num_children;
+	}
+
+	/**
+	 * Returns the pointer to the previous device.<br>
+	 * 
+	 * @return the pointer to the previous device or null
+	 */
+	public Usb_Device getPrev() {
+		return prev;
+	}
 
 	@Override
 	public String toString() {
 		return "Usb_Device " + filename;
 	}
-
 }

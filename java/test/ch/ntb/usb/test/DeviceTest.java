@@ -72,11 +72,11 @@ public class DeviceTest {
 		dev.updateDescriptors();
 		Usb_Device_Descriptor devDescriptor = dev.getDeviceDescriptor();
 		assertTrue(devDescriptor != null);
-		assertEquals(devinfo.getIdProduct(), devDescriptor.idProduct);
-		assertEquals(devinfo.getIdVendor(), devDescriptor.idVendor);
+		assertEquals(devinfo.getIdProduct(), devDescriptor.getIdProduct());
+		assertEquals(devinfo.getIdVendor(), devDescriptor.getIdVendor());
 		Usb_Config_Descriptor confDescriptors[] = dev.getConfigDescriptors();
 		assertTrue(confDescriptors != null);
-		assertTrue(confDescriptors[0].interface_.length > 0);
+		assertTrue(confDescriptors[0].getInterface().length > 0);
 	}
 
 	@Test

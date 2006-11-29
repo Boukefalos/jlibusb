@@ -20,62 +20,119 @@ package ch.ntb.usb;
 public class Usb_Config_Descriptor extends Usb_Descriptor {
 
 	/**
-	 * Maximum number of configuration per device
+	 * Maximum number of configurations per device
 	 */
 	public static final int USB_MAXCONFIG = 8;
 
-	/**
-	 * Total length in bytes of data returned.<br>
-	 * When the configuration descriptor is read, it returns the entire
-	 * configuration hierarchy which includes all related interface and endpoint
-	 * descriptors. The <code>wTotalLength</code> field reflects the number of
-	 * bytes in the hierarchy.
-	 */
-	public short wTotalLength;
+	private short wTotalLength;
+
+	private byte bNumInterfaces;
+
+	private byte bConfigurationValue;
+
+	private byte iConfiguration;
+
+	private byte bmAttributes;
+
+	private byte MaxPower;
+
+	private Usb_Interface[] interface_;
+
+	private Usb_Config_Descriptor extra; /* Extra descriptors */
+
+	private int extralen;
 
 	/**
-	 * Number of interfaces
+	 * Returns the value to use as an argument to select this configuration ({@link LibusbJava#usb_set_configuration(int, int)}).
+	 * 
+	 * @return the value to use as an argument to select this configuration
 	 */
-	public byte bNumInterfaces;
+	public byte getBConfigurationValue() {
+		return bConfigurationValue;
+	}
 
 	/**
-	 * Value to use as an argument to select this configuration ({@link LibusbJava#usb_set_configuration(int, int)}).
-	 */
-	public byte bConfigurationValue;
-
-	/**
-	 * Index of String descriptor describing this configuration
-	 */
-	public byte iConfiguration;
-
-	/**
-	 * Specifies power parameters for this configuration<br>
+	 * Returns the power parameters for this configuration.<br>
 	 * <br>
 	 * Bit 7: Reserved, set to 1 (USB 1.0 Bus Powered)<br>
 	 * Bit 6: Self Powered<br>
 	 * Bit 5: Remote Wakeup<br>
 	 * Bit 4..0: Reserved, set to 0
+	 * 
+	 * @return the power parameters for this configuration
 	 */
-	public byte bmAttributes;
+	public byte getBmAttributes() {
+		return bmAttributes;
+	}
 
 	/**
-	 * Maximum power consumption in 2mA units
+	 * Returns the number of interfaces.<br>
+	 * 
+	 * @return the number of interfaces
 	 */
-	public byte MaxPower;
-
-	/**
-	 * USB interface descriptors
-	 */
-	public Usb_Interface[] interface_;
+	public byte getBNumInterfaces() {
+		return bNumInterfaces;
+	}
 
 	/**
 	 * Extra descriptors are currently not interpreted because of their unknown
 	 * structure.
+	 * 
+	 * @return null
 	 */
-	public Usb_Config_Descriptor extra; /* Extra descriptors */
-	// TODO
+	// TODO: implementation
+	public Usb_Config_Descriptor getExtra() {
+		return extra;
+	}
 
-	public int extralen;
+	/**
+	 * Returns the number of bytes of the extra descriptor.<br>
+	 * 
+	 * @return the number of bytes of the extra descriptor
+	 */
+	public int getExtralen() {
+		return extralen;
+	}
+
+	/**
+	 * Returns the index of the String descriptor describing this configuration.<br>
+	 * 
+	 * @return the index of the String descriptor
+	 */
+	public byte getIConfiguration() {
+		return iConfiguration;
+	}
+
+	/**
+	 * Returns the USB interface descriptors.<br>
+	 * 
+	 * @return the USB interface descriptors
+	 */
+	public Usb_Interface[] getInterface() {
+		return interface_;
+	}
+
+	/**
+	 * Returns the maximum power consumption in 2mA units.<br>
+	 * 
+	 * @return the maximum power consumption in 2mA units
+	 */
+	public byte getMaxPower() {
+		return MaxPower;
+	}
+
+	/**
+	 * Returns the total length in bytes of all descriptors.<br>
+	 * When the configuration descriptor is read, it returns the entire
+	 * configuration hierarchy which includes all related interface and endpoint
+	 * descriptors. The <code>wTotalLength</code> field reflects the number of
+	 * bytes in the hierarchy.
+	 * 
+	 * @return the total length in bytes of all descriptors
+	 */
+	public short getWTotalLength() {
+		return wTotalLength;
+	}
 
 	@Override
 	public String toString() {

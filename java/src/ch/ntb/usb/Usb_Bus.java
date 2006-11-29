@@ -16,27 +16,69 @@ package ch.ntb.usb;
  */
 public class Usb_Bus {
 
-	/**
-	 * The next and previous bus object
-	 */
-	public Usb_Bus next, prev;
+	private Usb_Bus next, prev;
+
+	private String dirname;
+
+	private Usb_Device devices;
+
+	private long location;
+
+	private Usb_Device root_dev;
 
 	/**
-	 * Systems String representation of the bus
+	 * Get the first device ojects of the devices linked list.<br>
+	 * 
+	 * @return the first device ojects of the devices linked list or null
 	 */
-	public String dirname;
+	public Usb_Device getDevices() {
+		return devices;
+	}
 
 	/**
-	 * Device objects attached to this bus
+	 * Returns the systems String representation of the bus.<br>
+	 * 
+	 * @return the systems String representation of the bus
 	 */
-	public Usb_Device devices;
+	public String getDirname() {
+		return dirname;
+	}
 
 	/**
-	 * Location in the USB bus linked list
+	 * Returns the next bus object.<br>
+	 * 
+	 * @return Returns the next bus object or null
 	 */
-	public long location;
+	public Usb_Bus getNext() {
+		return next;
+	}
 
-	public Usb_Device root_dev;
+	/**
+	 * Returns the previous bus object.<br>
+	 * 
+	 * @return Returns the previous bus object or null
+	 */
+	public Usb_Bus getPrev() {
+		return prev;
+	}
+
+	/**
+	 * Get the root device of this bus.<br>
+	 * 
+	 * @return the root device oject or null
+	 */
+	public Usb_Device getRootDev() {
+		return root_dev;
+	}
+
+	/**
+	 * Returns the location in the USB bus linked list.<br>
+	 * 
+	 * @return the location in the USB bus linked list
+	 */
+	public long getLocation() {
+		return location;
+	}
 
 	@Override
 	public String toString() {
