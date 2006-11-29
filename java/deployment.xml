@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<!-- ====================================================================== 
+     ch.ntb.usb 
+     Ant deployment tasks for ch.ntb.usb
+
+	 NOTE: for deployment, \\www-server\web must be mapped to W:
+
+     schlaepfer                                                                
+     ====================================================================== -->
+<project name="ch.ntb.usb.deployment" basedir=".">
+	<description>
+		Ant deployment tasks for ch.ntb.usb
+	</description>
+	
+	<import file="build.xml" />
+
+	<property file="deployment.properties" />
+
+	<taskdef name="java2html" classname="de.java2html.anttasks.Java2HtmlTask" classpath="${java2html.dir.lib}" />
+	<target name="java2html">
+		<java2html srcdir="${java2html.dir.src}" destdir="${project.dir.demos}" includes="**/*.java" overwrite="true" style="eclipse" showFileName="true" />
+	</target>
+
+	<target name="distribute" depends="jar, javadoc, java2html" description="--> Distribute to server">
+		<echo message="\\www-server\web must be mapped to W:" />
+		<echo message="copy jar file to server" />
+		<copy file="${project.dir.lib}/${project.jarfile}" todir="${project.server.dir.bin}" />
+		<echo message="copy javadoc to server" />
+		<copy todir="${project.server.dir.doc}">
+			<fileset dir="${project.dir.doc}" />
+		</copy>
+		<echo message="copy html demo files to server" />
+		<copy todir="${project.server.dir.demos}">
+			<fileset dir="${project.dir.demos}" />
+		</copy>
+	</target>
+	
+</project>

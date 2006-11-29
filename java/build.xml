@@ -1,11 +1,7 @@
 <?xml version="1.0"?>
 <!-- ====================================================================== 
-     23.08.2006 08:03:24                                                        
-
      ch.ntb.usb 
      Ant tasks for ch.ntb.usb
-
-	 NOTE: for distribution, \\www-server\web must be mapped to W:
 
      schlaepfer                                                                
      ====================================================================== -->
@@ -31,6 +27,7 @@
 		<delete dir="${project.dir.bin}" />
 		<delete dir="${project.dir.doc}" />
 		<delete dir="${project.dir.lib}" />
+		<delete dir="${project.dir.demos}" />
 	</target>
 
 	<target name="compile" depends="clean" description="--> Compile Java files">
@@ -65,15 +62,4 @@
 			<fileset dir="${project.dir.src}" defaultexcludes="yes" />
 		</javadoc>
 	</target>
-
-	<target name="distribute" depends="jar, javadoc" description="--> Distribute to server">
-		<echo message="\\www-server\web must be mapped to W:" />
-		<echo message="copy jar file to server" />
-		<copy file="${project.dir.lib}/${project.jarfile}" todir="${project.server.dir.bin}" />
-		<echo message="copy javadoc to server" />
-		<copy todir="${project.server.dir.doc}">
-			<fileset dir="${project.dir.doc}" />
-		</copy>
-	</target>
-
 </project>
