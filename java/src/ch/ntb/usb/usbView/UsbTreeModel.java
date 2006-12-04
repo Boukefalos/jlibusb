@@ -79,17 +79,20 @@ public class UsbTreeModel implements TreeModel, TreeSelectionListener {
 				return null;
 			return confDescs[index - 1];
 		} else if (parent instanceof Usb_Config_Descriptor) {
-			Usb_Interface[] intDescs = ((Usb_Config_Descriptor) parent).getInterface();
+			Usb_Interface[] intDescs = ((Usb_Config_Descriptor) parent)
+					.getInterface();
 			if (index >= intDescs.length)
 				return null;
 			return intDescs[index];
 		} else if (parent instanceof Usb_Interface) {
-			Usb_Interface_Descriptor[] altSettings = ((Usb_Interface) parent).getAltsetting();
+			Usb_Interface_Descriptor[] altSettings = ((Usb_Interface) parent)
+					.getAltsetting();
 			if (index >= altSettings.length)
 				return null;
 			return altSettings[index];
 		} else if (parent instanceof Usb_Interface_Descriptor) {
-			Usb_Endpoint_Descriptor[] endpoints = ((Usb_Interface_Descriptor) parent).getEndpoint();
+			Usb_Endpoint_Descriptor[] endpoints = ((Usb_Interface_Descriptor) parent)
+					.getEndpoint();
 			if (index >= endpoints.length)
 				return null;
 			return endpoints[index];
@@ -173,7 +176,8 @@ public class UsbTreeModel implements TreeModel, TreeSelectionListener {
 			Usb_Bus bus = (Usb_Bus) component;
 			StringBuffer sb = new StringBuffer("Usb_Bus\n");
 			sb.append("\tdirname: " + bus.getDirname() + "\n");
-			sb.append("\tlocation: 0x" + Long.toHexString(bus.getLocation()) + "\n");
+			sb.append("\tlocation: 0x" + Long.toHexString(bus.getLocation())
+					+ "\n");
 			textArea.setText(sb.toString());
 		} else if (component instanceof Usb_Device) {
 			Usb_Device device = (Usb_Device) component;
@@ -185,14 +189,16 @@ public class UsbTreeModel implements TreeModel, TreeSelectionListener {
 		} else if (component instanceof Usb_Device_Descriptor) {
 			Usb_Device_Descriptor devDesc = (Usb_Device_Descriptor) component;
 			StringBuffer sb = new StringBuffer("Usb_Device_Descriptor\n");
-			sb.append("\tblenght: 0x" + Integer.toHexString(devDesc.getBLength())
-					+ "\n");
+			sb.append("\tblenght: 0x"
+					+ Integer.toHexString(devDesc.getBLength() & 0xFF) + "\n");
 			sb.append("\tbDescriptorType: 0x"
-					+ Integer.toHexString(devDesc.getBDescriptorType()) + "\n");
+					+ Integer.toHexString(devDesc.getBDescriptorType() & 0xFF)
+					+ "\n");
 			sb.append("\tbcdUSB: 0x"
 					+ Integer.toHexString(devDesc.getBcdUSB() & 0xFFFF) + "\n");
 			sb.append("\tbDeviceClass: 0x"
-					+ Integer.toHexString(devDesc.getBDeviceClass() & 0xFF) + "\n");
+					+ Integer.toHexString(devDesc.getBDeviceClass() & 0xFF)
+					+ "\n");
 			sb.append("\tbDeviceSubClass: 0x"
 					+ Integer.toHexString(devDesc.getBDeviceSubClass() & 0xFF)
 					+ "\n");
@@ -203,19 +209,28 @@ public class UsbTreeModel implements TreeModel, TreeSelectionListener {
 					+ Integer.toHexString(devDesc.getBMaxPacketSize0() & 0xFF)
 					+ " (" + devDesc.getBMaxPacketSize0() + ")\n");
 			sb.append("\tidVendor: 0x"
-					+ Integer.toHexString(devDesc.getIdVendor() & 0xFFFF) + "\n");
-			sb.append("\tidProduct: 0x"
-					+ Integer.toHexString(devDesc.getIdProduct() & 0xFFFF) + "\n");
-			sb.append("\tbcdDevice: 0x"
-					+ Integer.toHexString(devDesc.getBcdDevice()) + "\n");
-			sb.append("\tiManufacturer: 0x"
-					+ Integer.toHexString(devDesc.getIManufacturer()) + "\n");
-			sb.append("\tiProduct: 0x" + Integer.toHexString(devDesc.getIProduct())
+					+ Integer.toHexString(devDesc.getIdVendor() & 0xFFFF)
 					+ "\n");
+			sb.append("\tidProduct: 0x"
+					+ Integer.toHexString(devDesc.getIdProduct() & 0xFFFF)
+					+ "\n");
+			sb
+					.append("\tbcdDevice: 0x"
+							+ Integer
+									.toHexString(devDesc.getBcdDevice() & 0xFF)
+							+ "\n");
+			sb.append("\tiManufacturer: 0x"
+					+ Integer.toHexString(devDesc.getIManufacturer() & 0xFF)
+					+ "\n");
+			sb.append("\tiProduct: 0x"
+					+ Integer.toHexString(devDesc.getIProduct()) + "\n");
 			sb.append("\tiSerialNumber: 0x"
-					+ Integer.toHexString(devDesc.getISerialNumber()) + "\n");
-			sb.append("\tbNumConfigurations: 0x"
-					+ Integer.toHexString(devDesc.getBNumConfigurations()) + "\n");
+					+ Integer.toHexString(devDesc.getISerialNumber() & 0xFF)
+					+ "\n");
+			sb
+					.append("\tbNumConfigurations: 0x"
+							+ Integer.toHexString(devDesc
+									.getBNumConfigurations() & 0xFF) + "\n");
 			// get device handle to retrieve string descriptors
 			Usb_Bus bus = rootBus;
 			while (bus != null) {
@@ -224,7 +239,8 @@ public class UsbTreeModel implements TreeModel, TreeSelectionListener {
 					Usb_Device_Descriptor tmpDevDesc = dev.getDescriptor();
 					if ((dev.getDescriptor() != null)
 							&& ((dev.getDescriptor().getIManufacturer() > 0)
-									|| (dev.getDescriptor().getIProduct() > 0) || (dev.getDescriptor().getISerialNumber() > 0))) {
+									|| (dev.getDescriptor().getIProduct() > 0) || (dev
+									.getDescriptor().getISerialNumber() > 0))) {
 						if (tmpDevDesc.equals(devDesc)) {
 							int handle = LibusbJava.usb_open(dev);
 							sb.append("\nString descriptors\n");
@@ -234,8 +250,8 @@ public class UsbTreeModel implements TreeModel, TreeSelectionListener {
 							}
 							if (dev.getDescriptor().getIManufacturer() > 0) {
 								String manufacturer = LibusbJava
-										.usb_get_string_simple(handle,
-												devDesc.getIManufacturer());
+										.usb_get_string_simple(handle, devDesc
+												.getIManufacturer());
 								if (manufacturer == null)
 									manufacturer = "unable to fetch manufacturer string";
 								sb.append("\tiManufacturer: " + manufacturer
@@ -243,16 +259,16 @@ public class UsbTreeModel implements TreeModel, TreeSelectionListener {
 							}
 							if (dev.getDescriptor().getIProduct() > 0) {
 								String product = LibusbJava
-										.usb_get_string_simple(handle,
-												devDesc.getIProduct());
+										.usb_get_string_simple(handle, devDesc
+												.getIProduct());
 								if (product == null)
 									product = "unable to fetch product string";
 								sb.append("\tiProduct: " + product + "\n");
 							}
 							if (dev.getDescriptor().getISerialNumber() > 0) {
 								String serialNumber = LibusbJava
-										.usb_get_string_simple(handle,
-												devDesc.getISerialNumber());
+										.usb_get_string_simple(handle, devDesc
+												.getISerialNumber());
 								if (serialNumber == null)
 									serialNumber = "unable to fetch serial number string";
 								sb.append("\tiSerialNumber: " + serialNumber
@@ -269,23 +285,29 @@ public class UsbTreeModel implements TreeModel, TreeSelectionListener {
 		} else if (component instanceof Usb_Config_Descriptor) {
 			Usb_Config_Descriptor confDesc = (Usb_Config_Descriptor) component;
 			StringBuffer sb = new StringBuffer("Usb_Config_Descriptor\n");
-			sb.append("\tblenght: 0x" + Integer.toHexString(confDesc.getBLength())
-					+ "\n");
+			sb.append("\tblenght: 0x"
+					+ Integer.toHexString(confDesc.getBLength()) + "\n");
 			sb.append("\tbDescriptorType: 0x"
-					+ Integer.toHexString(confDesc.getBDescriptorType()) + "\n");
+					+ Integer.toHexString(confDesc.getBDescriptorType() & 0xFF)
+					+ "\n");
 			sb.append("\tbNumInterfaces: 0x"
-					+ Integer.toHexString(confDesc.getBNumInterfaces()) + "\n");
-			sb.append("\tbConfigurationValue: 0x"
-					+ Integer.toHexString(confDesc.getBConfigurationValue()) + "\n");
+					+ Integer.toHexString(confDesc.getBNumInterfaces() & 0xFF)
+					+ "\n");
+			sb
+					.append("\tbConfigurationValue: 0x"
+							+ Integer.toHexString(confDesc
+									.getBConfigurationValue() & 0xFF) + "\n");
 			sb.append("\tiConfiguration: 0x"
-					+ Integer.toHexString(confDesc.getIConfiguration()) + "\n");
+					+ Integer.toHexString(confDesc.getIConfiguration() & 0xFF)
+					+ "\n");
 			sb.append("\tbmAttributes: 0x"
-					+ Integer.toHexString(confDesc.getBmAttributes() & 0xFF) + "\n");
+					+ Integer.toHexString(confDesc.getBmAttributes() & 0xFF)
+					+ "\n");
 			sb.append("\tMaxPower [mA]: 0x"
 					+ Integer.toHexString(confDesc.getMaxPower() & 0xFF) + " ("
 					+ confDesc.getMaxPower() + ")\n");
-			sb.append("\textralen: 0x" + Integer.toHexString(confDesc.getExtralen())
-					+ "\n");
+			sb.append("\textralen: 0x"
+					+ Integer.toHexString(confDesc.getExtralen()) + "\n");
 			sb.append("\textra: " + confDesc.getExtra() + "\n");
 			// get device handle to retrieve string descriptors
 			Usb_Bus bus = rootBus;
@@ -303,8 +325,8 @@ public class UsbTreeModel implements TreeModel, TreeSelectionListener {
 								break;
 							}
 							String configuration = LibusbJava
-									.usb_get_string_simple(handle,
-											confDesc.getIConfiguration());
+									.usb_get_string_simple(handle, confDesc
+											.getIConfiguration());
 							if (configuration == null)
 								configuration = "unable to fetch configuration string";
 							sb.append("\tiConfiguration: " + configuration
@@ -329,29 +351,36 @@ public class UsbTreeModel implements TreeModel, TreeSelectionListener {
 		} else if (component instanceof Usb_Interface_Descriptor) {
 			Usb_Interface_Descriptor intDesc = (Usb_Interface_Descriptor) component;
 			StringBuffer sb = new StringBuffer("Usb_Interface_Descriptor\n");
-			sb.append("\tblenght: 0x" + Integer.toHexString(intDesc.getBLength())
-					+ "\n");
+			sb.append("\tblenght: 0x"
+					+ Integer.toHexString(intDesc.getBLength() & 0xFF) + "\n");
 			sb.append("\tbDescriptorType: 0x"
-					+ Integer.toHexString(intDesc.getBDescriptorType()) + "\n");
+					+ Integer.toHexString(intDesc.getBDescriptorType() & 0xFF)
+					+ "\n");
 			sb.append("\tbInterfaceNumber: 0x"
-					+ Integer.toHexString(intDesc.getBInterfaceNumber()) + "\n");
+					+ Integer.toHexString(intDesc.getBInterfaceNumber() & 0xFF)
+					+ "\n");
 			sb.append("\tbAlternateSetting: 0x"
-					+ Integer.toHexString(intDesc.getBAlternateSetting()) + "\n");
+					+ Integer
+							.toHexString(intDesc.getBAlternateSetting() & 0xFF)
+					+ "\n");
 			sb.append("\tbNumEndpoints: 0x"
-					+ Integer.toHexString(intDesc.getBNumEndpoints()) + "\n");
+					+ Integer.toHexString(intDesc.getBNumEndpoints() & 0xFF)
+					+ "\n");
 			sb.append("\tbInterfaceClass: 0x"
 					+ Integer.toHexString(intDesc.getBInterfaceClass() & 0xFF)
 					+ "\n");
-			sb.append("\tbInterfaceSubClass: 0x"
-					+ Integer.toHexString(intDesc.getBInterfaceSubClass() & 0xFF)
-					+ "\n");
-			sb.append("\tbInterfaceProtocol: 0x"
-					+ Integer.toHexString(intDesc.getBInterfaceProtocol() & 0xFF)
-					+ "\n");
+			sb
+					.append("\tbInterfaceSubClass: 0x"
+							+ Integer.toHexString(intDesc
+									.getBInterfaceSubClass() & 0xFF) + "\n");
+			sb
+					.append("\tbInterfaceProtocol: 0x"
+							+ Integer.toHexString(intDesc
+									.getBInterfaceProtocol() & 0xFF) + "\n");
 			sb.append("\tiInterface: 0x"
 					+ Integer.toHexString(intDesc.getIInterface()) + "\n");
-			sb.append("\textralen: 0x" + Integer.toHexString(intDesc.getExtralen())
-					+ "\n");
+			sb.append("\textralen: 0x"
+					+ Integer.toHexString(intDesc.getExtralen()) + "\n");
 			sb.append("\textra: " + intDesc.getExtra() + "\n");
 			// get device handle to retrieve string descriptors
 			Usb_Bus bus = rootBus;
@@ -362,7 +391,8 @@ public class UsbTreeModel implements TreeModel, TreeSelectionListener {
 					for (int i = 0; i < confDescs.length; i++) {
 						Usb_Interface[] ints = confDescs[i].getInterface();
 						for (int j = 0; j < ints.length; j++) {
-							Usb_Interface_Descriptor[] tmpIntDescs = ints[j].getAltsetting();
+							Usb_Interface_Descriptor[] tmpIntDescs = ints[j]
+									.getAltsetting();
 							for (int k = 0; k < ints.length; k++) {
 								if (tmpIntDescs[i].equals(intDesc)
 										&& (intDesc.getIInterface() > 0)) {
@@ -393,26 +423,28 @@ public class UsbTreeModel implements TreeModel, TreeSelectionListener {
 		} else if (component instanceof Usb_Endpoint_Descriptor) {
 			Usb_Endpoint_Descriptor epDesc = (Usb_Endpoint_Descriptor) component;
 			StringBuffer sb = new StringBuffer("Usb_Endpoint_Descriptor\n");
-			sb.append("\tblenght: 0x" + Integer.toHexString(epDesc.getBLength())
-					+ "\n");
+			sb.append("\tblenght: 0x"
+					+ Integer.toHexString(epDesc.getBLength() & 0xFF) + "\n");
 			sb.append("\tbDescriptorType: 0x"
-					+ Integer.toHexString(epDesc.getBDescriptorType()) + "\n");
+					+ Integer.toHexString(epDesc.getBDescriptorType() & 0xFF)
+					+ "\n");
 			sb.append("\tbEndpointAddress: 0x"
 					+ Integer.toHexString(epDesc.getBEndpointAddress() & 0xFF)
 					+ "\n");
 			sb.append("\tbmAttributes: 0x"
-					+ Integer.toHexString(epDesc.getBmAttributes() & 0xFF) + "\n");
+					+ Integer.toHexString(epDesc.getBmAttributes() & 0xFF)
+					+ "\n");
 			sb.append("\twMaxPacketSize: 0x"
 					+ Integer.toHexString(epDesc.getWMaxPacketSize() & 0xFFFF)
 					+ " (" + epDesc.getWMaxPacketSize() + ")\n");
-			sb.append("\tbInterval: 0x" + Integer.toHexString(epDesc.getBInterval())
-					+ "\n");
-			sb.append("\tbRefresh: 0x" + Integer.toHexString(epDesc.getBRefresh())
-					+ "\n");
+			sb.append("\tbInterval: 0x"
+					+ Integer.toHexString(epDesc.getBInterval() & 0xFF) + "\n");
+			sb.append("\tbRefresh: 0x"
+					+ Integer.toHexString(epDesc.getBRefresh() & 0xFF) + "\n");
 			sb.append("\tbSynchAddress: 0x"
 					+ Integer.toHexString(epDesc.getBSynchAddress()) + "\n");
-			sb.append("\textralen: 0x" + Integer.toHexString(epDesc.getExtralen())
-					+ "\n");
+			sb.append("\textralen: 0x"
+					+ Integer.toHexString(epDesc.getExtralen()) + "\n");
 			sb.append("\textra: " + epDesc.getExtra() + "\n");
 			textArea.setText(sb.toString());
 		}

@@ -25,7 +25,7 @@ import ch.ntb.usb.USB;
 import ch.ntb.usb.USBException;
 import ch.ntb.usb.Usb_Config_Descriptor;
 import ch.ntb.usb.Usb_Device_Descriptor;
-import ch.ntb.usb.test.AbstractDeviceInfo.WriteMode;
+import ch.ntb.usb.test.AbstractDeviceInfo.TransferMode;
 
 public class DeviceTest {
 
@@ -91,7 +91,7 @@ public class DeviceTest {
 		doOpen();
 		doClose();
 		// this call must throw an exception, because the device is closed
-		dev.writeBulk(devinfo.getOUT_EP_BULK(), testData, testData.length,
+		dev.writeBulk(devinfo.getOutEPBulk(), testData, testData.length,
 				devinfo.getTimeout(), false);
 	}
 
@@ -101,7 +101,7 @@ public class DeviceTest {
 		dev.reset();
 		timeout();
 		// this call must throw an exception, because the device is closed
-		dev.writeBulk(devinfo.getOUT_EP_BULK(), testData, testData.length,
+		dev.writeBulk(devinfo.getOutEPBulk(), testData, testData.length,
 				devinfo.getTimeout(), false);
 	}
 
@@ -116,13 +116,13 @@ public class DeviceTest {
 
 	@Test
 	public void bulkWriteRead() throws Exception {
-		devinfo.setMode(WriteMode.Bulk);
+		devinfo.setMode(TransferMode.Bulk);
 		doOpenWriteReadClose();
 	}
 
 	@Test
 	public void interruptWriteRead() throws Exception {
-		devinfo.setMode(WriteMode.Interrupt);
+		devinfo.setMode(TransferMode.Interrupt);
 		doOpenWriteReadClose();
 	}
 
@@ -130,7 +130,7 @@ public class DeviceTest {
 	public void bulkWriteReadMultiple() throws Exception {
 		final int NumberOfIterations = 100;
 
-		devinfo.setMode(WriteMode.Bulk);
+		devinfo.setMode(TransferMode.Bulk);
 		doOpen();
 		for (int i = 0; i < NumberOfIterations; i++) {
 			initTestData();
@@ -142,7 +142,7 @@ public class DeviceTest {
 
 	@Test
 	public void multipleOpenCloseWithBulkWrite() throws Exception {
-		devinfo.setMode(WriteMode.Bulk);
+		devinfo.setMode(TransferMode.Bulk);
 		for (int i = 0; i < 5; i++) {
 			doOpen();
 			doClose();
@@ -164,10 +164,10 @@ public class DeviceTest {
 	public void bulkAndInterrupt() throws Exception {
 		doOpen();
 		// BULK
-		devinfo.setMode(WriteMode.Bulk);
+		devinfo.setMode(TransferMode.Bulk);
 		doWriteRead();
 		// INTERRUPT
-		devinfo.setMode(WriteMode.Interrupt);
+		devinfo.setMode(TransferMode.Interrupt);
 		doWriteRead();
 		doClose();
 	}
@@ -175,9 +175,9 @@ public class DeviceTest {
 	@Test
 	public void bulkAndInterruptMultiple() throws Exception {
 		for (int i = 0; i < 20; i++) {
-			devinfo.setMode(WriteMode.Bulk);
+			devinfo.setMode(TransferMode.Bulk);
 			doOpenWriteReadClose();
-			devinfo.setMode(WriteMode.Interrupt);
+			devinfo.setMode(TransferMode.Interrupt);
 			doOpenWriteReadClose();
 		}
 	}
@@ -239,15 +239,15 @@ public class DeviceTest {
 
 	private void doWriteRead() throws Exception {
 		initTestData();
-		if (devinfo.getMode().equals(WriteMode.Bulk)) {
-			dev.writeBulk(devinfo.getOUT_EP_BULK(), testData, testData.length,
+		if (devinfo.getMode().equals(TransferMode.Bulk)) {
+			dev.writeBulk(devinfo.getOutEPBulk(), testData, testData.length,
 					devinfo.getTimeout(), false);
-			dev.readBulk(devinfo.getIN_EP_BULK(), readData, readData.length,
+			dev.readBulk(devinfo.getInEPBulk(), readData, readData.length,
 					devinfo.getTimeout(), false);
-		} else if (devinfo.getMode().equals(WriteMode.Interrupt)) {
-			dev.writeInterrupt(devinfo.getOUT_EP_INT(), testData,
+		} else if (devinfo.getMode().equals(TransferMode.Interrupt)) {
+			dev.writeInterrupt(devinfo.getOutEPInt(), testData,
 					testData.length, devinfo.getTimeout(), false);
-			dev.readInterrupt(devinfo.getIN_EP_INT(), readData,
+			dev.readInterrupt(devinfo.getInEPInt(), readData,
 					readData.length, devinfo.getTimeout(), false);
 		}
 		compare(testData, readData);

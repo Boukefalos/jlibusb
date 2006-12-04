@@ -8,33 +8,33 @@ package ch.ntb.usb.test;
 
 public abstract class AbstractDeviceInfo {
 
-	private short IdVendor;
+	private short idVendor;
 
-	private short IdProduct;
+	private short idProduct;
 
-	private int Timeout;
+	private int timeout;
 
-	private int Configuration;
+	private int configuration;
 
-	private int Interface;
+	private int interface_;
 
-	private int Altinterface;
+	private int altinterface;
 
-	private int OUT_EP_BULK;
+	private int outEPBulk;
 
-	private int IN_EP_BULK;
+	private int inEPBulk;
 
-	private int OUT_EP_INT;
+	private int outEPInt;
 
-	private int IN_EP_INT;
+	private int inEPInt;
 
-	private int SleepTimeout;
+	private int sleepTimeout;
 
-	private int MaxDataSize;
+	private int maxDataSize;
 
-	private WriteMode mode;
+	private TransferMode mode;
 
-	public static enum WriteMode {
+	public static enum TransferMode {
 		Bulk, Interrupt
 	}
 
@@ -45,106 +45,106 @@ public abstract class AbstractDeviceInfo {
 	abstract public void initValues();
 
 	public int getAltinterface() {
-		return Altinterface;
+		return altinterface;
 	}
 
 	public int getConfiguration() {
-		return Configuration;
+		return configuration;
 	}
 
 	public short getIdProduct() {
-		return IdProduct;
+		return idProduct;
 	}
 
 	public short getIdVendor() {
-		return IdVendor;
+		return idVendor;
 	}
 
-	public int getIN_EP_BULK() {
-		return IN_EP_BULK;
+	public int getInEPBulk() {
+		return inEPBulk;
 	}
 
-	public int getIN_EP_INT() {
-		return IN_EP_INT;
+	public int getInEPInt() {
+		return inEPInt;
 	}
 
 	public int getInterface() {
-		return Interface;
+		return interface_;
 	}
 
 	public int getMaxDataSize() {
-		return MaxDataSize;
+		return maxDataSize;
 	}
 
-	public int getOUT_EP_BULK() {
-		return OUT_EP_BULK;
+	public int getOutEPBulk() {
+		return outEPBulk;
 	}
 
-	public int getOUT_EP_INT() {
-		return OUT_EP_INT;
+	public int getOutEPInt() {
+		return outEPInt;
 	}
 
 	public int getSleepTimeout() {
-		return SleepTimeout;
+		return sleepTimeout;
 	}
 
 	public int getTimeout() {
-		return Timeout;
+		return timeout;
 	}
 
 	public void setAltinterface(int altinterface) {
-		Altinterface = altinterface;
+		this.altinterface = altinterface;
 	}
 
 	public void setConfiguration(int configuration) {
-		Configuration = configuration;
+		this.configuration = configuration;
 	}
 
 	public void setIdProduct(short idProduct) {
-		IdProduct = idProduct;
+		this.idProduct = idProduct;
 	}
 
 	public void setIdVendor(short idVendor) {
-		IdVendor = idVendor;
+		this.idVendor = idVendor;
 	}
 
-	public void setIN_EP_BULK(int in_ep_bulk) {
-		IN_EP_BULK = in_ep_bulk;
+	public void setInEPBulk(int in_ep_bulk) {
+		this.inEPBulk = in_ep_bulk;
 	}
 
-	public void setIN_EP_INT(int in_ep_int) {
-		IN_EP_INT = in_ep_int;
+	public void setInEPInt(int in_ep_int) {
+		this.inEPInt = in_ep_int;
 	}
 
-	public void setInterface(int interface1) {
-		Interface = interface1;
+	public void setInterface(int interface_) {
+		this.interface_ = interface_;
 	}
 
 	public void setMaxDataSize(int maxDataSize) {
-		MaxDataSize = maxDataSize;
+		this.maxDataSize = maxDataSize;
 	}
 
-	public void setOUT_EP_BULK(int out_ep_bulk) {
-		OUT_EP_BULK = out_ep_bulk;
+	public void setOutEPBulk(int out_ep_bulk) {
+		this.outEPBulk = out_ep_bulk;
 	}
 
-	public void setOUT_EP_INT(int out_ep_int) {
-		OUT_EP_INT = out_ep_int;
+	public void setOutEPInt(int out_ep_int) {
+		this.outEPInt = out_ep_int;
 	}
 
 	public void setSleepTimeout(int sleepTimeout) {
-		SleepTimeout = sleepTimeout;
+		this.sleepTimeout = sleepTimeout;
 	}
 
 	public void setTimeout(int timeout) {
-		Timeout = timeout;
+		this.timeout = timeout;
 	}
 
-	public WriteMode getMode() {
+	public TransferMode getMode() {
 		return mode;
 	}
 
-	public void setMode(WriteMode mode) {
+	public void setMode(TransferMode mode) {
 		this.mode = mode;
 	}
 

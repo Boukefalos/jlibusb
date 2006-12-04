@@ -2,10 +2,9 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Inf USB Library
 Bundle-SymbolicName: ch.ntb.usb
-Bundle-Version: 1.0.0
+Bundle-Version: 1.0.2
 Bundle-Localization: plugin
 Bundle-Vendor: inf.ntb.ch
 Eclipse-LazyStart: false
-Require-Bundle: org.junit4,
- org.eclipse.swt
+Require-Bundle: org.junit4
 Export-Package: ch.ntb.usb
