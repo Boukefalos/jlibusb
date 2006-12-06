@@ -1,6 +1,6 @@
 /* 
  * Java libusb wrapper
- * Copyright (c) 2005-2006 Andreas Schläpfer <libusb@drip.ch>
+ * Copyright (c) 2005-2006 Andreas Schlï¿½pfer <libusb@drip.ch>
  *
  * This library is covered by the LGPL, read LGPL.txt for details.
  */
@@ -8,6 +8,7 @@ package ch.ntb.usb.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -88,8 +89,14 @@ public class DeviceTest {
 
 	@Test(expected = USBException.class)
 	public void testClose() throws Exception {
-		doOpen();
-		doClose();
+		try {
+			// this calls must not throw an exception
+			doOpen();
+			doClose();
+		} catch (USBException e) {
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
 		// this call must throw an exception, because the device is closed
 		dev.writeBulk(devinfo.getOutEPBulk(), testData, testData.length,
 				devinfo.getTimeout(), false);
@@ -97,9 +104,15 @@ public class DeviceTest {
 
 	@Test(expected = USBException.class)
 	public void testReset1() throws Exception {
-		doOpen();
-		dev.reset();
-		timeout();
+		try {
+			// this calls must not throw an exception
+			doOpen();
+			dev.reset();
+			timeout();
+		} catch (USBException e) {
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
 		// this call must throw an exception, because the device is closed
 		dev.writeBulk(devinfo.getOutEPBulk(), testData, testData.length,
 				devinfo.getTimeout(), false);
@@ -107,9 +120,15 @@ public class DeviceTest {
 
 	@Test(expected = USBException.class)
 	public void testReset2() throws Exception {
-		doOpen();
-		dev.reset();
-		timeout();
+		try {
+			// this calls must not throw an exception
+			doOpen();
+			dev.reset();
+			timeout();
+		} catch (USBException e) {
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
 		// this call must throw an exception, because the device can't be closed
 		doClose();
 	}
@@ -183,6 +202,48 @@ public class DeviceTest {
 	}
 
 	@Test
+	public void invalidConfig() throws Exception {
+		try {
+			dev.open(devinfo.getConfiguration() + 5, devinfo.getInterface(),
+					devinfo.getAltinterface());
+			fail("USBException expected");
+		} catch (USBException e) {
+			System.err.println("INFO: " + getClass()
+					+ ": error expected: could not set config "
+					+ (devinfo.getConfiguration() + 5));
+		}
+		doOpenWriteReadClose();
+	}
+
+	@Test
+	public void invalidInterface() throws Exception {
+		try {
+			dev.open(devinfo.getConfiguration(), devinfo.getInterface() + 5,
+					devinfo.getAltinterface());
+			fail("USBException expected");
+		} catch (USBException e) {
+			System.err.println("INFO: " + getClass()
+					+ ": error expected: could not claim interface "
+					+ (devinfo.getInterface() + 5));
+		}
+		doOpenWriteReadClose();
+	}
+
+	@Test
+	public void invalidAltinterface() throws Exception {
+		try {
+			dev.open(devinfo.getConfiguration(), devinfo.getInterface(),
+					devinfo.getAltinterface() + 5);
+			fail("USBException expected");
+		} catch (USBException e) {
+			System.err.println("INFO: " + getClass()
+					+ ": error expected: could not set alt interface "
+					+ (devinfo.getAltinterface() + 5));
+		}
+		doOpenWriteReadClose();
+	}
+
+	@Test
 	public void testGetIdProduct() {
 		Assert.assertEquals(dev.getIdProduct(), devinfo.getIdProduct());
 	}
@@ -247,8 +308,8 @@ public class DeviceTest {
 		} else if (devinfo.getMode().equals(TransferMode.Interrupt)) {
 			dev.writeInterrupt(devinfo.getOutEPInt(), testData,
 					testData.length, devinfo.getTimeout(), false);
-			dev.readInterrupt(devinfo.getInEPInt(), readData,
-					readData.length, devinfo.getTimeout(), false);
+			dev.readInterrupt(devinfo.getInEPInt(), readData, readData.length,
+					devinfo.getTimeout(), false);
 		}
 		compare(testData, readData);
 	}

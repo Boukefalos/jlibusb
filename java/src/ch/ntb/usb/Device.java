@@ -241,6 +241,7 @@ public class Device {
 		if (usbDevHandle <= 0) {
 			throw new USBException("invalid device handle");
 		}
+		release_interface(usbDevHandle, dev_interface);
 		if (LibusbJava.usb_reset(usbDevHandle) < 0) {
 			usbDevHandle = 0;
 			throw new USBException("LibusbWin.usb_reset: "
@@ -511,15 +512,23 @@ public class Device {
 	private void claim_interface(int usb_dev_handle, int configuration,
 			int interface_, int altinterface) throws USBException {
 		if (LibusbJava.usb_set_configuration(usb_dev_handle, configuration) < 0) {
+			usbDevHandle = 0;
 			throw new USBException("LibusbWin.usb_set_configuration: "
 					+ LibusbJava.usb_strerror());
 		}
 		if (LibusbJava.usb_claim_interface(usb_dev_handle, interface_) < 0) {
+			usbDevHandle = 0;
 			throw new USBException("LibusbWin.usb_claim_interface: "
 					+ LibusbJava.usb_strerror());
 		}
 		if (altinterface >= 0) {
 			if (LibusbJava.usb_set_altinterface(usb_dev_handle, altinterface) < 0) {
+				try {
+					release_interface(usb_dev_handle, interface_);
+				} catch (USBException e) {
+					// ignore
+				}
+				usbDevHandle = 0;
 				throw new USBException("LibusbWin.usb_set_altinterface: "
 						+ LibusbJava.usb_strerror());
 			}
