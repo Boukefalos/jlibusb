@@ -89,7 +89,7 @@ public class TestApp extends JFrame {
 		setOutEpAddr();
 		setInEpAddr();
 
-		this.setSize(750, 300);
+		this.pack();
 		this.setVisible(true);
 	}
 
