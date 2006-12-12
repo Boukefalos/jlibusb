@@ -14,9 +14,8 @@ import ch.ntb.usb.Device;
 import ch.ntb.usb.USB;
 import ch.ntb.usb.USBException;
 import ch.ntb.usb.logger.LogUtil;
-import ch.ntb.usb.test.AT90USB1287;
 
-public class TestDevice extends AT90USB1287 {
+public class TestDevice extends AbstractDeviceInfo {
 
 	private static final Logger logger = LogUtil.getLogger("ch.ntb.usb.test");
 
@@ -39,6 +38,23 @@ public class TestDevice extends AT90USB1287 {
 				TransferMode.Interrupt.name());
 		inMode = TransferMode.Bulk;
 		outMode = TransferMode.Bulk;
+	}
+
+	@Override
+	public void initValues() {
+		setIdVendor((short) 0x8235);
+		setIdProduct((short) 0x0222);
+		setTimeout(2000);
+		setConfiguration(1);
+		setInterface(0);
+		setAltinterface(-1);
+		setOutEPBulk(0x01);
+		setInEPBulk(0x82);
+		setOutEPInt(0x03);
+		setInEPInt(0x84);
+		setSleepTimeout(2000);
+		setMaxDataSize(USB.FULLSPEED_MAX_BULK_PACKET_SIZE);
+		setMode(TransferMode.Bulk);
 	}
 
 	public void openUsbDevice() {

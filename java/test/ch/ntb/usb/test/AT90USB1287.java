@@ -7,6 +7,7 @@
 package ch.ntb.usb.test;
 
 import ch.ntb.usb.USB;
+import ch.ntb.usb.testApp.AbstractDeviceInfo;
 
 public class AT90USB1287 extends AbstractDeviceInfo {
 

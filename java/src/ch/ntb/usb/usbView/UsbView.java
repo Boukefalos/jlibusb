@@ -34,9 +34,9 @@ import ch.ntb.usb.Usb_Device;
 import ch.ntb.usb.Usb_Device_Descriptor;
 import ch.ntb.usb.Usb_Endpoint_Descriptor;
 import ch.ntb.usb.Usb_Interface_Descriptor;
-import ch.ntb.usb.test.AbstractDeviceInfo.TransferMode;
 import ch.ntb.usb.testApp.TestApp;
 import ch.ntb.usb.testApp.TestDevice;
+import ch.ntb.usb.testApp.AbstractDeviceInfo.TransferMode;
 
 public class UsbView extends JFrame {
 

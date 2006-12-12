@@ -4,7 +4,7 @@
  *
  * This library is covered by the LGPL, read LGPL.txt for details.
  */
-package ch.ntb.usb.test;
+package ch.ntb.usb.testApp;
 
 public abstract class AbstractDeviceInfo {
 
