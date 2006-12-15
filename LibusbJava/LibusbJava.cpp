@@ -588,8 +588,6 @@ JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbJava_usb_1control_1msg
   {
   	jbyte *bytes = env->GetByteArrayElements(jbytes, NULL);
   	int retVal = usb_control_msg((usb_dev_handle *) dev_handle, requesttype, request, value, index, (char *) bytes, size, timeout);
-  	if (bytes) { return retVal; }
-  	jbytes = env->NewByteArray(size);
   	env->SetByteArrayRegion(jbytes, 0, size, bytes);
   	return retVal;
   }
