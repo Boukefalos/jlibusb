@@ -12,6 +12,7 @@ import static org.junit.Assert.fail;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.Properties;
 
 import junit.framework.Assert;
@@ -32,8 +33,11 @@ import ch.ntb.usb.testApp.AbstractDeviceInfo.TransferMode;
 public class DeviceTest {
 
 	private static final String testdevicePropertiesFile = "testdevice.properties";
-
 	private static final String deviceInfoKey = "testdeviceInfo";
+
+	private static final String Manufacturer = "inf.ntb.ch";
+	private static final String Product = "JUnit Test Board";
+	private static final String SerialVersion = "00.10.00";
 
 	private static AbstractDeviceInfo devinfo;
 
@@ -200,6 +204,157 @@ public class DeviceTest {
 			devinfo.setMode(TransferMode.Interrupt);
 			doOpenWriteReadClose();
 		}
+	}
+
+	@Test
+	public void controlMsg() throws Exception {
+		dev.open(devinfo.getConfiguration(), devinfo.getInterface(), devinfo
+				.getAltinterface());
+		// GET STATUS (device)
+		byte[] data = getTestData(2);
+		int length = dev.controlMsg(USB.REQ_TYPE_DIR_DEVICE_TO_HOST
+				| USB.REQ_TYPE_TYPE_STANDARD | USB.REQ_TYPE_RECIP_DEVICE,
+				USB.REQ_GET_STATUS, 0, 0, data, data.length, devinfo
+						.getTimeout(), false);
+		assertEquals((byte) 0x01, data[0]);
+		assertEquals((byte) 0x00, data[1]);
+		// GET STATUS (interface)
+		data = getTestData(2);
+		length = dev.controlMsg(USB.REQ_TYPE_DIR_DEVICE_TO_HOST
+				| USB.REQ_TYPE_TYPE_STANDARD | USB.REQ_TYPE_RECIP_INTERFACE,
+				USB.REQ_GET_STATUS, 0, 0, data, data.length, devinfo
+						.getTimeout(), false);
+		assertEquals((byte) 0x00, data[0]);
+		assertEquals((byte) 0x00, data[1]);
+		// GET STATUS (endpoint)
+		data = getTestData(2);
+		length = dev.controlMsg(USB.REQ_TYPE_DIR_DEVICE_TO_HOST
+				| USB.REQ_TYPE_TYPE_STANDARD | USB.REQ_TYPE_RECIP_ENDPOINT,
+				USB.REQ_GET_STATUS, 0, 0, data, data.length, devinfo
+						.getTimeout(), false);
+		assertEquals((byte) 0x00, data[0]);
+		assertEquals((byte) 0x00, data[1]);
+		// GET CONFIGURATION
+		data = getTestData(1);
+		length = dev.controlMsg(USB.REQ_TYPE_DIR_DEVICE_TO_HOST
+				| USB.REQ_TYPE_TYPE_STANDARD | USB.REQ_TYPE_RECIP_DEVICE,
+				USB.REQ_GET_CONFIGURATION, 0, 0, data, data.length, devinfo
+						.getTimeout(), false);
+		assertEquals((byte) devinfo.getConfiguration(), data[0]);
+		// // GET INTERFACE
+		// data = byte[1];
+		// length = dev.controlMsg(USB.REQ_TYPE_DIR_DEVICE_TO_HOST
+		// | USB.REQ_TYPE_TYPE_STANDARD | USB.REQ_TYPE_RECIP_INTERFACE,
+		// USB.REQ_GET_INTERFACE, 0, devinfo.getInterface(), data, data.length,
+		// devinfo
+		// .getTimeout(), false);
+		// logData(data, length);
+		// GET DESCRIPTOR (device descriptor)
+		data = getTestData(128);
+		length = dev.controlMsg(USB.REQ_TYPE_DIR_DEVICE_TO_HOST
+				| USB.REQ_TYPE_TYPE_STANDARD | USB.REQ_TYPE_RECIP_DEVICE,
+				USB.REQ_GET_DESCRIPTOR, 1 << 8, 0, data, data.length, devinfo
+						.getTimeout(), false);
+		validateDeviceDescriptor(data, length);
+		// GET DESCRIPTOR (string descriptor (1))
+		data = getTestData(128);
+		length = dev.controlMsg(USB.REQ_TYPE_DIR_DEVICE_TO_HOST
+				| USB.REQ_TYPE_TYPE_STANDARD | USB.REQ_TYPE_RECIP_DEVICE,
+				USB.REQ_GET_DESCRIPTOR, (3 << 8) + 1, 0, data, data.length,
+				devinfo.getTimeout(), false);
+		String s = getString(data, length);
+		assertEquals(s, Manufacturer);
+		// GET DESCRIPTOR (string descriptor (2))
+		data = getTestData(128);
+		length = dev.controlMsg(USB.REQ_TYPE_DIR_DEVICE_TO_HOST
+				| USB.REQ_TYPE_TYPE_STANDARD | USB.REQ_TYPE_RECIP_DEVICE,
+				USB.REQ_GET_DESCRIPTOR, (3 << 8) + 2, 0, data, data.length,
+				devinfo.getTimeout(), false);
+		s = getString(data, length);
+		assertEquals(s, Product);
+		// GET DESCRIPTOR (string descriptor (3))
+		data = getTestData(128);
+		length = dev.controlMsg(USB.REQ_TYPE_DIR_DEVICE_TO_HOST
+				| USB.REQ_TYPE_TYPE_STANDARD | USB.REQ_TYPE_RECIP_DEVICE,
+				USB.REQ_GET_DESCRIPTOR, (3 << 8) + 3, 0, data, data.length,
+				devinfo.getTimeout(), false);
+		s = getString(data, length);
+		assertEquals(s, SerialVersion);
+		// close the device
+		dev.close();
+	}
+
+	private void validateDeviceDescriptor(byte[] data, int length) {
+		// length read
+		assertEquals(18, length);
+		// descriptor length
+		assertEquals((byte) 18, data[0]);
+		// descriptor type
+		assertEquals((byte) 1, data[1]);
+		// USB specification number LSB
+		assertEquals((byte) 0, data[2]);
+		// USB specification number MSB
+		assertEquals((byte) 0x02, data[3]);
+		// device class (vendor specific)
+		assertEquals((byte) 0xff, data[4]);
+		// device subclass (vendor specific)
+		assertEquals((byte) 0xff, data[5]);
+		// device protocol (vendor specific)
+		assertEquals((byte) 0xff, data[6]);
+		// maximum packet size for endpoint zero
+		assertEquals((byte) 64, data[7]);
+		// Vendor ID (NTB) LSB
+		assertEquals((byte) 0x35, data[8]);
+		// Vendor ID (NTB) MSB
+		assertEquals((byte) 0x82, data[9]);
+		// Product ID (JUnit test board) LSB
+		assertEquals((byte) 0x22, data[10]);
+		// Product ID (JUnit test board) MSB
+		assertEquals((byte) 0x02, data[11]);
+
+		// Device release number LSB
+		assertEquals((byte) 0x00, data[12]);
+		// Device release number MSB
+		assertEquals((byte) 0x10, data[13]);
+		// Index of manufacturer string descriptor
+		assertEquals((byte) 0x01, data[14]);
+		// Index of product string descriptor
+		assertEquals((byte) 0x02, data[15]);
+		// Index of serial number string descriptor
+		assertEquals((byte) 0x03, data[16]);
+		// Number of possible configurations
+		assertEquals((byte) 0x01, data[17]);
+	}
+
+	private byte[] getTestData(int length) {
+		byte[] b = new byte[length];
+		for (int i = 0; i < b.length; i++) {
+			b[i] = (byte) (Math.random() * 256);
+		}
+		return b;
+	}
+
+	private void logData(byte[] data, int length) {
+		if (length > 0) {
+			System.out.println("length: " + length);
+			for (int i = 0; i < length; i++) {
+				System.out.print("0x" + Integer.toHexString(data[i] & 0xff)
+						+ "\t");
+			}
+			System.out.println();
+		}
+	}
+
+	private String getString(byte[] data, int length)
+			throws UnsupportedEncodingException {
+		// data length
+		assertTrue(length > 2);
+		// string length
+		assertTrue(data[0] > 2);
+		// string descriptor ident
+		assertEquals((byte) 3, data[1]);
+		// create string from data
+		return new String(data, 2, length - 2, "UTF-16LE");
 	}
 
 	@Test

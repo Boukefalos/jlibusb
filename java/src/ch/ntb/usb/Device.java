@@ -258,8 +258,8 @@ public class Device {
 	 *            endpoint address to write to
 	 * @param data
 	 *            data to write to this endpoint
-	 * @param length
-	 *            length of the data
+	 * @param size
+	 *            size of the data
 	 * @param timeout
 	 *            amount of time in ms the device will try to send the data
 	 *            until a timeout exception is thrown
@@ -269,7 +269,7 @@ public class Device {
 	 * @return the actual number of bytes written
 	 * @throws USBException
 	 */
-	public int writeBulk(int out_ep_address, byte[] data, int length,
+	public int writeBulk(int out_ep_address, byte[] data, int size,
 			int timeout, boolean reopenOnTimeout) throws USBException {
 		if (usbDevHandle <= 0) {
 			throw new USBException("invalid device handle");
@@ -277,11 +277,11 @@ public class Device {
 		if (data == null) {
 			throw new USBException("data must not be null");
 		}
-		if (length <= 0) {
-			throw new USBException("size must be > 0");
+		if (size <= 0 || size > data.length) {
+			throw new ArrayIndexOutOfBoundsException("invalid size: " + size);
 		}
-		int lenWritten = LibusbJava.usb_bulk_write(usbDevHandle, out_ep_address,
-				data, length, timeout);
+		int lenWritten = LibusbJava.usb_bulk_write(usbDevHandle,
+				out_ep_address, data, size, timeout);
 		if (lenWritten < 0) {
 			if (lenWritten == TIMEOUT_ERROR_CODE) {
 				// try to reopen the device and send the data again
@@ -289,8 +289,7 @@ public class Device {
 					logger.info("try to reopen");
 					reset();
 					open(dev_configuration, dev_interface, dev_altinterface);
-					return writeBulk(out_ep_address, data, length, timeout,
-							false);
+					return writeBulk(out_ep_address, data, size, timeout, false);
 				}
 				throw new USBTimeoutException("LibusbWin.usb_bulk_write: "
 						+ LibusbJava.usb_strerror());
@@ -338,8 +337,8 @@ public class Device {
 		if (data == null) {
 			throw new USBException("data must not be null");
 		}
-		if (size <= 0) {
-			throw new USBException("size must be > 0");
+		if (size <= 0 || size > data.length) {
+			throw new ArrayIndexOutOfBoundsException("invalid size: " + size);
 		}
 		int lenRead = LibusbJava.usb_bulk_read(usbDevHandle, in_ep_address,
 				data, size, timeout);
@@ -379,8 +378,8 @@ public class Device {
 	 *            endpoint address to write to
 	 * @param data
 	 *            data to write to this endpoint
-	 * @param length
-	 *            length of the data
+	 * @param size
+	 *            size of the data
 	 * @param timeout
 	 *            amount of time in ms the device will try to send the data
 	 *            until a timeout exception is thrown
@@ -390,7 +389,7 @@ public class Device {
 	 * @return the actual number of bytes written
 	 * @throws USBException
 	 */
-	public int writeInterrupt(int out_ep_address, byte[] data, int length,
+	public int writeInterrupt(int out_ep_address, byte[] data, int size,
 			int timeout, boolean reopenOnTimeout) throws USBException {
 		if (usbDevHandle <= 0) {
 			throw new USBException("invalid device handle");
@@ -398,11 +397,11 @@ public class Device {
 		if (data == null) {
 			throw new USBException("data must not be null");
 		}
-		if (length <= 0) {
-			throw new USBException("size must be > 0");
+		if (size <= 0 || size > data.length) {
+			throw new ArrayIndexOutOfBoundsException("invalid size: " + size);
 		}
 		int lenWritten = LibusbJava.usb_interrupt_write(usbDevHandle,
-				out_ep_address, data, length, timeout);
+				out_ep_address, data, size, timeout);
 		if (lenWritten < 0) {
 			if (lenWritten == TIMEOUT_ERROR_CODE) {
 				// try to reopen the device and send the data again
@@ -410,8 +409,8 @@ public class Device {
 					logger.info("try to reopen");
 					reset();
 					open(dev_configuration, dev_interface, dev_altinterface);
-					return writeInterrupt(out_ep_address, data, length,
-							timeout, false);
+					return writeInterrupt(out_ep_address, data, size, timeout,
+							false);
 				}
 				throw new USBTimeoutException("LibusbWin.usb_bulk_write: "
 						+ LibusbJava.usb_strerror());
@@ -459,11 +458,11 @@ public class Device {
 		if (data == null) {
 			throw new USBException("data must not be null");
 		}
-		if (size <= 0) {
-			throw new USBException("size must be > 0");
+		if (size <= 0 || size > data.length) {
+			throw new ArrayIndexOutOfBoundsException("invalid size: " + size);
 		}
-		int lenRead = LibusbJava.usb_interrupt_read(usbDevHandle, in_ep_address,
-				data, size, timeout);
+		int lenRead = LibusbJava.usb_interrupt_read(usbDevHandle,
+				in_ep_address, data, size, timeout);
 		if (lenRead < 0) {
 			if (lenRead == TIMEOUT_ERROR_CODE) {
 				// try to reopen the device and send the data again
@@ -492,6 +491,81 @@ public class Device {
 			logger.info(sb.toString());
 		}
 		return lenRead;
+	}
+
+	/**
+	 * Performs a control request to the default control pipe on a device.<br>
+	 * The parameters mirror the types of the same name in the USB
+	 * specification.
+	 * 
+	 * @param requestType
+	 *            USB device request type (USB specification 9.3,
+	 *            bmRequestType). Use constants from {@link ch.ntb.usb.USB}
+	 *            (REQ_TYPE_xxx).
+	 * @param request
+	 *            specific request (USB specification 9.4, bRequest). Use
+	 *            constants from {@link ch.ntb.usb.USB} (REQ_xxx).
+	 * @param value
+	 *            field that varies according to request (USB specification 9.4,
+	 *            wValue)
+	 * @param index
+	 *            field that varies according to request (USB specification 9.4,
+	 *            wIndex)
+	 * @param data
+	 *            the send/receive buffer
+	 * @param size
+	 *            the buffer size
+	 * @param timeout
+	 *            amount of time in ms the device will try to send/receive data
+	 *            until a timeout exception is thrown
+	 * @param reopenOnTimeout
+	 *            if set to true, the device will try to open the connection and
+	 *            send/receive the data again before a timeout exception is
+	 *            thrown
+	 * @return the number of bytes written/read
+	 * @throws USBException
+	 */
+	public int controlMsg(int requestType, int request, int value, int index,
+			byte[] data, int size, int timeout, boolean reopenOnTimeout)
+			throws USBException {
+		if (usbDevHandle <= 0) {
+			throw new USBException("invalid device handle");
+		}
+		if (data == null) {
+			throw new USBException("data must not be null");
+		}
+		if (size <= 0 || size > data.length) {
+			throw new ArrayIndexOutOfBoundsException("invalid size: " + size);
+		}
+		int len = LibusbJava.usb_control_msg(usbDevHandle, requestType,
+				request, value, index, data, size, timeout);
+		if (len < 0) {
+			if (len == TIMEOUT_ERROR_CODE) {
+				// try to reopen the device and send the data again
+				if (reopenOnTimeout) {
+					logger.info("try to reopen");
+					reset();
+					open(dev_configuration, dev_interface, dev_altinterface);
+					return controlMsg(requestType, request, value, index, data,
+							size, timeout, false);
+				}
+				throw new USBTimeoutException("LibusbWin.controlMsg: "
+						+ LibusbJava.usb_strerror());
+			}
+			throw new USBException("LibusbWin.controlMsg: "
+					+ LibusbJava.usb_strerror());
+		}
+
+		logger.info("length read/written: " + len);
+		if (logger.isLoggable(Level.FINEST)) {
+			StringBuffer sb = new StringBuffer("controlMsg: " + len
+					+ " Bytes received(written: ");
+			for (int i = 0; i < len; i++) {
+				sb.append("0x" + String.format("%1$02X", data[i]) + " ");
+			}
+			logger.info(sb.toString());
+		}
+		return len;
 	}
 
 	/**
