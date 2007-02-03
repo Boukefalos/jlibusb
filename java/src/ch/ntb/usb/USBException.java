@@ -6,7 +6,9 @@
  */
 package ch.ntb.usb;
 
-public class USBException extends Exception{
+import java.io.IOException;
+
+public class USBException extends IOException {
 
 	public USBException(String string) {
 		super(string);
