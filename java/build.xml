@@ -38,7 +38,7 @@
 	<target name="jar" depends="compile" description="--> Create Jar">
 		<mkdir dir="${project.dir.lib}" />
 		<echo>Building Version ${version.major}.${version.minor}.${version.release}</echo>
-		<jar destfile="${project.dir.lib}/${project.jarfile}">
+		<jar destfile="${project.dir.lib}/${project.jarfile}.jar">
 			<fileset dir="${project.dir.bin}">
 				<patternset refid="classfiles" />
 			</fileset>
@@ -55,6 +55,8 @@
 				</section>
 			</manifest>
 		</jar>
+		<!-- copy and rename to versioned jar -->
+		<copy file="${project.dir.lib}/${project.jarfile}.jar" tofile="${project.dir.lib}/${project.jarfile}-${version.major}.${version.minor}.${version.release}.jar"/>
 	</target>
 
 	<target name="javadoc" description="--> Create Javadoc">

@@ -1,9 +1,13 @@
 <?xml version="1.0"?>
 <!-- ====================================================================== 
-     ch.ntb.usb 
+     ch.ntb.usb
      Ant deployment tasks for ch.ntb.usb
 
-	 NOTE: for deployment, \\www-server\web must be mapped to W:
+	 NOTE: for deployment the properties
+	 	project.server.username
+	 	project.server.password
+	 must be set on the command line
+	 (e.g. -Dproject.server.username=X as jvm command line argument).
 
      schlaepfer                                                                
      ====================================================================== -->
@@ -11,20 +15,22 @@
 	<description>
 		Ant deployment tasks for ch.ntb.usb
 	</description>
-	
+
 	<import file="build.xml" />
 
 	<property file="deployment.properties" />
 
-	<taskdef name="java2html" classname="de.java2html.anttasks.Java2HtmlTask" classpath="${java2html.dir.lib}" />
+	<taskdef name="java2html" classname="de.java2html.anttasks.Java2HtmlTask" classpath="${java2html.dir.lib}/java2html.jar" />
+
 	<target name="java2html">
 		<java2html srcdir="${java2html.dir.src}" destdir="${project.dir.demos}" includes="**/*.java" overwrite="true" style="eclipse" showFileName="true" />
 	</target>
 
-	<target name="deploy" depends="jar, javadoc, java2html" description="--> Deploy to server">
+	<!-- 
+	<target name="deploy" depends="jar, javadoc, java2html" description="-> Deploy to server">
 		<echo message="\\www-server\web must be mapped to W:" />
 		<echo message="copy jar file to server" />
-		<copy file="${project.dir.lib}/${project.jarfile}" todir="${project.server.dir.bin}" />
+		<copy file="${project.dir.lib}/${project.jarfile}.jar" todir="${project.server.dir.bin}" />
 		<echo message="copy javadoc to server" />
 		<copy todir="${project.server.dir.doc}">
 			<fileset dir="${project.dir.doc}" />
@@ -35,4 +41,21 @@
 		</copy>
 	</target>
 	
+	-->
+
+	<target name="deploy" depends="javadoc, java2html" description="-> Deploy to server">
+		<!-- 
+		<echo message="copy jar file to server" />
+		<scp trust="true" file="${project.dir.lib}/${project.jarfile}.jar" todir="${project.server.username}:${project.server.password}@${project.server.name}:${project.server.dir.bin}" />
+		-->
+		<echo message="copy javadoc to server" />
+		<scp trust="true" todir="${project.server.username}:${project.server.password}@${project.server.name}:${project.server.dir.doc}">
+			<fileset dir="${project.dir.doc}" />
+		</scp>
+		<echo message="copy html demo files to server" />
+		<scp trust="true" todir="${project.server.username}:${project.server.password}@${project.server.name}:${project.server.dir.demos}">
+			<fileset dir="${project.dir.demos}" />
+		</scp>
+	</target>
+
 </project>
