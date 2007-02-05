@@ -1,7 +1,8 @@
 /* 
  * Java libusb wrapper
- * Copyright (c) 2005-2006 Andreas Schläpfer <libusb@drip.ch>
+ * Copyright (c) 2005-2006 Andreas Schläpfer <spandi at users.sourceforge.net>
  *
+ * http://libusbjava.sourceforge.net
  * This library is covered by the LGPL, read LGPL.txt for details.
  */
 package ch.ntb.usb.demo;

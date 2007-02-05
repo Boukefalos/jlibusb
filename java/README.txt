@@ -12,7 +12,8 @@ For more information about LibUsb-Win32 visit:
 	http://sourceforge.net/projects/libusb-win32
 
 For more information about Java LibUsb-Win32 wrapper visit:
-	http://inf.ntb.ch/infoportal/help/topic/ch.ntb.infoportal/projects.html
+	http://libusbjava.sourceforge.net
+	http://sourceforge.net/projects/libusbjava
 
 License
 -------
@@ -23,4 +24,4 @@ For licensing information about LibUsb-Win32 see http://libusb-win32.sourceforge
 
 Authors
 -------
-Andreas Schläpfer	<libusb@drip.ch>
+Andreas Schläpfer	<spandi at users.sourceforge.net>
