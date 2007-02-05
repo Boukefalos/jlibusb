@@ -85,7 +85,7 @@
 <XPD:OBJ name="NameCompartment" type="UMLNameCompartmentView" guid="cNaEspNZDUWShne5Px5fpQAA">
 <XPD:OBJ name="NameLabel" type="LabelView" guid="YH3cek/r9EmzFAAFSgkBQwAA">
 <XPD:ATTR name="FontStyle" type="integer">1</XPD:ATTR>
-<XPD:ATTR name="Text" type="string">LibusbWin</XPD:ATTR>
+<XPD:ATTR name="Text" type="string">LibusbJava</XPD:ATTR>
 </XPD:OBJ>
 <XPD:OBJ name="StereotypeLabel" type="LabelView" guid="MPTaV9C7ekKPkdTzvJMzFAAA">
 <XPD:ATTR name="Visible" type="boolean">False</XPD:ATTR>
@@ -110,10 +110,10 @@
 <XPD:ATTR name="FillColor" type="string">$00B9FFFF</XPD:ATTR>
 <XPD:ATTR name="Left" type="integer">596</XPD:ATTR>
 <XPD:ATTR name="Top" type="integer">272</XPD:ATTR>
-<XPD:ATTR name="Width" type="integer">131</XPD:ATTR>
+<XPD:ATTR name="Width" type="integer">136</XPD:ATTR>
 <XPD:ATTR name="Height" type="integer">68</XPD:ATTR>
 <XPD:ATTR name="Text" type="string">Native class to access
-the LibusbWin.dll which
+the LibusbJava.dll which
 is a wrapper to the
 LibUsb-Win32 API.
 </XPD:ATTR>
@@ -121,7 +121,7 @@ LibUsb-Win32 API.
 <XPD:OBJ name="OwnedViews[3]" type="UMLNoteLinkView" guid="D0hLH9fr60ivITtMWo2amQAA">
 <XPD:ATTR name="LineColor" type="string">clMaroon</XPD:ATTR>
 <XPD:ATTR name="FillColor" type="string">$00B9FFFF</XPD:ATTR>
-<XPD:ATTR name="Points" type="Points">560,264;596,279</XPD:ATTR>
+<XPD:ATTR name="Points" type="Points">560,264;596,278</XPD:ATTR>
 <XPD:REF name="Head">kFuXbRCvX0OxyJYGXAJ2NwAA</XPD:REF>
 <XPD:REF name="Tail">bj7RYkSMO0qIEP8jkhRPkgAA</XPD:REF>
 </XPD:OBJ>
@@ -1447,7 +1447,7 @@ type Usb_Device
 <XPD:REF name="Views[0]">3aqcGmdQBU2yR8XWwbH6wgAA</XPD:REF>
 <XPD:ATTR name="#OwnedElements" type="integer">10</XPD:ATTR>
 <XPD:OBJ name="OwnedElements[0]" type="UMLClass" guid="Y0tGKOGA/UquqP1qaYDayQAA">
-<XPD:ATTR name="Name" type="string">LibusbWin</XPD:ATTR>
+<XPD:ATTR name="Name" type="string">LibusbJava</XPD:ATTR>
 <XPD:REF name="Namespace">BWFMxN62oEGNP+kKcODiEgAA</XPD:REF>
 <XPD:ATTR name="#Views" type="integer">4</XPD:ATTR>
 <XPD:REF name="Views[0]">bj7RYkSMO0qIEP8jkhRPkgAA</XPD:REF>
@@ -1947,8 +1947,8 @@ type Usb_Device
 <XPD:REF name="Participant">NDp8e0ch10ST3dwxWPam4AAA</XPD:REF>
 <XPD:ATTR name="#Views" type="integer">4</XPD:ATTR>
 <XPD:REF name="Views[0]">IIOw3R07h0mYIbxgQNAvlgAA</XPD:REF>
-<XPD:REF name="Views[1]">Ilbnf/apgU2JUqlCax0E0AAA</XPD:REF>
-<XPD:REF name="Views[2]">6DAAoxE3gE6btQ3QR6zXSAAA</XPD:REF>
+<XPD:REF name="Views[1]">6DAAoxE3gE6btQ3QR6zXSAAA</XPD:REF>
+<XPD:REF name="Views[2]">Ilbnf/apgU2JUqlCax0E0AAA</XPD:REF>
 <XPD:REF name="Views[3]">GWJjJWM040mgOfcnzTwGqgAA</XPD:REF>
 </XPD:OBJ>
 <XPD:OBJ name="Connections[1]" type="UMLAssociationEnd" guid="PCKabEdsC0+42T+WCC0J+gAA">
@@ -1956,8 +1956,8 @@ type Usb_Device
 <XPD:REF name="Participant">p/wk8BA7x0OTRXXHy0OJmgAA</XPD:REF>
 <XPD:ATTR name="#Views" type="integer">4</XPD:ATTR>
 <XPD:REF name="Views[0]">Mf6lj8hCekmAt8LSuv0gPQAA</XPD:REF>
-<XPD:REF name="Views[1]">gZyJB5c8j0qqNEv58A7qkQAA</XPD:REF>
-<XPD:REF name="Views[2]">roosZQXLT0uL9JG9OjvfIQAA</XPD:REF>
+<XPD:REF name="Views[1]">roosZQXLT0uL9JG9OjvfIQAA</XPD:REF>
+<XPD:REF name="Views[2]">gZyJB5c8j0qqNEv58A7qkQAA</XPD:REF>
 <XPD:REF name="Views[3]">jGiYNVwhsUqy+u4GsecJkwAA</XPD:REF>
 </XPD:OBJ>
 </XPD:OBJ>
@@ -1975,8 +1975,8 @@ type Usb_Device
 <XPD:REF name="Participant">NDp8e0ch10ST3dwxWPam4AAA</XPD:REF>
 <XPD:ATTR name="#Views" type="integer">4</XPD:ATTR>
 <XPD:REF name="Views[0]">zO1s01kJIE6XkTjlSB6aywAA</XPD:REF>
-<XPD:REF name="Views[1]">UxK4awc9BUaq32wB9ulIlQAA</XPD:REF>
-<XPD:REF name="Views[2]">W9sijr2Fr02bK6wbKT19/wAA</XPD:REF>
+<XPD:REF name="Views[1]">W9sijr2Fr02bK6wbKT19/wAA</XPD:REF>
+<XPD:REF name="Views[2]">UxK4awc9BUaq32wB9ulIlQAA</XPD:REF>
 <XPD:REF name="Views[3]">62JK0r9fykSMDnmw3ZuktgAA</XPD:REF>
 </XPD:OBJ>
 <XPD:OBJ name="Connections[1]" type="UMLAssociationEnd" guid="cJakFa0mdEChcxEhYeDaKwAA">
@@ -1984,8 +1984,8 @@ type Usb_Device
 <XPD:REF name="Participant">nCivixeClUeJ/8WDflvLoAAA</XPD:REF>
 <XPD:ATTR name="#Views" type="integer">4</XPD:ATTR>
 <XPD:REF name="Views[0]">NlVzv49r5EKp3NXgP9SJUgAA</XPD:REF>
-<XPD:REF name="Views[1]">S2waQNcxi0SMzX3GtK14MwAA</XPD:REF>
-<XPD:REF name="Views[2]">2Q3xA4DACkm0S1EmjZ54IwAA</XPD:REF>
+<XPD:REF name="Views[1]">2Q3xA4DACkm0S1EmjZ54IwAA</XPD:REF>
+<XPD:REF name="Views[2]">S2waQNcxi0SMzX3GtK14MwAA</XPD:REF>
 <XPD:REF name="Views[3]">hN0Adta+JUWLfSVgHKKVEgAA</XPD:REF>
 </XPD:OBJ>
 </XPD:OBJ>
