@@ -16,7 +16,7 @@ BEGIN
     BEGIN
         BLOCK "040904b0"  
         BEGIN
-            VALUE "CompanyName",     "http://inf.ntb.ch"
+            VALUE "CompanyName",     "http://libusbjava.sourceforge.net"
             VALUE "FileDescription", RC_PRODUCT_STR
             VALUE "FileVersion",     RC_VERSION_STR
             VALUE "InternalName",    RC_FILE_NAME_STR
