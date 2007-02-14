@@ -188,7 +188,7 @@ JNIEXPORT jobject JNICALL Java_ch_ntb_usb_LibusbJava_usb_1get_1busses
 	    usb_confDescFID_bmAttributes = env->GetFieldID(usb_confDescClazz, "bmAttributes", "B");
 	    usb_confDescFID_MaxPower = env->GetFieldID(usb_confDescClazz, "MaxPower", "B");
 	    usb_confDescFID_interface_ = env->GetFieldID(usb_confDescClazz, "interface_", "[Lch/ntb/usb/Usb_Interface;");
-	    usb_confDescFID_extra = env->GetFieldID(usb_confDescClazz, "extra", "Lch/ntb/usb/Usb_Config_Descriptor;");
+	    usb_confDescFID_extra = env->GetFieldID(usb_confDescClazz, "extra", "[B");
 	    usb_confDescFID_extralen = env->GetFieldID(usb_confDescClazz, "extralen", "I");
 
 		// usb_interface
@@ -216,7 +216,7 @@ JNIEXPORT jobject JNICALL Java_ch_ntb_usb_LibusbJava_usb_1get_1busses
 	    usb_intDescFID_bInterfaceProtocol = env->GetFieldID(usb_intDescClazz, "bInterfaceProtocol", "B");
 	    usb_intDescFID_iInterface = env->GetFieldID(usb_intDescClazz, "iInterface", "B");
 	    usb_intDescFID_endpoint = env->GetFieldID(usb_intDescClazz, "endpoint", "[Lch/ntb/usb/Usb_Endpoint_Descriptor;");
-	    usb_intDescFID_extra = env->GetFieldID(usb_intDescClazz, "extra", "Lch/ntb/usb/Usb_Interface_Descriptor;");
+	    usb_intDescFID_extra = env->GetFieldID(usb_intDescClazz, "extra", "[B");
 	    usb_intDescFID_extralen = env->GetFieldID(usb_intDescClazz, "extralen", "I");
 
 		// usb_endpoint_descriptor
@@ -233,7 +233,7 @@ JNIEXPORT jobject JNICALL Java_ch_ntb_usb_LibusbJava_usb_1get_1busses
 	    usb_epDescFID_bInterval = env->GetFieldID(usb_epDescClazz, "bInterval", "B");
 	    usb_epDescFID_bRefresh = env->GetFieldID(usb_epDescClazz, "bRefresh", "B");
 	    usb_epDescFID_bSynchAddress = env->GetFieldID(usb_epDescClazz, "bSynchAddress", "B");
-	    usb_epDescFID_extra = env->GetFieldID(usb_epDescClazz, "extra", "Lch/ntb/usb/Usb_Endpoint_Descriptor;");
+	    usb_epDescFID_extra = env->GetFieldID(usb_epDescClazz, "extra", "[B");
 	    usb_epDescFID_extralen = env->GetFieldID(usb_epDescClazz, "extralen", "I");
 #ifdef DEBUGON
 		printf("usb_get_busses: Field initialization done (1)\n");
@@ -363,11 +363,12 @@ JNIEXPORT jobject JNICALL Java_ch_ntb_usb_LibusbJava_usb_1get_1busses
 				env->SetByteField(usb_confDescObj, usb_confDescFID_bmAttributes, dev->config[c].bmAttributes);
 				env->SetByteField(usb_confDescObj, usb_confDescFID_MaxPower, dev->config[c].MaxPower);
 				env->SetIntField(usb_confDescObj, usb_confDescFID_extralen, dev->config[c].extralen);
-				// extra descriptors are not interpreted!!!
-				env->SetObjectField(usb_confDescObj, usb_confDescFID_extra, NULL);
 				if (dev->config[c].extra){
-					printf("The Device %d contains an extra descriptor!\n", dev->devnum);
-					printf("Extra descriptors are not passed to java!\n");
+					jbyteArray jbExtraDesc = env->NewByteArray(dev->config[c].extralen);
+					env->SetByteArrayRegion(jbExtraDesc, 0, dev->config[c].extralen, (jbyte *) dev->config[c].extra);
+					env->SetObjectField(usb_confDescObj, usb_confDescFID_extra, jbExtraDesc);
+				} else {
+					env->SetObjectField(usb_confDescObj, usb_confDescFID_extra, NULL);
 				}
 				// interface
 				usb_intObjArray = (jobjectArray) env->NewObjectArray(dev->config[c].bNumInterfaces, usb_intClazz, NULL);
@@ -412,12 +413,13 @@ JNIEXPORT jobject JNICALL Java_ch_ntb_usb_LibusbJava_usb_1get_1busses
 						env->SetByteField(usb_intDescObj, usb_intDescFID_bInterfaceProtocol, dev->config[c].interface[i].altsetting[a].bInterfaceProtocol);
 						env->SetByteField(usb_intDescObj, usb_intDescFID_iInterface, dev->config[c].interface[i].altsetting[a].iInterface);
 						env->SetIntField(usb_intDescObj, usb_intDescFID_extralen, dev->config[c].interface[i].altsetting[a].extralen);
-						// extra descriptors are not interpreted!!!
 						if (dev->config[c].interface[i].altsetting[a].extra){
-							printf("The Device %d contains an extra interface descriptor!\n", dev->devnum);
-							printf("Extra descriptors are not passed to java!\n");
+							jbyteArray jbExtraDesc = env->NewByteArray(dev->config[c].interface[i].altsetting[a].extralen);
+							env->SetByteArrayRegion(jbExtraDesc, 0, dev->config[c].interface[i].altsetting[a].extralen, (jbyte *) dev->config[c].interface[i].altsetting[a].extra);
+							env->SetObjectField(usb_intDescObj, usb_intDescFID_extra, jbExtraDesc);
+						} else {
+							env->SetObjectField(usb_intDescObj, usb_intDescFID_extra, NULL);
 						}
-						env->SetObjectField(usb_intDescObj, usb_intDescFID_extra, NULL);
 						// endpoint descriptor
 						usb_epDescObjArray = (jobjectArray) env->NewObjectArray(dev->config[c].interface[i].altsetting[a].bNumEndpoints, usb_epDescClazz, NULL);
 						if (!usb_epDescObjArray)	{ printf("Error NewObject (usb_epDescObjArray)\n"); return NULL;	}
@@ -442,12 +444,13 @@ JNIEXPORT jobject JNICALL Java_ch_ntb_usb_LibusbJava_usb_1get_1busses
 							env->SetByteField(usb_epDescObj, usb_epDescFID_bRefresh, dev->config[c].interface[i].altsetting[a].endpoint[e].bRefresh);
 							env->SetByteField(usb_epDescObj, usb_epDescFID_bSynchAddress, dev->config[c].interface[i].altsetting[a].endpoint[e].bSynchAddress);
 							env->SetIntField(usb_epDescObj, usb_epDescFID_extralen, dev->config[c].interface[i].altsetting[a].endpoint[e].extralen);
-							// extra descriptors are not interpreted!!!
 							if (dev->config[c].interface[i].altsetting[a].endpoint[e].extra){
-								printf("The Device %d contains an extra endpoint descriptor!\n", dev->devnum);
-								printf("Extra descriptors are not passed to java!\n");
+								jbyteArray jbExtraDesc = env->NewByteArray(dev->config[c].interface[i].altsetting[a].endpoint[e].extralen);
+								env->SetByteArrayRegion(jbExtraDesc, 0, dev->config[c].interface[i].altsetting[a].endpoint[e].extralen, (jbyte *) dev->config[c].interface[i].altsetting[a].endpoint[e].extra);
+								env->SetObjectField(usb_epDescObj, usb_epDescFID_extra, jbExtraDesc);
+							} else {
+								env->SetObjectField(usb_epDescObj, usb_epDescFID_extra, NULL);
 							}
-							env->SetObjectField(usb_epDescObj, usb_epDescFID_extra, NULL);
 						}
 						env->SetObjectField(usb_intDescObj, usb_intDescFID_endpoint, usb_epDescObjArray);
 					}

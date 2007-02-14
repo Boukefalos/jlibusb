@@ -39,7 +39,7 @@ public class Usb_Config_Descriptor extends Usb_Descriptor {
 
 	private Usb_Interface[] interface_;
 
-	private Usb_Config_Descriptor extra; /* Extra descriptors */
+	private byte[] extra; /* Extra descriptors */
 
 	private int extralen;
 
@@ -76,13 +76,11 @@ public class Usb_Config_Descriptor extends Usb_Descriptor {
 	}
 
 	/**
-	 * Extra descriptors are currently not interpreted because of their unknown
-	 * structure.
+	 * Returns the data of extra descriptor(s) if available.<br>
 	 * 
-	 * @return null
+	 * @return null or a byte array with the extra descriptor data
 	 */
-	// TODO: implementation
-	public Usb_Config_Descriptor getExtra() {
+	public byte[] getExtra() {
 		return extra;
 	}
 

@@ -49,8 +49,6 @@
 </profile>
 </item>
 <item id="org.eclipse.cdt.core.pathentry">
-<pathentry include="C:/Program Files/Java/jdk1.5.0_04/include" kind="inc" path="" system="true"/>
-<pathentry include="C:/MinGW/include" kind="inc" path="" system="true"/>
 <pathentry kind="src" path=""/>
 <pathentry kind="out" path=""/>
 <pathentry kind="con" path="org.eclipse.cdt.make.core.DISCOVERED_SCANNER_INFO"/>
