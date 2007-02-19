@@ -402,10 +402,8 @@ public class UsbView extends JFrame {
 	}
 
 	void expandAll(JTree tree) {
-		int row = 0;
-		while (row < tree.getRowCount()) {
+		for (int row = 0; row < tree.getRowCount(); row++) {
 			tree.expandRow(row);
-			row++;
 		}
 	}
 }

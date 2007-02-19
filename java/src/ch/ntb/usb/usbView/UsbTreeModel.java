@@ -309,7 +309,7 @@ public class UsbTreeModel implements TreeModel, TreeSelectionListener {
 					+ confDesc.getMaxPower() + ")\n");
 			sb.append("\textralen: 0x"
 					+ Integer.toHexString(confDesc.getExtralen()) + "\n");
-			sb.append("\textra: " + confDesc.getExtra() + "\n");
+			sb.append("\textra: " + extraDescriptorToString(confDesc.getExtra()) + "\n");
 			// get device handle to retrieve string descriptors
 			Usb_Bus bus = rootBus;
 			while (bus != null) {
@@ -382,7 +382,7 @@ public class UsbTreeModel implements TreeModel, TreeSelectionListener {
 					+ Integer.toHexString(intDesc.getIInterface()) + "\n");
 			sb.append("\textralen: 0x"
 					+ Integer.toHexString(intDesc.getExtralen()) + "\n");
-			sb.append("\textra: " + intDesc.getExtra() + "\n");
+			sb.append("\textra: " + extraDescriptorToString(intDesc.getExtra()) + "\n");
 			// get device handle to retrieve string descriptors
 			Usb_Bus bus = rootBus;
 			while (bus != null) {
@@ -446,8 +446,21 @@ public class UsbTreeModel implements TreeModel, TreeSelectionListener {
 					+ Integer.toHexString(epDesc.getBSynchAddress()) + "\n");
 			sb.append("\textralen: 0x"
 					+ Integer.toHexString(epDesc.getExtralen()) + "\n");
-			sb.append("\textra: " + epDesc.getExtra() + "\n");
+			sb.append("\textra: " + extraDescriptorToString(epDesc.getExtra()) + "\n");
 			textArea.setText(sb.toString());
 		}
+	}
+
+	private String extraDescriptorToString(byte[] extra) {
+		if (extra != null) {
+			StringBuffer sb = new StringBuffer();
+			for (int i = 0; i < extra.length; i++) {
+				sb.append("0x");
+				sb.append(Integer.toHexString(extra[i] & 0xff));
+				sb.append(' ');
+			}
+			return sb.toString();
+		}
+		return null;
 	}
 }
