@@ -59,7 +59,7 @@ public class Device {
 
 		Usb_Bus bus = LibusbJava.usb_get_busses();
 		if (bus == null) {
-			throw new USBException("LibusbWin.usb_get_busses(): "
+			throw new USBException("LibusbJava.usb_get_busses(): "
 					+ LibusbJava.usb_strerror());
 		}
 		return bus;
@@ -185,7 +185,7 @@ public class Device {
 		if (dev != null) {
 			int res = LibusbJava.usb_open(dev);
 			if (res <= 0) {
-				throw new USBException("LibusbWin.usb_open: "
+				throw new USBException("LibusbJava.usb_open: "
 						+ LibusbJava.usb_strerror());
 			}
 			usbDevHandle = res;
@@ -223,7 +223,7 @@ public class Device {
 		release_interface(usbDevHandle, dev_interface);
 		if (LibusbJava.usb_close(usbDevHandle) < 0) {
 			usbDevHandle = 0;
-			throw new USBException("LibusbWin.usb_close: "
+			throw new USBException("LibusbJava.usb_close: "
 					+ LibusbJava.usb_strerror());
 		}
 		usbDevHandle = 0;
@@ -245,7 +245,7 @@ public class Device {
 		release_interface(usbDevHandle, dev_interface);
 		if (LibusbJava.usb_reset(usbDevHandle) < 0) {
 			usbDevHandle = 0;
-			throw new USBException("LibusbWin.usb_reset: "
+			throw new USBException("LibusbJava.usb_reset: "
 					+ LibusbJava.usb_strerror());
 		}
 		usbDevHandle = 0;
@@ -292,10 +292,10 @@ public class Device {
 					open(dev_configuration, dev_interface, dev_altinterface);
 					return writeBulk(out_ep_address, data, size, timeout, false);
 				}
-				throw new USBTimeoutException("LibusbWin.usb_bulk_write: "
+				throw new USBTimeoutException("LibusbJava.usb_bulk_write: "
 						+ LibusbJava.usb_strerror());
 			}
-			throw new USBException("LibusbWin.usb_bulk_write: "
+			throw new USBException("LibusbJava.usb_bulk_write: "
 					+ LibusbJava.usb_strerror());
 		}
 
@@ -352,10 +352,10 @@ public class Device {
 					open(dev_configuration, dev_interface, dev_altinterface);
 					return readBulk(in_ep_address, data, size, timeout, false);
 				}
-				throw new USBTimeoutException("LibusbWin.usb_bulk_read: "
+				throw new USBTimeoutException("LibusbJava.usb_bulk_read: "
 						+ LibusbJava.usb_strerror());
 			}
-			throw new USBException("LibusbWin.usb_bulk_read: "
+			throw new USBException("LibusbJava.usb_bulk_read: "
 					+ LibusbJava.usb_strerror());
 		}
 
@@ -413,10 +413,10 @@ public class Device {
 					return writeInterrupt(out_ep_address, data, size, timeout,
 							false);
 				}
-				throw new USBTimeoutException("LibusbWin.usb_bulk_write: "
+				throw new USBTimeoutException("LibusbJava.usb_bulk_write: "
 						+ LibusbJava.usb_strerror());
 			}
-			throw new USBException("LibusbWin.usb_bulk_write: "
+			throw new USBException("LibusbJava.usb_bulk_write: "
 					+ LibusbJava.usb_strerror());
 		}
 
@@ -474,10 +474,10 @@ public class Device {
 					return readInterrupt(in_ep_address, data, size, timeout,
 							false);
 				}
-				throw new USBTimeoutException("LibusbWin.usb_bulk_read: "
+				throw new USBTimeoutException("LibusbJava.usb_bulk_read: "
 						+ LibusbJava.usb_strerror());
 			}
-			throw new USBException("LibusbWin.usb_bulk_read: "
+			throw new USBException("LibusbJava.usb_bulk_read: "
 					+ LibusbJava.usb_strerror());
 		}
 
@@ -550,10 +550,10 @@ public class Device {
 					return controlMsg(requestType, request, value, index, data,
 							size, timeout, false);
 				}
-				throw new USBTimeoutException("LibusbWin.controlMsg: "
+				throw new USBTimeoutException("LibusbJava.controlMsg: "
 						+ LibusbJava.usb_strerror());
 			}
-			throw new USBException("LibusbWin.controlMsg: "
+			throw new USBException("LibusbJava.controlMsg: "
 					+ LibusbJava.usb_strerror());
 		}
 
@@ -588,12 +588,12 @@ public class Device {
 			int interface_, int altinterface) throws USBException {
 		if (LibusbJava.usb_set_configuration(usb_dev_handle, configuration) < 0) {
 			usbDevHandle = 0;
-			throw new USBException("LibusbWin.usb_set_configuration: "
+			throw new USBException("LibusbJava.usb_set_configuration: "
 					+ LibusbJava.usb_strerror());
 		}
 		if (LibusbJava.usb_claim_interface(usb_dev_handle, interface_) < 0) {
 			usbDevHandle = 0;
-			throw new USBException("LibusbWin.usb_claim_interface: "
+			throw new USBException("LibusbJava.usb_claim_interface: "
 					+ LibusbJava.usb_strerror());
 		}
 		if (altinterface >= 0) {
@@ -604,7 +604,7 @@ public class Device {
 					// ignore
 				}
 				usbDevHandle = 0;
-				throw new USBException("LibusbWin.usb_set_altinterface: "
+				throw new USBException("LibusbJava.usb_set_altinterface: "
 						+ LibusbJava.usb_strerror());
 			}
 		}
@@ -625,7 +625,7 @@ public class Device {
 			throws USBException {
 		if (LibusbJava.usb_release_interface(dev_handle, interface_) < 0) {
 			usbDevHandle = 0;
-			throw new USBException("LibusbWin.usb_release_interface: "
+			throw new USBException("LibusbJava.usb_release_interface: "
 					+ LibusbJava.usb_strerror());
 		}
 		logger.info("interface released");
