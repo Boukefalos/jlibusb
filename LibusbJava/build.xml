@@ -7,7 +7,7 @@
      	winres (only on windows)
      	g++
 
-     schlaepfer                                                                
+     http://libusbJava.sourceforge.net                                                                
      ====================================================================== -->
 <project name="LibusbJava" basedir=".">
 	<description>
@@ -78,4 +78,19 @@
 		</exec>
 	</target>
 
+	<target name="mac" depends="clean" description="--> Build ${build.shlib.mac.shlibname}">
+		<exec dir="." executable="${build.mac.compiler}">
+			<!-- arguments to pass to gcc -->
+			<arg value="-v" />
+			<arg value="-dynamiclib" />
+			<arg line="-I ${build.mac.jni}" />
+			<arg value="${build.shlib.srcname}" />
+			<arg line="-o ${build.shlib.mac.shlibname}" />
+			<arg line="-current_version ${version.mac}" />
+			<arg line="-l ${build.mac.stdclib}" />
+			<arg value="${build.mac.includes}/${build.mac.lib.libusb}" />
+			<arg value="${build.mac.includes}/${build.mac.lib.libusbpp}" />
+		</exec>
+	</target>
+	
 </project>
