@@ -70,6 +70,7 @@
 			<arg value="-shared" />
 			<arg value="-Wl,-soname,${build.shlib.linux.shlibname}" />
 			<arg value="-I${build.linux.includes}" />
+			<arg value="-I${build.linux.includes2}" />
 			<arg value="-shared" />
 			<arg value="${build.shlib.srcname}" />
 			<arg value="-o${build.shlib.linux.shlibname}.${version.linux}" />
