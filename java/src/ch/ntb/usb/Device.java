@@ -174,7 +174,7 @@ public class Device {
 		this.dev_interface = interface_;
 		this.dev_altinterface = altinterface;
 
-		if (usbDevHandle > 0) {
+		if (usbDevHandle != 0) {
 			throw new USBException("device opened, close or reset first");
 		}
 
@@ -191,7 +191,7 @@ public class Device {
 			usbDevHandle = res;
 		}
 
-		if (dev == null || usbDevHandle <= 0) {
+		if (dev == null || usbDevHandle == 0) {
 			throw new USBException("USB device with idVendor 0x"
 					+ Integer.toHexString(idVendor & 0xFFFF)
 					+ " and idProduct 0x"
@@ -217,7 +217,7 @@ public class Device {
 	 * @throws USBException
 	 */
 	public void close() throws USBException {
-		if (usbDevHandle <= 0) {
+		if (usbDevHandle == 0) {
 			throw new USBException("invalid device handle");
 		}
 		release_interface(usbDevHandle, dev_interface);
@@ -239,7 +239,7 @@ public class Device {
 	 * @throws USBException
 	 */
 	public void reset() throws USBException {
-		if (usbDevHandle <= 0) {
+		if (usbDevHandle == 0) {
 			throw new USBException("invalid device handle");
 		}
 		release_interface(usbDevHandle, dev_interface);
@@ -272,7 +272,7 @@ public class Device {
 	 */
 	public int writeBulk(int out_ep_address, byte[] data, int size,
 			int timeout, boolean reopenOnTimeout) throws USBException {
-		if (usbDevHandle <= 0) {
+		if (usbDevHandle == 0) {
 			throw new USBException("invalid device handle");
 		}
 		if (data == null) {
@@ -332,7 +332,7 @@ public class Device {
 	 */
 	public int readBulk(int in_ep_address, byte[] data, int size, int timeout,
 			boolean reopenOnTimeout) throws USBException {
-		if (usbDevHandle <= 0) {
+		if (usbDevHandle == 0) {
 			throw new USBException("invalid device handle");
 		}
 		if (data == null) {
@@ -392,7 +392,7 @@ public class Device {
 	 */
 	public int writeInterrupt(int out_ep_address, byte[] data, int size,
 			int timeout, boolean reopenOnTimeout) throws USBException {
-		if (usbDevHandle <= 0) {
+		if (usbDevHandle == 0) {
 			throw new USBException("invalid device handle");
 		}
 		if (data == null) {
@@ -453,7 +453,7 @@ public class Device {
 	 */
 	public int readInterrupt(int in_ep_address, byte[] data, int size,
 			int timeout, boolean reopenOnTimeout) throws USBException {
-		if (usbDevHandle <= 0) {
+		if (usbDevHandle == 0) {
 			throw new USBException("invalid device handle");
 		}
 		if (data == null) {
@@ -529,7 +529,7 @@ public class Device {
 	public int controlMsg(int requestType, int request, int value, int index,
 			byte[] data, int size, int timeout, boolean reopenOnTimeout)
 			throws USBException {
-		if (usbDevHandle <= 0) {
+		if (usbDevHandle == 0) {
 			throw new USBException("invalid device handle");
 		}
 		if (data == null) {
@@ -705,7 +705,7 @@ public class Device {
 	 * @return true if the device is open
 	 */
 	public boolean isOpen() {
-		return usbDevHandle > 0;
+		return usbDevHandle != 0;
 	}
 
 	/**
