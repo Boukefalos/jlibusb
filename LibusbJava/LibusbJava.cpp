@@ -10,8 +10,14 @@
 #include <stddef.h>
 #include <string.h>
 #include <locale.h>
+#include <errno.h>
 #include <usb.h>
 #include "LibusbJava.h"
+
+// Windows specific stuff
+#ifdef WIN32
+#include <error.h>
+#endif
 
 //#define DEBUGON
 
@@ -805,4 +811,32 @@ JNIEXPORT jstring JNICALL Java_ch_ntb_usb_LibusbJava_usb_1strerror
   	return env->NewStringUTF(str);
   }
   
-
+/*
+ * Class:     ch_ntb_usb_LibusbJava
+ * Method:    usb_error_no
+ * Signature: (I)I
+ */
+JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbJava_usb_1error_1no
+  (JNIEnv *env, jclass obj, jint java_error_no){
+	
+	switch (java_error_no) {
+	case 0:
+		return 0;
+	case 1:
+		return EBADF;
+	case 2:
+		return ENXIO;
+	case 3:
+		return EBUSY;
+	case 4:
+		return EINVAL;
+	case 5:
+		return ETIMEDOUT;
+	case 6:
+		return EIO;
+	case 7:
+		return ENOMEM;
+	default:
+		return 100000;
+	}
+}

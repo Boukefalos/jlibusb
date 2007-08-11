@@ -191,6 +191,14 @@ JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbJava_usb_1interrupt_1read
 JNIEXPORT jstring JNICALL Java_ch_ntb_usb_LibusbJava_usb_1strerror
   (JNIEnv *, jclass);
 
+/*
+ * Class:     ch_ntb_usb_LibusbJava
+ * Method:    usb_error_no
+ * Signature: (I)I
+ */
+JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbJava_usb_1error_1no
+  (JNIEnv *, jclass, jint);
+
 #ifdef __cplusplus
 }
 #endif

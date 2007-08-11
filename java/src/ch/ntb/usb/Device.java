@@ -22,8 +22,6 @@ public class Device {
 
 	private static final Logger logger = LogUtil.getLogger("ch.ntb.usb");
 
-	private static final int TIMEOUT_ERROR_CODE = -116;
-
 	private int maxPacketSize;
 
 	private int idVendor, idProduct, dev_configuration, dev_interface,
@@ -284,7 +282,7 @@ public class Device {
 		int lenWritten = LibusbJava.usb_bulk_write(usbDevHandle,
 				out_ep_address, data, size, timeout);
 		if (lenWritten < 0) {
-			if (lenWritten == TIMEOUT_ERROR_CODE) {
+			if (lenWritten == LibusbJava.ERROR_TIMEDOUT) {
 				// try to reopen the device and send the data again
 				if (reopenOnTimeout) {
 					logger.info("try to reopen");
@@ -344,7 +342,7 @@ public class Device {
 		int lenRead = LibusbJava.usb_bulk_read(usbDevHandle, in_ep_address,
 				data, size, timeout);
 		if (lenRead < 0) {
-			if (lenRead == TIMEOUT_ERROR_CODE) {
+			if (lenRead == LibusbJava.ERROR_TIMEDOUT) {
 				// try to reopen the device and send the data again
 				if (reopenOnTimeout) {
 					logger.info("try to reopen");
@@ -404,7 +402,7 @@ public class Device {
 		int lenWritten = LibusbJava.usb_interrupt_write(usbDevHandle,
 				out_ep_address, data, size, timeout);
 		if (lenWritten < 0) {
-			if (lenWritten == TIMEOUT_ERROR_CODE) {
+			if (lenWritten == LibusbJava.ERROR_TIMEDOUT) {
 				// try to reopen the device and send the data again
 				if (reopenOnTimeout) {
 					logger.info("try to reopen");
@@ -465,7 +463,7 @@ public class Device {
 		int lenRead = LibusbJava.usb_interrupt_read(usbDevHandle,
 				in_ep_address, data, size, timeout);
 		if (lenRead < 0) {
-			if (lenRead == TIMEOUT_ERROR_CODE) {
+			if (lenRead == LibusbJava.ERROR_TIMEDOUT) {
 				// try to reopen the device and send the data again
 				if (reopenOnTimeout) {
 					logger.info("try to reopen");
@@ -541,7 +539,7 @@ public class Device {
 		int len = LibusbJava.usb_control_msg(usbDevHandle, requestType,
 				request, value, index, data, size, timeout);
 		if (len < 0) {
-			if (len == TIMEOUT_ERROR_CODE) {
+			if (len == LibusbJava.ERROR_TIMEDOUT) {
 				// try to reopen the device and send the data again
 				if (reopenOnTimeout) {
 					logger.info("try to reopen");

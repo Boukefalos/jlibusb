@@ -33,6 +33,16 @@ package ch.ntb.usb;
 public class LibusbJava {
 
 	/**
+	 * System error codes.<br>
+	 * This list is not complete! For more error codes see the file 'errorno.h'
+	 * on your system.
+	 */
+	public static int ERROR_SUCCESS, ERROR_BAD_FILE_DESCRIPTOR,
+			ERROR_NO_SUCH_DEVICE_OR_ADDRESS, ERROR_BUSY,
+			ERROR_INVALID_PARAMETER, ERROR_TIMEDOUT, ERROR_IO_ERROR,
+			ERROR_NOT_ENOUGH_MEMORY;;
+
+	/**
 	 * Sets the debugging level of libusb.<br>
 	 * 
 	 * The range is from 0 to 255, where 0 disables debug output and 255 enables
@@ -330,6 +340,25 @@ public class LibusbJava {
 
 	/** **************************************************************** */
 
+	/**
+	 * Maps the Java error code to the system error code.<br>
+	 * <br>
+	 * Note that not all error codes are be mapped by this method. For more
+	 * error codes see the file 'errno.h' on your system.<br>
+	 * <br>
+	 * 1: EBADF: Bad file descriptor.<br>
+	 * 2: ENXIO: No such device or address.<br>
+	 * 3: EBUSY: Device or resource busy.<br>
+	 * 4: EINVAL: Invalid argument.<br>
+	 * 5: ETIMEDOUT: Connection timed out.<br>
+	 * 6: EIO: I/O error.<br>
+	 * 7: ENOMEM: Not enough memory.<br>
+	 * 
+	 * 
+	 * @return the system error code or 100000 if no mapping has been found.
+	 */
+	private static native int usb_error_no(int value);
+
 	static {
 		String os = System.getProperty("os.name");
 		if (os.contains("Windows")) {
@@ -337,5 +366,14 @@ public class LibusbJava {
 		} else {
 			System.loadLibrary("usbJava");
 		}
+		// define the error codes
+		ERROR_SUCCESS = 0;
+		ERROR_BAD_FILE_DESCRIPTOR = -usb_error_no(1);
+		ERROR_NO_SUCH_DEVICE_OR_ADDRESS = -usb_error_no(2);
+		ERROR_BUSY = -usb_error_no(3);
+		ERROR_INVALID_PARAMETER = -usb_error_no(4);
+		ERROR_TIMEDOUT = -usb_error_no(5);
+		ERROR_IO_ERROR = -usb_error_no(6);
+		ERROR_NOT_ENOUGH_MEMORY = -usb_error_no(7);
 	}
 }
