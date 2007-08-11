@@ -1,10 +1,9 @@
 /* 
- * 2005/2006
- * Interstate University of Applied Sciences of Technology Buchs NTB
- * Computer Science Laboratory, inf.ntb.ch
- * Andreas Schlï¿½pfer, aschlaepfer@ntb.ch
- * 
- * Version 00.02.00
+ * Java libusb wrapper
+ * Copyright (c) 2005-2006 Andreas Schläpfer <spandi at users.sourceforge.net>
+ *
+ * http://libusbjava.sourceforge.net
+ * This library is covered by the LGPL, read LGPL.txt for details.
  */
 
 #include <jni.h>
@@ -21,6 +20,13 @@ struct usb_bus *busses;
 
 // global flag for loading all class, method and field ID references
 int java_references_loaded = 0;
+
+// if > 0 an LibusbJava specific error string is set
+char *libusbJavaError = NULL;
+
+// macros to set and clear LibusbJava specific errors
+#define setLibusbJavaError(error) libusbJavaError = error
+#define clearLibusbJavaError() libusbJavaError = NULL
 
 // class references
 jclass usb_busClazz, usb_devClazz, usb_devDescClazz, usb_confDescClazz, \
@@ -75,6 +81,7 @@ jfieldID usb_epDescFID_bLength, usb_epDescFID_bDescriptorType, \
 JNIEXPORT void JNICALL Java_ch_ntb_usb_LibusbJava_usb_1set_1debug
   (JNIEnv *env, jclass obj, jint level)
   {
+  	clearLibusbJavaError();
   	usb_set_debug(level);
   }
 /*
@@ -85,6 +92,7 @@ JNIEXPORT void JNICALL Java_ch_ntb_usb_LibusbJava_usb_1set_1debug
 JNIEXPORT void JNICALL Java_ch_ntb_usb_LibusbJava_usb_1init
   (JNIEnv *env, jclass obj)
   {
+  	clearLibusbJavaError();
   	usb_init();
   }
 
@@ -96,6 +104,7 @@ JNIEXPORT void JNICALL Java_ch_ntb_usb_LibusbJava_usb_1init
 JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbJava_usb_1find_1busses
   (JNIEnv *env, jclass obj)
   {
+  	clearLibusbJavaError();
   	return usb_find_busses();
   }
 
@@ -107,6 +116,7 @@ JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbJava_usb_1find_1busses
 JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbJava_usb_1find_1devices
   (JNIEnv *env, jclass obj)
   {
+  	clearLibusbJavaError();
   	return usb_find_devices();
   }
 
@@ -118,6 +128,8 @@ JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbJava_usb_1find_1devices
 JNIEXPORT jobject JNICALL Java_ch_ntb_usb_LibusbJava_usb_1get_1busses
   (JNIEnv *env, jclass obj)
   {
+	
+	clearLibusbJavaError();
 	
 	// only load class, method and field ID references once
 	if (!java_references_loaded) {
@@ -275,7 +287,10 @@ JNIEXPORT jobject JNICALL Java_ch_ntb_usb_LibusbJava_usb_1get_1busses
     	// create a new object for every bus
     	if (!usb_busObj) {
     		usb_busObj = env->NewObject(usb_busClazz, usb_busMid);
-			if (!usb_busObj)	{ printf("Error NewObject (usb_busObj)\n"); return NULL;	}
+			if (!usb_busObj) {
+				setLibusbJavaError("shared library error: Error NewObject (usb_busObj)");
+				return NULL;
+			}
     		main_usb_busObj = usb_busObj;
     	}
     	
@@ -283,7 +298,10 @@ JNIEXPORT jobject JNICALL Java_ch_ntb_usb_LibusbJava_usb_1get_1busses
 		usb_busObj_next = NULL;
 		if (bus->next){
 			usb_busObj_next = env->NewObject(usb_busClazz, usb_busMid);
-			if (!usb_busObj_next)	{ printf("Error NewObject (usb_busObj_next)\n"); return NULL;	}
+			if (!usb_busObj_next) {
+				setLibusbJavaError("shared library error: Error NewObject (usb_busObj_next)");
+				return NULL;
+			}
 		}
 		env->SetObjectField(usb_busObj, usb_busFID_next, usb_busObj_next);
 		env->SetObjectField(usb_busObj, usb_busFID_prev, usb_busObj_prev);
@@ -302,14 +320,20 @@ JNIEXPORT jobject JNICALL Java_ch_ntb_usb_LibusbJava_usb_1get_1busses
 			// create a new object for every device
 			if (!usb_devObj){
 				usb_devObj = env->NewObject(usb_devClazz, usb_devMid);
-				if (!usb_devObj)	{ printf("Error NewObject (usb_devObj)\n"); return NULL;	}
+				if (!usb_devObj) {
+					setLibusbJavaError("shared library error: Error NewObject (usb_devObj)");
+					return NULL;
+				}
 				main_usb_devObj = usb_devObj;
 			}
 			// fill the fields of the object
 			usb_devObj_next = NULL;
 			if (dev->next){
 				usb_devObj_next = env->NewObject(usb_devClazz, usb_devMid);
-				if (!usb_devObj_next)	{ printf("Error NewObject (usb_devObj_next)\n"); return NULL;	}
+				if (!usb_devObj_next) {
+					setLibusbJavaError("shared library error: Error NewObject (usb_devObj_next)");
+					return NULL;
+				}
 			}
 			env->SetObjectField(usb_devObj, usb_devFID_next, usb_devObj_next);
 			env->SetObjectField(usb_devObj, usb_devFID_prev, usb_devObj_prev);
@@ -320,7 +344,10 @@ JNIEXPORT jobject JNICALL Java_ch_ntb_usb_LibusbJava_usb_1get_1busses
 
 			// device descriptor
 			usb_devDescObj = env->NewObject(usb_devDescClazz, usb_devDescMid);
-			if (!usb_devDescObj)	{ printf("Error NewObject (usb_devDescObj)\n"); return NULL;	}
+			if (!usb_devDescObj) {
+				setLibusbJavaError("shared library error: Error NewObject (usb_devDescObj)");
+				return NULL;
+			}
 			env->SetByteField(usb_devDescObj, usb_devDescFID_bLength, dev->descriptor.bLength);
 			env->SetByteField(usb_devDescObj, usb_devDescFID_bDescriptorType, dev->descriptor.bDescriptorType);
 			env->SetShortField(usb_devDescObj, usb_devDescFID_bcdUSB, dev->descriptor.bcdUSB);
@@ -340,19 +367,25 @@ JNIEXPORT jobject JNICALL Java_ch_ntb_usb_LibusbJava_usb_1get_1busses
 			// configuration descriptor
 			// Loop through all of the configurations
 			usb_confDescObjArray = (jobjectArray) env->NewObjectArray(dev->descriptor.bNumConfigurations, usb_confDescClazz, NULL);
-			if (!usb_confDescObjArray)	{ printf("Error NewObject 6\n"); return NULL;	}
+			if (!usb_confDescObjArray) {
+				setLibusbJavaError("shared library error: Error NewObject 6");
+				return NULL;
+			}
 			for (int c = 0; c < dev->descriptor.bNumConfigurations; c++){
 #ifdef DEBUGON
 				printf("\t\tusb_get_busses: configuration %x (5)\n", c);
 #endif
 				if (dev->config == NULL) {
 					// this shouldn't happen, but it did occasionally (maybe this is (or probably was) a libusb bug)
-					printf("dev->config == NULL\n");
+					setLibusbJavaError("shared library error: dev->config == NULL");
 					return main_usb_busObj;
 				}
 
 				usb_confDescObj = env->NewObject(usb_confDescClazz, usb_confDescMid);
-				if (!usb_confDescObj)	{ printf("Error NewObject (usb_confDescObj)\n"); return NULL;	}
+				if (!usb_confDescObj) {
+					setLibusbJavaError("shared library error: Error NewObject (usb_confDescObj)");
+					return NULL;
+				}
 				env->SetObjectArrayElement(usb_confDescObjArray, c, usb_confDescObj);
 				env->SetByteField(usb_confDescObj, usb_confDescFID_bLength, dev->config[c].bLength);
 				env->SetByteField(usb_confDescObj, usb_confDescFID_bDescriptorType, dev->config[c].bDescriptorType);
@@ -372,36 +405,48 @@ JNIEXPORT jobject JNICALL Java_ch_ntb_usb_LibusbJava_usb_1get_1busses
 				}
 				// interface
 				usb_intObjArray = (jobjectArray) env->NewObjectArray(dev->config[c].bNumInterfaces, usb_intClazz, NULL);
-				if (!usb_intObjArray)	{ printf("Error NewObject (usb_intObjArray)\n"); return NULL;	}
+				if (!usb_intObjArray) {
+					setLibusbJavaError("shared library error: Error NewObject (usb_intObjArray)");
+					return NULL;
+				}
 				for (int i = 0; i < dev->config[c].bNumInterfaces; i++){
 #ifdef DEBUGON
 					printf("\t\t\tusb_get_busses: interface %x (6)\n", i);
 #endif
 					if (dev->config[c].interface == NULL) {
 						// this shouldn't happen
-						printf("dev->config[c].interface == NULL\n");
+						printf("dev->config[c].interface == NULL");
 						return main_usb_busObj;
 					}
 
 					usb_intObj = env->NewObject(usb_intClazz, usb_intMid);
-					if (!usb_intObj)	{ printf("Error NewObject (usb_intObj)\n"); return NULL;	}
+					if (!usb_intObj) {
+						setLibusbJavaError("shared library error: Error NewObject (usb_intObj)");
+						return NULL;
+					}
 					env->SetObjectArrayElement(usb_intObjArray, i, usb_intObj);
 					env->SetIntField(usb_intObj, usb_intFID_num_altsetting, dev->config[c].interface[i].num_altsetting);
 					// interface descriptor
 					usb_intDescObjArray = (jobjectArray) env->NewObjectArray(dev->config[c].interface[i].num_altsetting, usb_intDescClazz, NULL);
-					if (!usb_intDescObjArray)	{ printf("Error NewObject (usb_intDescObjArray)\n"); return NULL;	}
+					if (!usb_intDescObjArray) {
+						setLibusbJavaError("shared library error: Error NewObject (usb_intDescObjArray)");
+						return NULL;
+					}
 					for (int a = 0; a < dev->config[c].interface[i].num_altsetting; a++){
 #ifdef DEBUGON
 						printf("\t\t\t\tusb_get_busses: interface descriptor %x (7)\n", a);
 #endif
 						if (dev->config[c].interface[i].altsetting == NULL) {
 							// this shouldn't happen
-							printf("dev->config[c].interface[i].altsetting == NULL\n");
+							printf("LibusbJava: usb_get_busses: dev->config[c].interface[i].altsetting == NULL\n");
 							return main_usb_busObj;
 						}
 
 						usb_intDescObj = env->NewObject(usb_intDescClazz, usb_intDescMid);
-						if (!usb_intDescObj)	{ printf("Error NewObject (usb_intDescObj)\n"); return NULL;	}
+						if (!usb_intDescObj) {
+							setLibusbJavaError("shared library error: Error NewObject (usb_intDescObj)");
+							return NULL;
+						}
 						env->SetObjectArrayElement(usb_intDescObjArray, a, usb_intDescObj);
 						env->SetByteField(usb_intDescObj, usb_intDescFID_bLength, dev->config[c].interface[i].altsetting[a].bLength);
 						env->SetByteField(usb_intDescObj, usb_intDescFID_bDescriptorType, dev->config[c].interface[i].altsetting[a].bDescriptorType);
@@ -422,18 +467,24 @@ JNIEXPORT jobject JNICALL Java_ch_ntb_usb_LibusbJava_usb_1get_1busses
 						}
 						// endpoint descriptor
 						usb_epDescObjArray = (jobjectArray) env->NewObjectArray(dev->config[c].interface[i].altsetting[a].bNumEndpoints, usb_epDescClazz, NULL);
-						if (!usb_epDescObjArray)	{ printf("Error NewObject (usb_epDescObjArray)\n"); return NULL;	}
+						if (!usb_epDescObjArray) {
+							setLibusbJavaError("shared library error: Error NewObject (usb_epDescObjArray)");
+							return NULL;
+						}
 						for (int e = 0; e < dev->config[c].interface[i].altsetting[a].bNumEndpoints; e++){
 #ifdef DEBUGON
 							printf("\t\t\t\t\tusb_get_busses: endpoint descriptor %x (8)\n", e);
 #endif
 							if (dev->config[c].interface[i].altsetting[a].endpoint == NULL) {
-								printf("dev->config[c].interface[i].altsetting[a].endpoint == NULL\n");
+								printf("LibusbJava: usb_get_busses: dev->config[c].interface[i].altsetting[a].endpoint == NULL\n");
 								return main_usb_busObj;
 							}
 
 							usb_epDescObj = env->NewObject(usb_epDescClazz, usb_epDescMid);
-							if (!usb_epDescObj)	{ printf("Error NewObject (usb_epDescObj)\n"); return NULL;	}
+							if (!usb_epDescObj)	{
+								setLibusbJavaError("shared library error: Error NewObject (usb_epDescObj)");
+								return NULL;
+							}
 							env->SetObjectArrayElement(usb_epDescObjArray, e, usb_epDescObj);
 							env->SetByteField(usb_epDescObj, usb_epDescFID_bLength, dev->config[c].interface[i].altsetting[a].endpoint[e].bLength);
 							env->SetByteField(usb_epDescObj, usb_epDescFID_bDescriptorType, dev->config[c].interface[i].altsetting[a].endpoint[e].bDescriptorType);
@@ -488,7 +539,11 @@ JNIEXPORT jobject JNICALL Java_ch_ntb_usb_LibusbJava_usb_1get_1busses
 JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbJava_usb_1open
   (JNIEnv *env, jclass obj, jobject dev)
   {
-  	if (busses == NULL) {	return -1; 	}
+  	clearLibusbJavaError();
+  	if (busses == NULL) {
+  		setLibusbJavaError("shared library error: busses is null");
+  		return 0;
+	}
   	
   	unsigned char devnum = env->GetByteField(dev, usb_devFID_devnum);
   	struct usb_bus *tmpBus;
@@ -501,7 +556,8 @@ JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbJava_usb_1open
 	  		}
 		}
   	}
-  	return -3;
+  	setLibusbJavaError("shared library error: no device with dev.devnum found on busses");
+  	return 0;
   }
 
 /*
@@ -512,6 +568,7 @@ JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbJava_usb_1open
 JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbJava_usb_1close
   (JNIEnv *env, jclass obj, jint dev_handle)
   {
+  	clearLibusbJavaError();
 	return (jint) usb_close((usb_dev_handle *) dev_handle);
   }
 
@@ -523,6 +580,7 @@ JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbJava_usb_1close
 JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbJava_usb_1set_1configuration
   (JNIEnv *env, jclass obj, jint dev_handle, jint configuration)
   {
+  	clearLibusbJavaError();
  	return usb_set_configuration((usb_dev_handle *) dev_handle, configuration);
   }
 
@@ -534,6 +592,7 @@ JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbJava_usb_1set_1configuration
 JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbJava_usb_1set_1altinterface
   (JNIEnv *env, jclass obj, jint dev_handle, jint alternate)
   {
+  	clearLibusbJavaError();
  	return usb_set_altinterface((usb_dev_handle *) dev_handle, alternate);
   }
 
@@ -545,6 +604,7 @@ JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbJava_usb_1set_1altinterface
 JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbJava_usb_1clear_1halt
   (JNIEnv *env, jclass obj, jint dev_handle, jint ep)
   {
+  	clearLibusbJavaError();
  	return usb_clear_halt((usb_dev_handle *) dev_handle, (unsigned) ep);
   }
 
@@ -556,6 +616,7 @@ JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbJava_usb_1clear_1halt
 JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbJava_usb_1reset
   (JNIEnv *env, jclass obj, jint dev_handle)
   {
+  	clearLibusbJavaError();
  	return usb_reset((usb_dev_handle *) dev_handle);
   }
 
@@ -567,6 +628,7 @@ JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbJava_usb_1reset
 JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbJava_usb_1claim_1interface
   (JNIEnv *env, jclass obj, jint dev_handle, jint interface)
   {
+  	clearLibusbJavaError();
  	return usb_claim_interface((usb_dev_handle *) dev_handle, interface);
   }
 
@@ -578,6 +640,7 @@ JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbJava_usb_1claim_1interface
 JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbJava_usb_1release_1interface
   (JNIEnv *env, jclass obj, jint dev_handle, jint interface)
   {
+  	clearLibusbJavaError();
  	return usb_release_interface((usb_dev_handle *) dev_handle, interface);
   }
 
@@ -589,6 +652,7 @@ JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbJava_usb_1release_1interface
 JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbJava_usb_1control_1msg
   (JNIEnv *env, jclass obj, jint dev_handle, jint requesttype, jint request, jint value, jint index, jbyteArray jbytes, jint size, jint timeout)
   {
+  	clearLibusbJavaError();
   	jbyte *bytes = env->GetByteArrayElements(jbytes, NULL);
   	int retVal = usb_control_msg((usb_dev_handle *) dev_handle, requesttype, request, value, index, (char *) bytes, size, timeout);
   	env->SetByteArrayRegion(jbytes, 0, size, bytes);
@@ -603,6 +667,7 @@ JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbJava_usb_1control_1msg
 JNIEXPORT jstring JNICALL Java_ch_ntb_usb_LibusbJava_usb_1get_1string
   (JNIEnv *env, jclass obj, jint dev_handle, jint index, jint langid)
   {
+  	clearLibusbJavaError();
 	char string[256];
  	int retVal = usb_get_string((usb_dev_handle *) dev_handle, index, langid, string, 256);
  	if (retVal > 0)
@@ -618,6 +683,7 @@ JNIEXPORT jstring JNICALL Java_ch_ntb_usb_LibusbJava_usb_1get_1string
 JNIEXPORT jstring JNICALL Java_ch_ntb_usb_LibusbJava_usb_1get_1string_1simple
   (JNIEnv *env, jclass obj, jint dev_handle, jint index)
   {
+  	clearLibusbJavaError();
 	char string[256];
  	int retVal = usb_get_string_simple((usb_dev_handle *) dev_handle, index, string, 256);
  	if (retVal > 0)
@@ -633,6 +699,7 @@ JNIEXPORT jstring JNICALL Java_ch_ntb_usb_LibusbJava_usb_1get_1string_1simple
 JNIEXPORT jstring JNICALL Java_ch_ntb_usb_LibusbJava_usb_1get_1descriptor
   (JNIEnv *env, jclass obj, jint dev_handle, jbyte type, jbyte index, jint size)
   {
+  	clearLibusbJavaError();
 	char *string = (char *) malloc(size * sizeof(char));
  	int retVal = usb_get_descriptor((usb_dev_handle *) dev_handle, (unsigned) type,
  										(unsigned) index, string, size);
@@ -649,6 +716,7 @@ JNIEXPORT jstring JNICALL Java_ch_ntb_usb_LibusbJava_usb_1get_1descriptor
 JNIEXPORT jstring JNICALL Java_ch_ntb_usb_LibusbJava_usb_1get_1descriptor_1by_1endpoint
   (JNIEnv *env, jclass obj, jint dev_handle, jint ep, jbyte type, jbyte index, jint size)
   {
+  	clearLibusbJavaError();
 	char *string = (char *) malloc(size * sizeof(char));
  	int retVal = usb_get_descriptor_by_endpoint((usb_dev_handle *) dev_handle, ep, (unsigned) type,
  												(unsigned) index, string, size);
@@ -665,6 +733,7 @@ JNIEXPORT jstring JNICALL Java_ch_ntb_usb_LibusbJava_usb_1get_1descriptor_1by_1e
 JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbJava_usb_1bulk_1write
   (JNIEnv *env, jclass obj, jint dev_handle, jint ep, jbyteArray jbytes, jint size, jint timeout)
   {
+  	clearLibusbJavaError();
   	jbyte *bytes = env->GetByteArrayElements(jbytes, NULL);
  	return usb_bulk_write((usb_dev_handle *) dev_handle, ep, (char *) bytes, size, timeout);
   }
@@ -677,6 +746,7 @@ JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbJava_usb_1bulk_1write
 JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbJava_usb_1bulk_1read
   (JNIEnv *env, jclass obj, jint dev_handle, jint ep, jbyteArray jbytes, jint size, jint timeout)
   {
+  	clearLibusbJavaError();
   	char *bytes = (char *) malloc(size * sizeof(char));
  	int retVal = usb_bulk_read((usb_dev_handle *) dev_handle, ep, bytes, size, timeout);
   	if (!bytes) { return retVal; }
@@ -693,6 +763,7 @@ JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbJava_usb_1bulk_1read
 JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbJava_usb_1interrupt_1write
   (JNIEnv *env, jclass obj, jint dev_handle, jint ep, jbyteArray jbytes, jint size, jint timeout)
   {
+  	clearLibusbJavaError();
   	jbyte *bytes = env->GetByteArrayElements(jbytes, NULL);
  	return usb_interrupt_write((usb_dev_handle *) dev_handle, ep, (char *) bytes, size, timeout);
   }
@@ -705,6 +776,7 @@ JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbJava_usb_1interrupt_1write
 JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbJava_usb_1interrupt_1read
   (JNIEnv *env, jclass obj, jint dev_handle, jint ep, jbyteArray jbytes, jint size, jint timeout)
   {
+  	clearLibusbJavaError();
   	char *bytes = (char *) malloc(size * sizeof(char));
  	int retVal = usb_interrupt_read((usb_dev_handle *) dev_handle, ep, bytes, size, timeout);
   	if (!bytes) { return retVal; }
@@ -721,7 +793,15 @@ JNIEXPORT jint JNICALL Java_ch_ntb_usb_LibusbJava_usb_1interrupt_1read
 JNIEXPORT jstring JNICALL Java_ch_ntb_usb_LibusbJava_usb_1strerror
   (JNIEnv *env, jclass obj){
   	
-  	char *str = usb_strerror();
+  	char *str;
+  	// check for LibusbJava specific errors first
+  	if (libusbJavaError != NULL) {
+  		str = libusbJavaError;
+  		clearLibusbJavaError();
+  	} else {
+	  	str = usb_strerror();
+  	}
+  	
   	return env->NewStringUTF(str);
   }
   
