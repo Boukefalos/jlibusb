@@ -141,14 +141,30 @@ public class DeviceTest {
 
 	@Test
 	public void bulkWriteRead() throws Exception {
+		checkBulkEndpoints();
 		devinfo.setMode(TransferMode.Bulk);
 		doOpenWriteReadClose();
 	}
 
+	private void checkBulkEndpoints() {
+		if (devinfo.getInEPBulk() == -1 && devinfo.getOutEPBulk() == -1) {
+			throw new UnsupportedOperationException(
+					"no bulk endpoints defined in test device definition");
+		}
+	}
+
 	@Test
 	public void interruptWriteRead() throws Exception {
+		checkInterruptEndpoints();
 		devinfo.setMode(TransferMode.Interrupt);
 		doOpenWriteReadClose();
+	}
+
+	private void checkInterruptEndpoints() {
+		if (devinfo.getInEPInt() == -1 && devinfo.getOutEPInt() == -1) {
+			throw new UnsupportedOperationException(
+					"no interrupt endpoints defined in test device definition");
+		}
 	}
 
 	@Test
@@ -451,24 +467,31 @@ public class DeviceTest {
 	private void doOpenWriteReadClose() throws Exception {
 		doOpen();
 		doWriteRead();
-		compare(testData, readData);
 		doClose();
 	}
 
 	private void doWriteRead() throws Exception {
 		initTestData();
 		if (devinfo.getMode().equals(TransferMode.Bulk)) {
-			dev.writeBulk(devinfo.getOutEPBulk(), testData, testData.length,
-					devinfo.getTimeout(), false);
-			dev.readBulk(devinfo.getInEPBulk(), readData, readData.length,
-					devinfo.getTimeout(), false);
+			if (devinfo.getOutEPBulk() != -1) {
+				dev.writeBulk(devinfo.getOutEPBulk(), testData,
+						testData.length, devinfo.getTimeout(), false);
+			} else if (devinfo.getInEPBulk() != -1) {
+				dev.readBulk(devinfo.getInEPBulk(), readData, readData.length,
+						devinfo.getTimeout(), false);
+			}
 		} else if (devinfo.getMode().equals(TransferMode.Interrupt)) {
-			dev.writeInterrupt(devinfo.getOutEPInt(), testData,
-					testData.length, devinfo.getTimeout(), false);
-			dev.readInterrupt(devinfo.getInEPInt(), readData, readData.length,
-					devinfo.getTimeout(), false);
+			if (devinfo.getOutEPInt() != -1) {
+				dev.writeInterrupt(devinfo.getOutEPInt(), testData,
+						testData.length, devinfo.getTimeout(), false);
+			} else if (devinfo.getInEPInt() != -1) {
+				dev.readInterrupt(devinfo.getInEPInt(), readData,
+						readData.length, devinfo.getTimeout(), false);
+			}
 		}
-		compare(testData, readData);
+		if (devinfo.doCompareData()) {
+			compare(testData, readData);
+		}
 	}
 
 	private static void compare(byte[] d1, byte[] d2) {

@@ -35,6 +35,8 @@ public abstract class AbstractDeviceInfo {
 
 	private TransferMode mode;
 
+	private boolean compareData = true;
+
 	public static enum TransferMode {
 		Bulk, Interrupt
 	}
@@ -149,4 +151,11 @@ public abstract class AbstractDeviceInfo {
 		this.mode = mode;
 	}
 
+	public boolean doCompareData() {
+		return compareData;
+	}
+
+	public void setDoCompareData(boolean compareData) {
+		this.compareData = compareData;
+	}
 }
