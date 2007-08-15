@@ -182,7 +182,7 @@ public class Device {
 
 		if (dev != null) {
 			int res = LibusbJava.usb_open(dev);
-			if (res <= 0) {
+			if (res != 0) {
 				throw new USBException("LibusbJava.usb_open: "
 						+ LibusbJava.usb_strerror());
 			}
