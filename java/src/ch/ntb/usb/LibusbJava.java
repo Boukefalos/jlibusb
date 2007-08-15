@@ -99,7 +99,8 @@ public class LibusbJava {
 	 * 
 	 * @param dev
 	 *            The device to open.
-	 * @return a handle used in future communication with the device.
+	 * @return a handle used in future communication with the device. 0 if an
+	 *         error has occurred.
 	 */
 	public static native int usb_open(Usb_Device dev);
 
