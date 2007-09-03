@@ -174,9 +174,7 @@ public class DeviceTest {
 		devinfo.setMode(TransferMode.Bulk);
 		doOpen();
 		for (int i = 0; i < NumberOfIterations; i++) {
-			initTestData();
 			doWriteRead();
-			compare(testData, readData);
 		}
 		doClose();
 	}
@@ -225,80 +223,99 @@ public class DeviceTest {
 
 	@Test
 	public void controlMsg() throws Exception {
-		dev.open(devinfo.getConfiguration(), devinfo.getInterface(), devinfo
-				.getAltinterface());
-		// GET STATUS (device)
-		byte[] data = getTestData(2);
-		int length = dev.controlMsg(USB.REQ_TYPE_DIR_DEVICE_TO_HOST
-				| USB.REQ_TYPE_TYPE_STANDARD | USB.REQ_TYPE_RECIP_DEVICE,
-				USB.REQ_GET_STATUS, 0, 0, data, data.length, devinfo
-						.getTimeout(), false);
-		assertEquals((byte) 0x01, data[0]);
-		assertEquals((byte) 0x00, data[1]);
-		// GET STATUS (interface)
-		data = getTestData(2);
-		length = dev.controlMsg(USB.REQ_TYPE_DIR_DEVICE_TO_HOST
-				| USB.REQ_TYPE_TYPE_STANDARD | USB.REQ_TYPE_RECIP_INTERFACE,
-				USB.REQ_GET_STATUS, 0, 0, data, data.length, devinfo
-						.getTimeout(), false);
-		assertEquals((byte) 0x00, data[0]);
-		assertEquals((byte) 0x00, data[1]);
-		// GET STATUS (endpoint)
-		data = getTestData(2);
-		length = dev.controlMsg(USB.REQ_TYPE_DIR_DEVICE_TO_HOST
-				| USB.REQ_TYPE_TYPE_STANDARD | USB.REQ_TYPE_RECIP_ENDPOINT,
-				USB.REQ_GET_STATUS, 0, 0, data, data.length, devinfo
-						.getTimeout(), false);
-		assertEquals((byte) 0x00, data[0]);
-		assertEquals((byte) 0x00, data[1]);
-		// GET CONFIGURATION
-		data = getTestData(1);
-		length = dev.controlMsg(USB.REQ_TYPE_DIR_DEVICE_TO_HOST
-				| USB.REQ_TYPE_TYPE_STANDARD | USB.REQ_TYPE_RECIP_DEVICE,
-				USB.REQ_GET_CONFIGURATION, 0, 0, data, data.length, devinfo
-						.getTimeout(), false);
-		assertEquals((byte) devinfo.getConfiguration(), data[0]);
-		// // GET INTERFACE
-		// data = byte[1];
-		// length = dev.controlMsg(USB.REQ_TYPE_DIR_DEVICE_TO_HOST
-		// | USB.REQ_TYPE_TYPE_STANDARD | USB.REQ_TYPE_RECIP_INTERFACE,
-		// USB.REQ_GET_INTERFACE, 0, devinfo.getInterface(), data, data.length,
-		// devinfo
-		// .getTimeout(), false);
-		// logData(data, length);
-		// GET DESCRIPTOR (device descriptor)
-		data = getTestData(128);
-		length = dev.controlMsg(USB.REQ_TYPE_DIR_DEVICE_TO_HOST
-				| USB.REQ_TYPE_TYPE_STANDARD | USB.REQ_TYPE_RECIP_DEVICE,
-				USB.REQ_GET_DESCRIPTOR, 1 << 8, 0, data, data.length, devinfo
-						.getTimeout(), false);
-		validateDeviceDescriptor(data, length);
-		// GET DESCRIPTOR (string descriptor (1))
-		data = getTestData(128);
-		length = dev.controlMsg(USB.REQ_TYPE_DIR_DEVICE_TO_HOST
-				| USB.REQ_TYPE_TYPE_STANDARD | USB.REQ_TYPE_RECIP_DEVICE,
-				USB.REQ_GET_DESCRIPTOR, (3 << 8) + 1, 0, data, data.length,
-				devinfo.getTimeout(), false);
-		String s = getString(data, length);
-		assertEquals(s, Manufacturer);
-		// GET DESCRIPTOR (string descriptor (2))
-		data = getTestData(128);
-		length = dev.controlMsg(USB.REQ_TYPE_DIR_DEVICE_TO_HOST
-				| USB.REQ_TYPE_TYPE_STANDARD | USB.REQ_TYPE_RECIP_DEVICE,
-				USB.REQ_GET_DESCRIPTOR, (3 << 8) + 2, 0, data, data.length,
-				devinfo.getTimeout(), false);
-		s = getString(data, length);
-		assertEquals(s, Product);
-		// GET DESCRIPTOR (string descriptor (3))
-		data = getTestData(128);
-		length = dev.controlMsg(USB.REQ_TYPE_DIR_DEVICE_TO_HOST
-				| USB.REQ_TYPE_TYPE_STANDARD | USB.REQ_TYPE_RECIP_DEVICE,
-				USB.REQ_GET_DESCRIPTOR, (3 << 8) + 3, 0, data, data.length,
-				devinfo.getTimeout(), false);
-		s = getString(data, length);
-		assertEquals(s, SerialVersion);
-		// close the device
-		dev.close();
+		try {
+			dev.open(devinfo.getConfiguration(), devinfo.getInterface(), devinfo
+					.getAltinterface());
+			// GET STATUS (device)
+			byte[] data = getTestData(2);
+			int length = dev.controlMsg(USB.REQ_TYPE_DIR_DEVICE_TO_HOST
+					| USB.REQ_TYPE_TYPE_STANDARD | USB.REQ_TYPE_RECIP_DEVICE,
+					USB.REQ_GET_STATUS, 0, 0, data, data.length, devinfo
+							.getTimeout(), false);
+			assertTrue(length > 0);
+			assertEquals((byte) 0x01, data[0]);
+			assertEquals((byte) 0x00, data[1]);
+			// GET STATUS (interface)
+			data = getTestData(2);
+			length = dev.controlMsg(USB.REQ_TYPE_DIR_DEVICE_TO_HOST
+					| USB.REQ_TYPE_TYPE_STANDARD | USB.REQ_TYPE_RECIP_INTERFACE,
+					USB.REQ_GET_STATUS, 0, 0, data, data.length, devinfo
+							.getTimeout(), false);
+			assertTrue(length > 0);
+			assertEquals((byte) 0x00, data[0]);
+			assertEquals((byte) 0x00, data[1]);
+			// GET STATUS (endpoint)
+			data = getTestData(2);
+			length = dev.controlMsg(USB.REQ_TYPE_DIR_DEVICE_TO_HOST
+					| USB.REQ_TYPE_TYPE_STANDARD | USB.REQ_TYPE_RECIP_ENDPOINT,
+					USB.REQ_GET_STATUS, 0, 0, data, data.length, devinfo
+							.getTimeout(), false);
+			assertTrue(length > 0);
+			assertEquals((byte) 0x00, data[0]);
+			assertEquals((byte) 0x00, data[1]);
+			// GET CONFIGURATION
+			data = getTestData(1);
+			length = dev.controlMsg(USB.REQ_TYPE_DIR_DEVICE_TO_HOST
+					| USB.REQ_TYPE_TYPE_STANDARD | USB.REQ_TYPE_RECIP_DEVICE,
+					USB.REQ_GET_CONFIGURATION, 0, 0, data, data.length, devinfo
+							.getTimeout(), false);
+			assertTrue(length > 0);
+			assertEquals((byte) devinfo.getConfiguration(), data[0]);
+			// // GET INTERFACE
+			// data = byte[1];
+			// length = dev.controlMsg(USB.REQ_TYPE_DIR_DEVICE_TO_HOST
+			// | USB.REQ_TYPE_TYPE_STANDARD | USB.REQ_TYPE_RECIP_INTERFACE,
+			// USB.REQ_GET_INTERFACE, 0, devinfo.getInterface(), data, data.length,
+			// devinfo
+			// .getTimeout(), false);
+			// logData(data, length);
+			// GET DESCRIPTOR (device descriptor)
+			data = getTestData(128);
+			length = dev.controlMsg(USB.REQ_TYPE_DIR_DEVICE_TO_HOST
+					| USB.REQ_TYPE_TYPE_STANDARD | USB.REQ_TYPE_RECIP_DEVICE,
+					USB.REQ_GET_DESCRIPTOR, 1 << 8, 0, data, data.length, devinfo
+							.getTimeout(), false);
+			validateDeviceDescriptor(data, length);
+			// GET DESCRIPTOR (string descriptor (1))
+			data = getTestData(128);
+			length = dev.controlMsg(USB.REQ_TYPE_DIR_DEVICE_TO_HOST
+					| USB.REQ_TYPE_TYPE_STANDARD | USB.REQ_TYPE_RECIP_DEVICE,
+					USB.REQ_GET_DESCRIPTOR, (3 << 8) + 1, 0, data, data.length,
+					devinfo.getTimeout(), false);
+			String s = getString(data, length);
+			assertEquals(s, Manufacturer);
+			// GET DESCRIPTOR (string descriptor (2))
+			data = getTestData(128);
+			length = dev.controlMsg(USB.REQ_TYPE_DIR_DEVICE_TO_HOST
+					| USB.REQ_TYPE_TYPE_STANDARD | USB.REQ_TYPE_RECIP_DEVICE,
+					USB.REQ_GET_DESCRIPTOR, (3 << 8) + 2, 0, data, data.length,
+					devinfo.getTimeout(), false);
+			s = getString(data, length);
+			assertEquals(s, Product);
+			// GET DESCRIPTOR (string descriptor (3))
+			data = getTestData(128);
+			length = dev.controlMsg(USB.REQ_TYPE_DIR_DEVICE_TO_HOST
+					| USB.REQ_TYPE_TYPE_STANDARD | USB.REQ_TYPE_RECIP_DEVICE,
+					USB.REQ_GET_DESCRIPTOR, (3 << 8) + 3, 0, data, data.length,
+					devinfo.getTimeout(), false);
+			s = getString(data, length);
+			assertEquals(s, SerialVersion);
+			// close the device
+			dev.close();
+		} catch (Exception e) {
+			closeOnException();
+		} catch (AssertionError e) {
+			closeOnException();
+			throw e;
+		}
+	}
+
+	private void closeOnException() {
+		try {
+			dev.close();
+		} catch (USBException e1) {
+			// ignore exceptions
+		}
 	}
 
 	private void validateDeviceDescriptor(byte[] data, int length) {
@@ -472,22 +489,27 @@ public class DeviceTest {
 
 	private void doWriteRead() throws Exception {
 		initTestData();
-		if (devinfo.getMode().equals(TransferMode.Bulk)) {
-			if (devinfo.getOutEPBulk() != -1) {
-				dev.writeBulk(devinfo.getOutEPBulk(), testData,
-						testData.length, devinfo.getTimeout(), false);
-			} else if (devinfo.getInEPBulk() != -1) {
-				dev.readBulk(devinfo.getInEPBulk(), readData, readData.length,
-						devinfo.getTimeout(), false);
+		try {
+			if (devinfo.getMode().equals(TransferMode.Bulk)) {
+				if (devinfo.getOutEPBulk() != -1) {
+					dev.writeBulk(devinfo.getOutEPBulk(), testData,
+							testData.length, devinfo.getTimeout(), false);
+				} else if (devinfo.getInEPBulk() != -1) {
+					dev.readBulk(devinfo.getInEPBulk(), readData,
+							readData.length, devinfo.getTimeout(), false);
+				}
+			} else if (devinfo.getMode().equals(TransferMode.Interrupt)) {
+				if (devinfo.getOutEPInt() != -1) {
+					dev.writeInterrupt(devinfo.getOutEPInt(), testData,
+							testData.length, devinfo.getTimeout(), false);
+				} else if (devinfo.getInEPInt() != -1) {
+					dev.readInterrupt(devinfo.getInEPInt(), readData,
+							readData.length, devinfo.getTimeout(), false);
+				}
 			}
-		} else if (devinfo.getMode().equals(TransferMode.Interrupt)) {
-			if (devinfo.getOutEPInt() != -1) {
-				dev.writeInterrupt(devinfo.getOutEPInt(), testData,
-						testData.length, devinfo.getTimeout(), false);
-			} else if (devinfo.getInEPInt() != -1) {
-				dev.readInterrupt(devinfo.getInEPInt(), readData,
-						readData.length, devinfo.getTimeout(), false);
-			}
+		} catch (Exception e) {
+			closeOnException();
+			throw e;
 		}
 		if (devinfo.doCompareData()) {
 			compare(testData, readData);

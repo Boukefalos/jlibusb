@@ -68,15 +68,15 @@
 	<target name="linux" depends="clean" description="--> Build ${build.shlib.linux.shlibname}">
 		<exec dir="." executable="${build.linux.compiler}">
 			<arg value="-shared" />
+			<arg value="-fPIC" />
 			<arg value="-Wl,-soname,${build.shlib.linux.shlibname}" />
 			<arg value="-I${build.linux.includes}" />
 			<arg value="-I${build.linux.includes2}" />
 			<arg value="-I${build.linux.includes3}" />
-			<arg value="-shared" />
 			<arg value="${build.shlib.srcname}" />
 			<arg value="-o${build.shlib.linux.shlibname}.${version.linux}" />
-			<arg value="${build.linux.includes}/${build.lib.libusb}" />
-			<arg value="${build.linux.includes}/${build.lib.libusbpp}" />
+			<arg value="${build.linux.includes}/${build.linux.lib.libusb}" />
+			<arg value="${build.linux.includes}/${build.linux.lib.libusbpp}" />
 		</exec>
 	</target>
 

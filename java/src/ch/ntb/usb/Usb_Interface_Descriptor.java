@@ -53,7 +53,7 @@ public class Usb_Interface_Descriptor extends Usb_Descriptor {
 	}
 
 	/**
-	 * Returns the value used to select the alternate setting ({@link LibusbJava#usb_set_altinterface(int, int)}).<br>
+	 * Returns the value used to select the alternate setting ({@link LibusbJava#usb_set_altinterface(long, int)}).<br>
 	 * 
 	 * @return the alternate setting
 	 */

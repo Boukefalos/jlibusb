@@ -7,7 +7,6 @@
  */
 package ch.ntb.usb.test;
 
-import ch.ntb.usb.USB;
 import ch.ntb.usb.testApp.AbstractDeviceInfo;
 
 public class MX500 extends AbstractDeviceInfo {
@@ -16,7 +15,7 @@ public class MX500 extends AbstractDeviceInfo {
 	public void initValues() {
 		setIdVendor((short) 0x046d);
 		setIdProduct((short) 0xc025);
-		setTimeout(5000);
+		setTimeout(2000);
 		setConfiguration(1);
 		setInterface(0);
 		setAltinterface(0);
@@ -24,8 +23,8 @@ public class MX500 extends AbstractDeviceInfo {
 		setInEPInt(0x81);
 		setOutEPBulk(-1);
 		setInEPBulk(-1);
-		setSleepTimeout(2000);
-		setMaxDataSize(USB.HIGHSPEED_MAX_BULK_PACKET_SIZE);
+		setSleepTimeout(5000);
+		setMaxDataSize(5);
 		setMode(TransferMode.Interrupt);
 		// we only read data -> don't compare
 		setDoCompareData(false);

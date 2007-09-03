@@ -109,7 +109,7 @@ public class TestLibUsbJava {
 	}
 
 	private static int printDevice(Usb_Device dev, int level) {
-		int udev;
+		long udev;
 		String mfr;
 		String product;
 		String sn;

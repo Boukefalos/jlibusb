@@ -44,7 +44,7 @@ public class Usb_Config_Descriptor extends Usb_Descriptor {
 	private int extralen;
 
 	/**
-	 * Returns the value to use as an argument to select this configuration ({@link LibusbJava#usb_set_configuration(int, int)}).
+	 * Returns the value to use as an argument to select this configuration ({@link LibusbJava#usb_set_configuration(long, int)}).
 	 * 
 	 * @return the value to use as an argument to select this configuration
 	 */

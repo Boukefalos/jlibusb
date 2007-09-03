@@ -32,7 +32,7 @@
 
 	<target name="compile" depends="clean" description="--> Compile Java files">
 		<mkdir dir="${project.dir.bin}" />
-		<javac srcdir="${project.dir.src}" destdir="${project.dir.bin}" debug="on" />
+		<javac srcdir="${project.dir.src}" destdir="${project.dir.bin}" debug="on"  encoding="iso-8859-1"/>
 	</target>
 
 	<target name="jar" depends="compile" description="--> Create Jar">
@@ -60,7 +60,7 @@
 	</target>
 
 	<target name="javadoc" description="--> Create Javadoc">
-		<javadoc destdir="${project.dir.doc}">
+		<javadoc destdir="${project.dir.doc}" encoding="iso-8859-1">
 			<fileset dir="${project.dir.src}" defaultexcludes="yes" />
 		</javadoc>
 	</target>

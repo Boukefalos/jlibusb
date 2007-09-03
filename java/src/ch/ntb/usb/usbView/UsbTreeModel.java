@@ -31,6 +31,8 @@ public class UsbTreeModel implements TreeModel, TreeSelectionListener {
 
 	private Usb_Bus rootBus;
 
+	private static final String USB_ROOT = "USB";
+
 	private JTextArea textArea;
 
 	private Vector<TreeModelListener> treeModelListeners = new Vector<TreeModelListener>();
@@ -52,14 +54,26 @@ public class UsbTreeModel implements TreeModel, TreeSelectionListener {
 	 * Returns the root of the tree.
 	 */
 	public Object getRoot() {
-		return rootBus;
+		return USB_ROOT;
 	}
 
 	/**
 	 * Returns the child of parent at index index in the parent's child array.
 	 */
 	public Object getChild(Object parent, int index) {
-		if (parent instanceof Usb_Bus) {
+		
+		if (parent instanceof String && ((String) parent).compareTo(USB_ROOT) == 0)
+		{
+			Usb_Bus curBus = rootBus;
+			
+			for (int i = 0; curBus != null; curBus = curBus.getNext(), i++)
+			{
+				if (i == index)
+					return curBus;
+			}
+		}
+			
+		else if (parent instanceof Usb_Bus) {
 			Usb_Device device = ((Usb_Bus) parent).getDevices();
 			int count = 0;
 			while (device != null) {
@@ -104,8 +118,23 @@ public class UsbTreeModel implements TreeModel, TreeSelectionListener {
 	/**
 	 * Returns the number of children of parent.
 	 */
-	public int getChildCount(Object parent) {
-		if (parent instanceof Usb_Bus) {
+	public int getChildCount(Object parent) 
+	{
+		if (parent instanceof String && ((String) parent).compareTo(USB_ROOT) == 0)
+		{
+			int count = 0;
+			
+			Usb_Bus curBus = rootBus;
+			
+			for (; curBus != null; curBus = curBus.getNext())
+			{
+				count++;
+			}
+			
+			return count;
+			
+		}
+		else if (parent instanceof Usb_Bus) {
 			Usb_Device device = ((Usb_Bus) parent).getDevices();
 			int count = 0;
 			while (device != null) {
@@ -243,7 +272,7 @@ public class UsbTreeModel implements TreeModel, TreeSelectionListener {
 									|| (dev.getDescriptor().getIProduct() > 0) || (dev
 									.getDescriptor().getISerialNumber() > 0))) {
 						if (tmpDevDesc.equals(devDesc)) {
-							int handle = LibusbJava.usb_open(dev);
+							long handle = LibusbJava.usb_open(dev);
 							sb.append("\nString descriptors\n");
 							if (handle <= 0) {
 								sb.append("\terror opening the device\n");
@@ -319,7 +348,7 @@ public class UsbTreeModel implements TreeModel, TreeSelectionListener {
 					for (int i = 0; i < tmpConfDesc.length; i++) {
 						if ((tmpConfDesc.equals(confDesc))
 								&& (confDesc.getIConfiguration() > 0)) {
-							int handle = LibusbJava.usb_open(dev);
+							long handle = LibusbJava.usb_open(dev);
 							sb.append("\nString descriptors\n");
 							if (handle <= 0) {
 								sb.append("\terror opening the device\n");
@@ -395,9 +424,9 @@ public class UsbTreeModel implements TreeModel, TreeSelectionListener {
 							Usb_Interface_Descriptor[] tmpIntDescs = ints[j]
 									.getAltsetting();
 							for (int k = 0; k < ints.length; k++) {
-								if (tmpIntDescs[i].equals(intDesc)
+								if (i < tmpIntDescs.length && tmpIntDescs[i].equals(intDesc)
 										&& (intDesc.getIInterface() > 0)) {
-									int handle = LibusbJava.usb_open(dev);
+									long handle = LibusbJava.usb_open(dev);
 									sb.append("\nString descriptors\n");
 									if (handle <= 0) {
 										sb

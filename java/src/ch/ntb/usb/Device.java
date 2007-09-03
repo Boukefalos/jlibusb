@@ -27,7 +27,7 @@ public class Device {
 	private int idVendor, idProduct, dev_configuration, dev_interface,
 			dev_altinterface;
 
-	private int usbDevHandle;
+	private long usbDevHandle;
 
 	private boolean resetOnFirstOpen, resetDone;
 
@@ -181,7 +181,7 @@ public class Device {
 		dev = initDevice();
 
 		if (dev != null) {
-			int res = LibusbJava.usb_open(dev);
+			long res = LibusbJava.usb_open(dev);
 			if (res == 0) {
 				throw new USBException("LibusbJava.usb_open: "
 						+ LibusbJava.usb_strerror());
@@ -411,16 +411,17 @@ public class Device {
 					return writeInterrupt(out_ep_address, data, size, timeout,
 							false);
 				}
-				throw new USBTimeoutException("LibusbJava.usb_bulk_write: "
-						+ LibusbJava.usb_strerror());
+				throw new USBTimeoutException(
+						"LibusbJava.usb_interrupt_write: "
+								+ LibusbJava.usb_strerror());
 			}
-			throw new USBException("LibusbJava.usb_bulk_write: "
+			throw new USBException("LibusbJava.usb_interrupt_write: "
 					+ LibusbJava.usb_strerror());
 		}
 
 		logger.info("length written: " + lenWritten);
 		if (logger.isLoggable(Level.FINEST)) {
-			StringBuffer sb = new StringBuffer("bulkwrite, ep 0x"
+			StringBuffer sb = new StringBuffer("interruptwrite, ep 0x"
 					+ Integer.toHexString(out_ep_address) + ": " + lenWritten
 					+ " Bytes sent: ");
 			for (int i = 0; i < lenWritten; i++) {
@@ -472,16 +473,16 @@ public class Device {
 					return readInterrupt(in_ep_address, data, size, timeout,
 							false);
 				}
-				throw new USBTimeoutException("LibusbJava.usb_bulk_read: "
+				throw new USBTimeoutException("LibusbJava.usb_interrupt_read: "
 						+ LibusbJava.usb_strerror());
 			}
-			throw new USBException("LibusbJava.usb_bulk_read: "
+			throw new USBException("LibusbJava.usb_interrupt_read: "
 					+ LibusbJava.usb_strerror());
 		}
 
 		logger.info("length read: " + lenRead);
 		if (logger.isLoggable(Level.FINEST)) {
-			StringBuffer sb = new StringBuffer("bulkread, ep 0x"
+			StringBuffer sb = new StringBuffer("interrupt, ep 0x"
 					+ Integer.toHexString(in_ep_address) + ": " + lenRead
 					+ " Bytes received: ");
 			for (int i = 0; i < lenRead; i++) {
@@ -582,7 +583,7 @@ public class Device {
 	 * @throws USBException
 	 *             throws an USBException if the action fails
 	 */
-	private void claim_interface(int usb_dev_handle, int configuration,
+	private void claim_interface(long usb_dev_handle, int configuration,
 			int interface_, int altinterface) throws USBException {
 		if (LibusbJava.usb_set_configuration(usb_dev_handle, configuration) < 0) {
 			usbDevHandle = 0;
@@ -619,7 +620,7 @@ public class Device {
 	 * @throws USBException
 	 *             throws an USBException if the action fails
 	 */
-	private void release_interface(int dev_handle, int interface_)
+	private void release_interface(long dev_handle, int interface_)
 			throws USBException {
 		if (LibusbJava.usb_release_interface(dev_handle, interface_) < 0) {
 			usbDevHandle = 0;
