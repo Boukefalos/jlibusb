@@ -14,8 +14,6 @@ import ch.ntb.usb.USBException;
 /**
  * Demo class to demonstrate simple read and write operations to an USB device.<br>
  * 
- * @author schlaepfer
- * 
  */
 public class ReadWrite {
 

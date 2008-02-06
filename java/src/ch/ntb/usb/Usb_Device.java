@@ -12,8 +12,6 @@ package ch.ntb.usb;
  * An USB device has one device descriptor and it may have multiple
  * configuration descriptors.
  * 
- * @author schlaepfer
- * 
  */
 public class Usb_Device {
 

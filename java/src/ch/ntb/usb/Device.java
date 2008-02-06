@@ -16,7 +16,6 @@ import ch.ntb.usb.logger.LogUtil;
  * This class represents an USB device.<br>
  * To get an instance of an USB device use <code>USB.getDevice(...)</code>.
  * 
- * @author schlaepfer
  */
 public class Device {
 

@@ -12,8 +12,6 @@ package ch.ntb.usb;
  * This is the root class for the representation of the libusb USB structure.
  * Zero or more devices may be connected to an USB bus.
  * 
- * @author schlaepfer
- * 
  */
 public class Usb_Bus {
 

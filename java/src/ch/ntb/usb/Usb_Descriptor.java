@@ -10,8 +10,6 @@ package ch.ntb.usb;
 /**
  * Common USB descriptor values.<br>
  * 
- * @author schlaepfer
- * 
  */
 public class Usb_Descriptor {
 

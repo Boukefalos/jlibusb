@@ -3,7 +3,6 @@
      ch.ntb.usb 
      Ant tasks for ch.ntb.usb
 
-     schlaepfer                                                                
      ====================================================================== -->
 <project name="ch.ntb.usb" basedir="." default="javadoc">
 	<description>

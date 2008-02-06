@@ -16,8 +16,6 @@ import ch.ntb.usb.Utils;
  * standard out.<br>
  * 
  * 
- * @author schlaepfer
- * 
  */
 public class LogBus {
 

@@ -16,8 +16,6 @@ import ch.ntb.usb.logger.LogUtil;
 /**
  * This class manages all USB devices and defines some USB specific constants.<br>
  * 
- * @author schlaepfer
- * 
  */
 public class USB {
 

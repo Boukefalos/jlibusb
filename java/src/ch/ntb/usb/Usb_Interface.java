@@ -11,8 +11,6 @@ package ch.ntb.usb;
  * Represents an USB interface.<br>
  * An interface is a group of alternate settings of a configuration.<br>
  * 
- * @author schlaepfer
- * 
  */
 public class Usb_Interface {
 

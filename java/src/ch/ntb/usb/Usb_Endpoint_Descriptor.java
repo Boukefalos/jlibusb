@@ -19,8 +19,6 @@ package ch.ntb.usb;
  * {@link ch.ntb.usb.Usb_Descriptor#USB_DT_ENDPOINT_SIZE} and the type is
  * {@link ch.ntb.usb.Usb_Descriptor#USB_DT_ENDPOINT}.
  * 
- * @author schlaepfer
- * 
  */
 public class Usb_Endpoint_Descriptor extends Usb_Descriptor {
 

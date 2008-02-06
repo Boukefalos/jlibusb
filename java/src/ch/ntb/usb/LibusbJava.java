@@ -27,8 +27,6 @@ package ch.ntb.usb;
  * href="http://libusb.sourceforge.net/documentation.html">libusb documentation</a>
  * and adapted where neccessary.<br>
  * 
- * @author schlaepfer
- * 
  */
 public class LibusbJava {
 

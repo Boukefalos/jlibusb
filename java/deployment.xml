@@ -9,7 +9,6 @@
 	 must be set on the command line
 	 (e.g. -Dproject.server.username=X as jvm command line argument).
 
-     schlaepfer                                                                
      ====================================================================== -->
 <project name="ch.ntb.usb.deployment" basedir=".">
 	<description>
