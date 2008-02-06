@@ -514,7 +514,8 @@ public class Device {
 	 * @param data
 	 *            the send/receive buffer
 	 * @param size
-	 *            the buffer size
+	 *            the buffer size. 0 is a valid value, but there must still be a
+	 *            dummy data buffer provided.
 	 * @param timeout
 	 *            amount of time in ms the device will try to send/receive data
 	 *            until a timeout exception is thrown
@@ -534,7 +535,7 @@ public class Device {
 		if (data == null) {
 			throw new USBException("data must not be null");
 		}
-		if (size <= 0 || size > data.length) {
+		if (size < 0 || size > data.length) {
 			throw new ArrayIndexOutOfBoundsException("invalid size: " + size);
 		}
 		int len = LibusbJava.usb_control_msg(usbDevHandle, requestType,

@@ -304,6 +304,7 @@ public class DeviceTest {
 			dev.close();
 		} catch (Exception e) {
 			closeOnException();
+			throw e;
 		} catch (AssertionError e) {
 			closeOnException();
 			throw e;
