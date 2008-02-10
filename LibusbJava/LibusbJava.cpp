@@ -49,7 +49,8 @@ jfieldID usb_busFID_next, usb_busFID_prev, usb_busFID_dirname, \
 // usb_device
 jfieldID usb_devFID_next, usb_devFID_prev, usb_devFID_filename, \
 		 usb_devFID_bus, usb_devFID_descriptor, usb_devFID_config, \
-		 usb_devFID_devnum, usb_devFID_num_children, usb_devFID_children;
+		 usb_devFID_devnum, usb_devFID_num_children, usb_devFID_children, \
+		 usb_devFID_devStructAddr;
 // usb_deviceDescriptor
 jfieldID usb_devDescFID_bLength, usb_devDescFID_bDescriptorType, \
 		 usb_devDescFID_bcdUSB, usb_devDescFID_bDeviceClass, \
@@ -168,6 +169,7 @@ JNIEXPORT jobject JNICALL Java_ch_ntb_usb_LibusbJava_usb_1get_1busses
 	    usb_devFID_devnum = env->GetFieldID(usb_devClazz, "devnum", "B");
 	    usb_devFID_num_children = env->GetFieldID(usb_devClazz, "num_children", "B");
 	    usb_devFID_children = env->GetFieldID(usb_devClazz, "children", "Lch/ntb/usb/Usb_Device;");
+	    usb_devFID_devStructAddr = env->GetFieldID(usb_devClazz, "devStructAddr", "J");
 
 
 	    // usb_device_descriptor
@@ -347,6 +349,7 @@ JNIEXPORT jobject JNICALL Java_ch_ntb_usb_LibusbJava_usb_1get_1busses
 			env->SetObjectField(usb_devObj, usb_devFID_filename, env->NewStringUTF(dev->filename));
 			env->SetByteField(usb_devObj, usb_devFID_devnum, dev->devnum);
 			env->SetByteField(usb_devObj, usb_devFID_num_children, dev->num_children);
+			env->SetLongField(usb_devObj, usb_devFID_devStructAddr, (jlong) dev);
 
 			// device descriptor
 			usb_devDescObj = env->NewObject(usb_devDescClazz, usb_devDescMid);
@@ -552,12 +555,14 @@ JNIEXPORT jlong JNICALL Java_ch_ntb_usb_LibusbJava_usb_1open
 	}
   	
   	unsigned char devnum = env->GetByteField(dev, usb_devFID_devnum);
+  	struct usb_device *usb_device_cmp;
+  	jlong usb_device_cmp_addr = env->GetLongField(dev, usb_devFID_devStructAddr);
   	struct usb_bus *tmpBus;
   	
   	for (tmpBus = busses; tmpBus; tmpBus = tmpBus->next) {
   		struct usb_device *device;
 		for (device = tmpBus->devices; device; device = device->next) {
-	  		if (device->devnum == devnum){
+	  		if ((jlong) device == usb_device_cmp_addr){
 	  			return (jlong) usb_open(device);
 	  		}
 		}

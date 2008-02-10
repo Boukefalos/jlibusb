@@ -32,6 +32,13 @@ public class Usb_Device {
 	private Usb_Device children;
 
 	/**
+	 * The address of the device structure to be passed to usb_open. This value
+	 * is used only internally so we don't use getter or setter methods.
+	 */
+	@SuppressWarnings("unused")
+	public long devStructAddr;
+
+	/**
 	 * Returns the reference to the bus to which this device is connected.<br>
 	 * 
 	 * @return the reference to the bus to which this device is connected
