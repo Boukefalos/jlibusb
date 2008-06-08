@@ -167,6 +167,8 @@ public class USB {
 
 	private static LinkedList<Device> devices = new LinkedList<Device>();
 
+	private static boolean initUSBDone = false;
+
 	/**
 	 * Create a new device an register it in a device queue. If the device is
 	 * already registered, a reference to it will be returned.<br>
@@ -175,20 +177,36 @@ public class USB {
 	 *            the vendor id of the USB device
 	 * @param idProduct
 	 *            the product id of the USB device
+	 * @param filename
+	 *            an optional filename which can be used to distinguish multiple
+	 *            devices with the same vendor and product id.
 	 * @return a newly created device or an already registered device
 	 */
-	public static Device getDevice(short idVendor, short idProduct) {
+	public static Device getDevice(short idVendor, short idProduct,
+			String filename) {
 
 		// check if this device is already registered
-		Device dev = getRegisteredDevice(idVendor, idProduct);
+		Device dev = getRegisteredDevice(idVendor, idProduct, filename);
 		if (dev != null) {
 			logger.info("return already registered device");
 			return dev;
 		}
-		dev = new Device(idVendor, idProduct);
+		dev = new Device(idVendor, idProduct, filename);
 		logger.info("create new device");
 		devices.add(dev);
 		return dev;
+	}
+
+	/**
+	 * See {@link #getDevice(short, short, String)}. The parameter
+	 * <code>filename</code> is set to null.
+	 * 
+	 * @param idVendor
+	 * @param idProduct
+	 * @return
+	 */
+	public static Device getDevice(short idVendor, short idProduct) {
+		return getDevice(idVendor, idProduct, null);
 	}
 
 	/**
@@ -198,16 +216,55 @@ public class USB {
 	 *            the vendor id of the USB device
 	 * @param idProduct
 	 *            the product id of the USB device
+	 * @param filename
+	 *            an optional filename which can be used to distinguish multiple
+	 *            devices with the same vendor and product id.
 	 * @return the device or null
 	 */
-	private static Device getRegisteredDevice(short idVendor, short idProduct) {
+	private static Device getRegisteredDevice(short idVendor, short idProduct,
+			String filename) {
 		for (Iterator<Device> iter = devices.iterator(); iter.hasNext();) {
 			Device dev = iter.next();
-			if ((dev.getIdVendor() == idVendor)
-					&& (dev.getIdProduct() == idProduct)) {
+			if (filename != null && filename.compareTo(dev.getFilename()) == 0
+					&& dev.getIdVendor() == idVendor
+					&& dev.getIdProduct() == idProduct) {
+				return dev;
+			} else if (dev.getIdVendor() == idVendor
+					&& dev.getIdProduct() == idProduct) {
 				return dev;
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Returns the root {@link Usb_Bus} element.
+	 * 
+	 * @return the root {@link Usb_Bus} element
+	 * @throws USBException
+	 */
+	public static Usb_Bus getBus() throws USBException {
+		if (!initUSBDone) {
+			init();
+		}
+		LibusbJava.usb_find_busses();
+		LibusbJava.usb_find_devices();
+
+		Usb_Bus bus = LibusbJava.usb_get_busses();
+		if (bus == null) {
+			throw new USBException("LibusbJava.usb_get_busses(): "
+					+ LibusbJava.usb_strerror());
+		}
+		return bus;
+	}
+
+	/**
+	 * Explicitly calls {@link LibusbJava#usb_init()}. Note that you don't need
+	 * to call this procedure as it is called implicitly when creating a new
+	 * device with {@link USB#getDevice(short, short, String)}.
+	 */
+	public static void init() {
+		LibusbJava.usb_init();
+		initUSBDone = true;
 	}
 }

@@ -23,8 +23,18 @@ public class Device {
 
 	private int maxPacketSize;
 
-	private int idVendor, idProduct, dev_configuration, dev_interface,
-			dev_altinterface;
+	/**
+	 * Mandatory identification values for the device.
+	 */
+	private int idVendor, idProduct;
+
+	/**
+	 * Optional identification value for the device (e.g. if there are multiple
+	 * devices with the same vendor and product id).
+	 */
+	private String filename;
+
+	private int dev_configuration, dev_interface, dev_altinterface;
 
 	private long usbDevHandle;
 
@@ -34,32 +44,22 @@ public class Device {
 
 	private Usb_Device dev;
 
-	private boolean initUSBDone;
-
 	protected Device(short idVendor, short idProduct) {
-		initUSBDone = false;
 		resetOnFirstOpen = false;
 		resetDone = false;
 		maxPacketSize = -1;
 		this.idVendor = idVendor;
 		this.idProduct = idProduct;
+		this.filename = null;
 	}
 
-	private void initUSB() {
-		LibusbJava.usb_init();
-		initUSBDone = true;
-	}
-
-	private Usb_Bus initBus() throws USBException {
-		LibusbJava.usb_find_busses();
-		LibusbJava.usb_find_devices();
-
-		Usb_Bus bus = LibusbJava.usb_get_busses();
-		if (bus == null) {
-			throw new USBException("LibusbJava.usb_get_busses(): "
-					+ LibusbJava.usb_strerror());
-		}
-		return bus;
+	protected Device(short idVendor, short idProduct, String filename) {
+		resetOnFirstOpen = false;
+		resetDone = false;
+		maxPacketSize = -1;
+		this.idVendor = idVendor;
+		this.idProduct = idProduct;
+		this.filename = filename;
 	}
 
 	private void updateMaxPacketSize(Usb_Device device) throws USBException {
@@ -84,8 +84,14 @@ public class Device {
 		}
 	}
 
-	private Usb_Device initDevice() throws USBException {
-		Usb_Bus bus = initBus();
+	/**
+	 * Initializes the device. The parameters <code>idVendor</code> and
+	 * <code>idProduct</code> are mandatory. The parameter
+	 * <code>filename</code> is optional.
+	 */
+	private Usb_Device initDevice(int idVendorParam, int idProductParam,
+			String filename) throws USBException {
+		Usb_Bus bus = USB.getBus();
 
 		Usb_Device device = null;
 		// search for device
@@ -93,8 +99,17 @@ public class Device {
 			device = bus.getDevices();
 			while (device != null) {
 				Usb_Device_Descriptor devDesc = device.getDescriptor();
-				if ((devDesc.getIdVendor() == idVendor)
-						&& (devDesc.getIdProduct() == idProduct)) {
+				if (filename != null
+						&& filename.compareTo(device.getFilename()) == 0
+						&& devDesc.getIdVendor() == idVendorParam
+						&& devDesc.getIdProduct() == idProductParam) {
+					// idVendor, idProduct and filename
+					logger.info("Device found: " + device.getFilename());
+					updateMaxPacketSize(device);
+					return device;
+				} else if (devDesc.getIdVendor() == idVendorParam
+						&& devDesc.getIdProduct() == idProductParam) {
+					// only idVendor and idProduct
 					logger.info("Device found: " + device.getFilename());
 					updateMaxPacketSize(device);
 					return device;
@@ -114,9 +129,7 @@ public class Device {
 	 * @throws USBException
 	 */
 	public void updateDescriptors() throws USBException {
-		if (!initUSBDone)
-			initUSB();
-		dev = initDevice();
+		dev = initDevice(idVendor, idProduct, filename);
 	}
 
 	/**
@@ -175,9 +188,7 @@ public class Device {
 			throw new USBException("device opened, close or reset first");
 		}
 
-		initUSB();
-
-		dev = initDevice();
+		dev = initDevice(idVendor, idProduct, filename);
 
 		if (dev != null) {
 			long res = LibusbJava.usb_open(dev);
@@ -723,5 +734,27 @@ public class Device {
 	public void setResetOnFirstOpen(boolean enable, int timeout) {
 		resetOnFirstOpen = enable;
 		resetTimeout = timeout;
+	}
+
+	/**
+	 * Returns the optional filename which is set when there are multiple
+	 * devices with the same vendor and product id. See
+	 * {@link USB#getDevice(short, short, String)}. Use
+	 * {@link Usb_Device#getFilename()} to read the filename of a device.
+	 * 
+	 * @return the filename if set or null
+	 */
+	protected String getFilename() {
+		return filename;
+	}
+
+	/**
+	 * Returns the Usb_Device instance associated with this device. This value
+	 * is only valid after opening the device.
+	 * 
+	 * @return the Usb_Device instance associated with this device.
+	 */
+	public Usb_Device getDevice() {
+		return dev;
 	}
 }

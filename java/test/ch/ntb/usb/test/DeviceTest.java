@@ -8,13 +8,17 @@
 package ch.ntb.usb.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Properties;
+import java.util.logging.Logger;
 
 import junit.framework.Assert;
 
@@ -26,8 +30,10 @@ import ch.ntb.usb.Device;
 import ch.ntb.usb.LibusbJava;
 import ch.ntb.usb.USB;
 import ch.ntb.usb.USBException;
+import ch.ntb.usb.Usb_Bus;
 import ch.ntb.usb.Usb_Config_Descriptor;
 import ch.ntb.usb.Usb_Device_Descriptor;
+import ch.ntb.usb.Utils;
 import ch.ntb.usb.testApp.AbstractDeviceInfo;
 import ch.ntb.usb.testApp.AbstractDeviceInfo.TransferMode;
 
@@ -47,6 +53,8 @@ public class DeviceTest {
 	private static byte[] readData;
 
 	private static Device dev;
+
+	private static Logger log = Logger.getLogger(DeviceTest.class.getName());
 
 	@SuppressWarnings("unchecked")
 	@BeforeClass
@@ -71,6 +79,17 @@ public class DeviceTest {
 		// initialise the device
 		LibusbJava.usb_set_debug(255);
 		dev = USB.getDevice(devinfo.getIdVendor(), devinfo.getIdProduct());
+		assertNotNull(dev);
+
+		// print the devices
+		LibusbJava.usb_init();
+		LibusbJava.usb_find_busses();
+		LibusbJava.usb_find_devices();
+		Usb_Bus bus = LibusbJava.usb_get_busses();
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		PrintStream ps = new PrintStream(baos);
+		Utils.logBus(bus, ps);
+		log.info(baos.toString());
 	}
 
 	@SuppressWarnings("null")
@@ -78,11 +97,11 @@ public class DeviceTest {
 	public void getDescriptors() throws Exception {
 		dev.updateDescriptors();
 		Usb_Device_Descriptor devDescriptor = dev.getDeviceDescriptor();
-		assertTrue(devDescriptor != null);
+		assertNotNull(devDescriptor);
 		assertEquals(devinfo.getIdProduct(), devDescriptor.getIdProduct());
 		assertEquals(devinfo.getIdVendor(), devDescriptor.getIdVendor());
 		Usb_Config_Descriptor confDescriptors[] = dev.getConfigDescriptors();
-		assertTrue(confDescriptors != null);
+		assertNotNull(confDescriptors);
 		assertTrue(confDescriptors[0].getInterface().length > 0);
 	}
 
@@ -136,6 +155,20 @@ public class DeviceTest {
 			fail(e.getMessage());
 		}
 		// this call must throw an exception, because the device can't be closed
+		doClose();
+	}
+
+	@Test
+	public void openWithFilename() throws Exception {
+		// get device by filename
+		doOpen();
+		assertNotNull(dev.getDevice());
+		String oldFilename = dev.getDevice().getFilename();
+		assertNotNull(oldFilename);
+		log.info("Filename: " + oldFilename);
+		Device dev2 = USB.getDevice(devinfo.getIdVendor(), devinfo
+				.getIdProduct(), oldFilename);
+		assertEquals(dev, dev2);
 		doClose();
 	}
 
@@ -224,8 +257,8 @@ public class DeviceTest {
 	@Test
 	public void controlMsg() throws Exception {
 		try {
-			dev.open(devinfo.getConfiguration(), devinfo.getInterface(), devinfo
-					.getAltinterface());
+			dev.open(devinfo.getConfiguration(), devinfo.getInterface(),
+					devinfo.getAltinterface());
 			// GET STATUS (device)
 			byte[] data = getTestData(2);
 			int length = dev.controlMsg(USB.REQ_TYPE_DIR_DEVICE_TO_HOST
@@ -237,10 +270,11 @@ public class DeviceTest {
 			assertEquals((byte) 0x00, data[1]);
 			// GET STATUS (interface)
 			data = getTestData(2);
-			length = dev.controlMsg(USB.REQ_TYPE_DIR_DEVICE_TO_HOST
-					| USB.REQ_TYPE_TYPE_STANDARD | USB.REQ_TYPE_RECIP_INTERFACE,
-					USB.REQ_GET_STATUS, 0, 0, data, data.length, devinfo
-							.getTimeout(), false);
+			length = dev.controlMsg(
+					USB.REQ_TYPE_DIR_DEVICE_TO_HOST
+							| USB.REQ_TYPE_TYPE_STANDARD
+							| USB.REQ_TYPE_RECIP_INTERFACE, USB.REQ_GET_STATUS,
+					0, 0, data, data.length, devinfo.getTimeout(), false);
 			assertTrue(length > 0);
 			assertEquals((byte) 0x00, data[0]);
 			assertEquals((byte) 0x00, data[1]);
@@ -265,7 +299,8 @@ public class DeviceTest {
 			// data = byte[1];
 			// length = dev.controlMsg(USB.REQ_TYPE_DIR_DEVICE_TO_HOST
 			// | USB.REQ_TYPE_TYPE_STANDARD | USB.REQ_TYPE_RECIP_INTERFACE,
-			// USB.REQ_GET_INTERFACE, 0, devinfo.getInterface(), data, data.length,
+			// USB.REQ_GET_INTERFACE, 0, devinfo.getInterface(), data,
+			// data.length,
 			// devinfo
 			// .getTimeout(), false);
 			// logData(data, length);
@@ -273,8 +308,8 @@ public class DeviceTest {
 			data = getTestData(128);
 			length = dev.controlMsg(USB.REQ_TYPE_DIR_DEVICE_TO_HOST
 					| USB.REQ_TYPE_TYPE_STANDARD | USB.REQ_TYPE_RECIP_DEVICE,
-					USB.REQ_GET_DESCRIPTOR, 1 << 8, 0, data, data.length, devinfo
-							.getTimeout(), false);
+					USB.REQ_GET_DESCRIPTOR, 1 << 8, 0, data, data.length,
+					devinfo.getTimeout(), false);
 			validateDeviceDescriptor(data, length);
 			// GET DESCRIPTOR (string descriptor (1))
 			data = getTestData(128);
@@ -369,14 +404,15 @@ public class DeviceTest {
 		return b;
 	}
 
+	@SuppressWarnings("unused")
 	private void logData(byte[] data, int length) {
 		if (length > 0) {
-			System.out.println("length: " + length);
+			log.info("length: " + length);
+			String logData = "";
 			for (int i = 0; i < length; i++) {
-				System.out.print("0x" + Integer.toHexString(data[i] & 0xff)
-						+ "\t");
+				logData += "0x" + Integer.toHexString(data[i] & 0xff) + "\t";
 			}
-			System.out.println();
+			log.info(logData);
 		}
 	}
 
@@ -399,8 +435,7 @@ public class DeviceTest {
 					devinfo.getAltinterface());
 			fail("USBException expected");
 		} catch (USBException e) {
-			System.err.println("INFO: " + getClass()
-					+ ": error expected: could not set config "
+			log.severe("could not set config "
 					+ (devinfo.getConfiguration() + 5));
 		}
 		doOpenWriteReadClose();
@@ -413,8 +448,7 @@ public class DeviceTest {
 					devinfo.getAltinterface());
 			fail("USBException expected");
 		} catch (USBException e) {
-			System.err.println("INFO: " + getClass()
-					+ ": error expected: could not claim interface "
+			log.severe("could not claim interface "
 					+ (devinfo.getInterface() + 5));
 		}
 		doOpenWriteReadClose();
@@ -427,8 +461,7 @@ public class DeviceTest {
 					devinfo.getAltinterface() + 5);
 			fail("USBException expected");
 		} catch (USBException e) {
-			System.err.println("INFO: " + getClass()
-					+ ": error expected: could not set alt interface "
+			log.severe("could not set alt interface "
 					+ (devinfo.getAltinterface() + 5));
 		}
 		doOpenWriteReadClose();
@@ -436,33 +469,33 @@ public class DeviceTest {
 
 	@Test
 	public void testGetIdProduct() {
-		Assert.assertEquals(dev.getIdProduct(), devinfo.getIdProduct());
+		Assert.assertEquals(devinfo.getIdProduct(), dev.getIdProduct());
 	}
 
 	@Test
 	public void testGetIdVendor() {
-		Assert.assertEquals(dev.getIdVendor(), devinfo.getIdVendor());
+		Assert.assertEquals(devinfo.getIdVendor(), dev.getIdVendor());
 	}
 
 	@Test
 	public void testGetAltinterface() {
-		Assert.assertEquals(dev.getAltinterface(), devinfo.getAltinterface());
+		Assert.assertEquals(devinfo.getAltinterface(), dev.getAltinterface());
 	}
 
 	@Test
 	public void testGetConfiguration() {
-		Assert.assertEquals(dev.getConfiguration(), devinfo.getConfiguration());
+		Assert.assertEquals(devinfo.getConfiguration(), dev.getConfiguration());
 	}
 
 	@Test
 	public void testGetInterface() {
-		Assert.assertEquals(dev.getInterface(), devinfo.getInterface());
+		Assert.assertEquals(devinfo.getInterface(), dev.getInterface());
 	}
 
 	@Test
 	public void testGetMaxPacketSize() throws USBException {
 		doOpen();
-		Assert.assertEquals(dev.getMaxPacketSize(), devinfo.getMaxDataSize());
+		Assert.assertEquals(devinfo.getMaxDataSize(), dev.getMaxPacketSize());
 		doClose();
 	}
 
@@ -495,7 +528,8 @@ public class DeviceTest {
 				if (devinfo.getOutEPBulk() != -1) {
 					dev.writeBulk(devinfo.getOutEPBulk(), testData,
 							testData.length, devinfo.getTimeout(), false);
-				} else if (devinfo.getInEPBulk() != -1) {
+				}
+				if (devinfo.getInEPBulk() != -1) {
 					dev.readBulk(devinfo.getInEPBulk(), readData,
 							readData.length, devinfo.getTimeout(), false);
 				}
@@ -503,17 +537,21 @@ public class DeviceTest {
 				if (devinfo.getOutEPInt() != -1) {
 					dev.writeInterrupt(devinfo.getOutEPInt(), testData,
 							testData.length, devinfo.getTimeout(), false);
-				} else if (devinfo.getInEPInt() != -1) {
+				}
+				if (devinfo.getInEPInt() != -1) {
 					dev.readInterrupt(devinfo.getInEPInt(), readData,
 							readData.length, devinfo.getTimeout(), false);
 				}
 			}
+			if (devinfo.doCompareData()) {
+				compare(testData, readData);
+			}
+		} catch (AssertionError e) {
+			closeOnException();
+			throw e;
 		} catch (Exception e) {
 			closeOnException();
 			throw e;
-		}
-		if (devinfo.doCompareData()) {
-			compare(testData, readData);
 		}
 	}
 
