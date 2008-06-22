@@ -75,17 +75,11 @@ public class UsbView extends JFrame {
 	 * @return void
 	 */
 	private void initialize() {
-		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		this.setJMenuBar(getJJMenuBar());
 		this.setSize(APP_WIDTH, APP_HIGHT);
 		this.setContentPane(getJContentPane());
 		this.setTitle("USB View");
-		this.addWindowListener(new java.awt.event.WindowAdapter() {
-			@Override
-			public void windowClosing(java.awt.event.WindowEvent e) {
-				System.exit(0);
-			}
-		});
 	}
 
 	/**
