@@ -27,5 +27,8 @@ public class AT90USB1287 extends AbstractDeviceInfo {
 		setSleepTimeout(2000);
 		setMaxDataSize(USB.FULLSPEED_MAX_BULK_PACKET_SIZE);
 		setMode(TransferMode.Bulk);
+		setManufacturer("inf.ntb.ch");
+		setProduct("JUnit Test Board");
+		setSerialVersion("00.10.00");
 	}
 }

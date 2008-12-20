@@ -42,10 +42,6 @@ public class DeviceTest {
 	private static final String testdevicePropertiesFile = "testdevice.properties";
 	private static final String deviceInfoKey = "testdeviceInfo";
 
-	private static final String Manufacturer = "inf.ntb.ch";
-	private static final String Product = "JUnit Test Board";
-	private static final String SerialVersion = "00.10.00";
-
 	private static AbstractDeviceInfo devinfo;
 
 	private static byte[] testData;
@@ -56,7 +52,6 @@ public class DeviceTest {
 
 	private static Logger log = Logger.getLogger(DeviceTest.class.getName());
 
-	@SuppressWarnings("unchecked")
 	@BeforeClass
 	public static void setUp() throws Exception {
 		// load the device info class with the key
@@ -70,7 +65,7 @@ public class DeviceTest {
 			throw new Exception("property " + deviceInfoKey
 					+ " not found in file " + testdevicePropertiesFile);
 		}
-		Class devInfoClazz = Class.forName(devInfoClazzName);
+		Class<?> devInfoClazz = Class.forName(devInfoClazzName);
 		devinfo = (AbstractDeviceInfo) devInfoClazz.newInstance();
 		// devinfo = new CY7C68013A();
 		// setup test data
@@ -92,7 +87,6 @@ public class DeviceTest {
 		log.info(baos.toString());
 	}
 
-	@SuppressWarnings("null")
 	@Test
 	public void getDescriptors() throws Exception {
 		dev.updateDescriptors();
@@ -318,7 +312,7 @@ public class DeviceTest {
 					USB.REQ_GET_DESCRIPTOR, (3 << 8) + 1, 0, data, data.length,
 					devinfo.getTimeout(), false);
 			String s = getString(data, length);
-			assertEquals(s, Manufacturer);
+			assertEquals(s, devinfo.getManufacturer());
 			// GET DESCRIPTOR (string descriptor (2))
 			data = getTestData(128);
 			length = dev.controlMsg(USB.REQ_TYPE_DIR_DEVICE_TO_HOST
@@ -326,7 +320,7 @@ public class DeviceTest {
 					USB.REQ_GET_DESCRIPTOR, (3 << 8) + 2, 0, data, data.length,
 					devinfo.getTimeout(), false);
 			s = getString(data, length);
-			assertEquals(s, Product);
+			assertEquals(s, devinfo.getProduct());
 			// GET DESCRIPTOR (string descriptor (3))
 			data = getTestData(128);
 			length = dev.controlMsg(USB.REQ_TYPE_DIR_DEVICE_TO_HOST
@@ -334,7 +328,7 @@ public class DeviceTest {
 					USB.REQ_GET_DESCRIPTOR, (3 << 8) + 3, 0, data, data.length,
 					devinfo.getTimeout(), false);
 			s = getString(data, length);
-			assertEquals(s, SerialVersion);
+			assertEquals(s, devinfo.getSerialVersion());
 			// close the device
 			dev.close();
 		} catch (Exception e) {
@@ -404,7 +398,6 @@ public class DeviceTest {
 		return b;
 	}
 
-	@SuppressWarnings("unused")
 	private void logData(byte[] data, int length) {
 		if (length > 0) {
 			log.info("length: " + length);

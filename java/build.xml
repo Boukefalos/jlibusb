@@ -60,7 +60,7 @@
 
 	<target name="javadoc" description="--> Create Javadoc">
 		<javadoc destdir="${project.dir.doc}" encoding="iso-8859-1">
-			<fileset dir="${project.dir.src}" defaultexcludes="yes" />
+			<fileset dir="${project.dir.src}" includes="**/*.java" />
 		</javadoc>
 	</target>
 </project>

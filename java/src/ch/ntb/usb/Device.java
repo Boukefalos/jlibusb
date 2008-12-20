@@ -170,12 +170,15 @@ public class Device {
 	 * endpoints are found in the descriptors an exception is thrown.
 	 * 
 	 * @param configuration
-	 *            the configuration
+	 *            the configuration, see
+	 *            {@link Usb_Config_Descriptor#getBConfigurationValue()}
 	 * @param interface_
-	 *            the interface
+	 *            the interface, see
+	 *            {@link Usb_Interface_Descriptor#getBInterfaceNumber()}
 	 * @param altinterface
-	 *            the alternate interface. If no alternate interface must be set
-	 *            <i>-1</i> can be used.
+	 *            the alternate interface, see
+	 *            {@link Usb_Interface_Descriptor#getBAlternateSetting()}. If
+	 *            no alternate interface must be set <i>-1</i> can be used.
 	 * @throws USBException
 	 */
 	public void open(int configuration, int interface_, int altinterface)

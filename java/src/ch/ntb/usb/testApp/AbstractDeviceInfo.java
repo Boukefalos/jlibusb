@@ -21,13 +21,13 @@ public abstract class AbstractDeviceInfo {
 
 	private int altinterface;
 
-	private int outEPBulk;
+	private int outEPBulk = -1;
 
-	private int inEPBulk;
+	private int inEPBulk = -1;
 
-	private int outEPInt;
+	private int outEPInt = -1;
 
-	private int inEPInt;
+	private int inEPInt = -1;
 
 	private int sleepTimeout;
 
@@ -36,6 +36,12 @@ public abstract class AbstractDeviceInfo {
 	private TransferMode mode;
 
 	private boolean compareData = true;
+
+	private String manufacturer = null;
+
+	private String product = null;
+
+	private String serialVersion = null;
 
 	public static enum TransferMode {
 		Bulk, Interrupt
@@ -157,5 +163,29 @@ public abstract class AbstractDeviceInfo {
 
 	public void setDoCompareData(boolean compareData) {
 		this.compareData = compareData;
+	}
+
+	public String getManufacturer() {
+		return manufacturer;
+	}
+
+	public void setManufacturer(String manufacturer) {
+		this.manufacturer = manufacturer;
+	}
+
+	public String getProduct() {
+		return product;
+	}
+
+	public void setProduct(String product) {
+		this.product = product;
+	}
+
+	public String getSerialVersion() {
+		return serialVersion;
+	}
+
+	public void setSerialVersion(String serialVersion) {
+		this.serialVersion = serialVersion;
 	}
 }

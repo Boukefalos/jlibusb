@@ -203,7 +203,7 @@ public class USB {
 	 * 
 	 * @param idVendor
 	 * @param idProduct
-	 * @return
+	 * @return a newly created device or an already registered device
 	 */
 	public static Device getDevice(short idVendor, short idProduct) {
 		return getDevice(idVendor, idProduct, null);
@@ -225,7 +225,8 @@ public class USB {
 			String filename) {
 		for (Iterator<Device> iter = devices.iterator(); iter.hasNext();) {
 			Device dev = iter.next();
-			if (filename != null && filename.compareTo(dev.getFilename()) == 0
+			if (filename != null && dev.getFilename() != null
+					&& filename.compareTo(dev.getFilename()) == 0
 					&& dev.getIdVendor() == idVendor
 					&& dev.getIdProduct() == idProduct) {
 				return dev;
