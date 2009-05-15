@@ -66,7 +66,9 @@ public class Usb_Endpoint_Descriptor extends Usb_Descriptor {
 	 * <br>
 	 * Bits 3..0: Endpoint number <br>
 	 * Bits 6..4: Reserved. Set to zero <br>
-	 * Bit 7: Direction. 0 = Out, 1 = In (ignored for control endpoints)<br>
+	 * Bit 7: Direction (host to device). 0 = OUT (send data from host to
+	 * device), 1 = IN (host receives data from device). Note: these values are
+	 * ignored for control endpoints.<br>
 	 * 
 	 * @return the endpoint address
 	 */

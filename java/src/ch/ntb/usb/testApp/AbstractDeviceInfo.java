@@ -13,6 +13,10 @@ public abstract class AbstractDeviceInfo {
 
 	private short idProduct;
 
+	private String filename = null;
+
+	private String busName = null;
+
 	private int timeout;
 
 	private int configuration;
@@ -187,5 +191,21 @@ public abstract class AbstractDeviceInfo {
 
 	public void setSerialVersion(String serialVersion) {
 		this.serialVersion = serialVersion;
+	}
+
+	public String getFilename() {
+		return filename;
+	}
+
+	public void setFilename(String filename) {
+		this.filename = filename;
+	}
+
+	public String getBusName() {
+		return busName;
+	}
+
+	public void setBusName(String busName) {
+		this.busName = busName;
 	}
 }

@@ -5,12 +5,12 @@
  * http://libusbjava.sourceforge.net
  * This library is covered by the LGPL, read LGPL.txt for details.
  */
-package ch.ntb.usb.test;
+package ch.ntb.usb.test.devices;
 
 import ch.ntb.usb.USB;
 import ch.ntb.usb.testApp.AbstractDeviceInfo;
 
-public class AT90USB1287 extends AbstractDeviceInfo {
+public class CY7C68013A extends AbstractDeviceInfo {
 
 	@Override
 	public void initValues() {
@@ -20,15 +20,12 @@ public class AT90USB1287 extends AbstractDeviceInfo {
 		setConfiguration(1);
 		setInterface(0);
 		setAltinterface(-1);
-		setOutEPBulk(0x01);
-		setInEPBulk(0x82);
-		setOutEPInt(0x03);
-		setInEPInt(0x84);
+		setOutEPInt(0x02);
+		setInEPInt(0x86);
+		setOutEPBulk(0x04);
+		setInEPBulk(0x88);
 		setSleepTimeout(2000);
-		setMaxDataSize(USB.FULLSPEED_MAX_BULK_PACKET_SIZE);
+		setMaxDataSize(USB.HIGHSPEED_MAX_BULK_PACKET_SIZE);
 		setMode(TransferMode.Bulk);
-		setManufacturer("inf.ntb.ch");
-		setProduct("JUnit Test Board");
-		setSerialVersion("00.10.00");
 	}
 }

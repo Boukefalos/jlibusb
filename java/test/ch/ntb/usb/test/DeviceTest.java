@@ -73,7 +73,8 @@ public class DeviceTest {
 		readData = new byte[testData.length];
 		// initialise the device
 		LibusbJava.usb_set_debug(255);
-		dev = USB.getDevice(devinfo.getIdVendor(), devinfo.getIdProduct());
+		dev = USB.getDevice(devinfo.getIdVendor(), devinfo.getIdProduct(),
+				devinfo.getBusName(), devinfo.getFilename());
 		assertNotNull(dev);
 
 		// print the devices
@@ -102,6 +103,7 @@ public class DeviceTest {
 	@Test
 	public void initalReset() throws Exception {
 		doOpen();
+		// this may change the bus and file name of the device
 		dev.reset();
 		timeout();
 	}
@@ -153,19 +155,69 @@ public class DeviceTest {
 	}
 
 	@Test
-	public void openWithFilename() throws Exception {
-		// get device by filename
+	public void open() throws Exception {
+		// get device by busname
 		doOpen();
 		assertNotNull(dev.getDevice());
 		String oldFilename = dev.getDevice().getFilename();
+		String oldBusName = dev.getDevice().getBus().getDirname();
 		assertNotNull(oldFilename);
-		log.info("Filename: " + oldFilename);
+		assertNotNull(oldBusName);
+		log.info("filename: " + oldFilename + ", busName: " + oldBusName);
 		Device dev2 = USB.getDevice(devinfo.getIdVendor(), devinfo
-				.getIdProduct(), oldFilename);
-		assertEquals(dev, dev2);
+				.getIdProduct());
 		doClose();
+		assertEquals(dev, dev2);
 	}
 
+	@Test
+	public void openWithBusName() throws Exception {
+		// get device by busname
+		doOpen();
+		assertNotNull(dev.getDevice());
+		String oldFilename = dev.getDevice().getFilename();
+		String oldBusName = dev.getDevice().getBus().getDirname();
+		assertNotNull(oldFilename);
+		assertNotNull(oldBusName);
+		log.info("filename: " + oldFilename + ", busName: " + oldBusName);
+		Device dev2 = USB.getDevice(devinfo.getIdVendor(), devinfo
+				.getIdProduct(), oldBusName, null);
+		doClose();
+		assertEquals(dev, dev2);
+	}
+
+	@Test
+	public void openWithFilename() throws Exception {
+		// get device by busname
+		doOpen();
+		assertNotNull(dev.getDevice());
+		String oldFilename = dev.getDevice().getFilename();
+		String oldBusName = dev.getDevice().getBus().getDirname();
+		assertNotNull(oldFilename);
+		assertNotNull(oldBusName);
+		log.info("filename: " + oldFilename + ", busName: " + oldBusName);
+		Device dev2 = USB.getDevice(devinfo.getIdVendor(), devinfo
+				.getIdProduct(), null, oldFilename);
+		doClose();
+		assertEquals(dev, dev2);
+	}
+
+	@Test
+	public void openWithBusAndFilename() throws Exception {
+		// get device by busname and filename
+		doOpen();
+		assertNotNull(dev.getDevice());
+		String oldFilename = dev.getDevice().getFilename();
+		String oldBusName = dev.getDevice().getBus().getDirname();
+		assertNotNull(oldFilename);
+		assertNotNull(oldBusName);
+		log.info("filename: " + oldFilename + ", busName: " + oldBusName);
+		Device dev2 = USB.getDevice(devinfo.getIdVendor(), devinfo
+				.getIdProduct(), oldBusName, oldFilename);
+		doClose();
+		assertEquals(dev, dev2);
+	}
+	
 	@Test
 	public void bulkWriteRead() throws Exception {
 		checkBulkEndpoints();
@@ -398,6 +450,7 @@ public class DeviceTest {
 		return b;
 	}
 
+	@SuppressWarnings("unused")
 	private void logData(byte[] data, int length) {
 		if (length > 0) {
 			log.info("length: " + length);

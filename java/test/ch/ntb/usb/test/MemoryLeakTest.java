@@ -89,7 +89,7 @@ public class MemoryLeakTest {
 
 	@Test
 	public void bulkWriteReadMultiple() throws Exception {
-		final int NumberOfIterations = 30000;
+		final int NumberOfIterations = 3000;
 
 		devinfo.setMode(TransferMode.Bulk);
 		doOpen();
@@ -104,7 +104,7 @@ public class MemoryLeakTest {
 
 	@Test
 	public void interruptWriteReadMultiple() throws Exception {
-		final int NumberOfIterations = 30000;
+		final int NumberOfIterations = 3000;
 
 		devinfo.setMode(TransferMode.Interrupt);
 		doOpen();

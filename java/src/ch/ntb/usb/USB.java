@@ -170,66 +170,113 @@ public class USB {
 	private static boolean initUSBDone = false;
 
 	/**
-	 * Create a new device an register it in a device queue. If the device is
+	 * Create a new device an register it in a device list. If the device is
 	 * already registered, a reference to it will be returned.<br>
+	 * After resetting or re-attaching a device the busName and filename may
+	 * change. You can unregister the current device instance (see
+	 * {@link #unregisterDevice(Device)}) and get a new instance with the
+	 * updated bus and filename.
 	 * 
 	 * @param idVendor
 	 *            the vendor id of the USB device
 	 * @param idProduct
 	 *            the product id of the USB device
+	 * @param busName
+	 *            optional name of the bus which can be used to distinguish
+	 *            multiple devices with the same vendor and product id.<br>
+	 *            see {@link Usb_Bus#getDirname()}
 	 * @param filename
-	 *            an optional filename which can be used to distinguish multiple
-	 *            devices with the same vendor and product id.
+	 *            optional filename which can be used to distinguish multiple
+	 *            devices with the same vendor and product id.<br>
+	 *            see {@link Usb_Device#getFilename()}
 	 * @return a newly created device or an already registered device
 	 */
 	public static Device getDevice(short idVendor, short idProduct,
-			String filename) {
+			String busName, String filename) {
 
 		// check if this device is already registered
-		Device dev = getRegisteredDevice(idVendor, idProduct, filename);
+		Device dev = getRegisteredDevice(idVendor, idProduct, busName, filename);
 		if (dev != null) {
-			logger.info("return already registered device");
+			logger.info("return already registered device: " + dev);
 			return dev;
 		}
-		dev = new Device(idVendor, idProduct, filename);
-		logger.info("create new device");
+		dev = new Device(idVendor, idProduct, busName, filename);
+		logger.info("create new device: " + dev);
 		devices.add(dev);
 		return dev;
 	}
 
 	/**
-	 * See {@link #getDevice(short, short, String)}. The parameter
-	 * <code>filename</code> is set to null.
+	 * See {@link #getDevice(short, short, String, String)}. The parameter
+	 * <code>filename</code> and <code>busName</code>is set to null.
 	 * 
 	 * @param idVendor
 	 * @param idProduct
 	 * @return a newly created device or an already registered device
 	 */
 	public static Device getDevice(short idVendor, short idProduct) {
-		return getDevice(idVendor, idProduct, null);
+		return getDevice(idVendor, idProduct, null, null);
+	}
+
+	/**
+	 * Unregister a registered device.
+	 * 
+	 * @param dev
+	 *            the device to unregister
+	 * @return true if the device has been removed, else false
+	 */
+	public static boolean unregisterDevice(Device dev) {
+		return devices.remove(dev);
 	}
 
 	/**
 	 * Get an already registered device or null if the device does not exist.<br>
+	 * To uniquely identify a device bus and filename should be set. If only one
+	 * of those is set the first device matching the criteria is returned.
 	 * 
 	 * @param idVendor
 	 *            the vendor id of the USB device
 	 * @param idProduct
 	 *            the product id of the USB device
+	 * @param busName
+	 *            the name of the bus which can be used to distinguish multiple
+	 *            devices with the same vendor and product id.<br>
+	 *            see {@link Usb_Bus#getDirname()}
 	 * @param filename
 	 *            an optional filename which can be used to distinguish multiple
-	 *            devices with the same vendor and product id.
+	 *            devices with the same vendor and product id. see
+	 *            {@link Usb_Device#getFilename()}
+	 * 
 	 * @return the device or null
 	 */
 	private static Device getRegisteredDevice(short idVendor, short idProduct,
-			String filename) {
+			String busName, String filename) {
 		for (Iterator<Device> iter = devices.iterator(); iter.hasNext();) {
 			Device dev = iter.next();
-			if (filename != null && dev.getFilename() != null
-					&& filename.compareTo(dev.getFilename()) == 0
-					&& dev.getIdVendor() == idVendor
-					&& dev.getIdProduct() == idProduct) {
-				return dev;
+			// bus and filename
+			if (busName != null && filename != null) {
+				if (busName.compareTo(dev.getBusName() == null ? "" : dev
+						.getBusName()) == 0
+						&& filename.compareTo(dev.getFilename() == null ? ""
+								: dev.getFilename()) == 0
+						&& dev.getIdVendor() == idVendor
+						&& dev.getIdProduct() == idProduct) {
+					return dev;
+				}
+			} else if (filename != null) {
+				if (filename.compareTo(dev.getFilename() == null ? "" : dev
+						.getFilename()) == 0
+						&& dev.getIdVendor() == idVendor
+						&& dev.getIdProduct() == idProduct) {
+					return dev;
+				}
+			} else if (busName != null) {
+				if (busName.compareTo(dev.getBusName() == null ? "" : dev
+						.getBusName()) == 0
+						&& dev.getIdVendor() == idVendor
+						&& dev.getIdProduct() == idProduct) {
+					return dev;
+				}
 			} else if (dev.getIdVendor() == idVendor
 					&& dev.getIdProduct() == idProduct) {
 				return dev;
@@ -262,7 +309,7 @@ public class USB {
 	/**
 	 * Explicitly calls {@link LibusbJava#usb_init()}. Note that you don't need
 	 * to call this procedure as it is called implicitly when creating a new
-	 * device with {@link USB#getDevice(short, short, String)}.
+	 * device with {@link USB#getDevice(short, short, String, String)}.
 	 */
 	public static void init() {
 		LibusbJava.usb_init();

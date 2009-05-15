@@ -216,9 +216,9 @@ public class TestLibUsbJava {
 			verbose = false;
 		}
 
-		// used for debugging. 0 = no debugging.
+		// used for debugging. 0 = no debugging, 255 = with debugging
 		//
-		LibusbJava.usb_set_debug(0);
+		LibusbJava.usb_set_debug(255);
 
 		LibusbJava.usb_init();
 

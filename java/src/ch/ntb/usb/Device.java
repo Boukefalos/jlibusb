@@ -34,6 +34,12 @@ public class Device {
 	 */
 	private String filename;
 
+	/**
+	 * Optional identification value for the device (e.g. if there are multiple
+	 * devices with the same vendor and product id).
+	 */
+	private String busName;
+
 	private int dev_configuration, dev_interface, dev_altinterface;
 
 	private long usbDevHandle;
@@ -53,12 +59,14 @@ public class Device {
 		this.filename = null;
 	}
 
-	protected Device(short idVendor, short idProduct, String filename) {
+	protected Device(short idVendor, short idProduct, String busName,
+			String filename) {
 		resetOnFirstOpen = false;
 		resetDone = false;
 		maxPacketSize = -1;
 		this.idVendor = idVendor;
 		this.idProduct = idProduct;
+		this.busName = busName;
 		this.filename = filename;
 	}
 
@@ -86,11 +94,11 @@ public class Device {
 
 	/**
 	 * Initializes the device. The parameters <code>idVendor</code> and
-	 * <code>idProduct</code> are mandatory. The parameter
-	 * <code>filename</code> is optional.
+	 * <code>idProduct</code> are mandatory. The parameter <code>filename</code>
+	 * is optional.
 	 */
 	private Usb_Device initDevice(int idVendorParam, int idProductParam,
-			String filename) throws USBException {
+			String busName, String filename) throws USBException {
 		Usb_Bus bus = USB.getBus();
 
 		Usb_Device device = null;
@@ -99,18 +107,38 @@ public class Device {
 			device = bus.getDevices();
 			while (device != null) {
 				Usb_Device_Descriptor devDesc = device.getDescriptor();
-				if (filename != null
-						&& filename.compareTo(device.getFilename()) == 0
-						&& devDesc.getIdVendor() == idVendorParam
-						&& devDesc.getIdProduct() == idProductParam) {
-					// idVendor, idProduct and filename
-					logger.info("Device found: " + device.getFilename());
-					updateMaxPacketSize(device);
-					return device;
-				} else if (devDesc.getIdVendor() == idVendorParam
-						&& devDesc.getIdProduct() == idProductParam) {
-					// only idVendor and idProduct
-					logger.info("Device found: " + device.getFilename());
+				if (busName != null && filename != null) {
+					if (busName.compareTo(bus.getDirname()) == 0
+							&& filename.compareTo(device.getFilename()) == 0
+							&& devDesc.getIdVendor() == idVendor
+							&& devDesc.getIdProduct() == idProduct) {
+						logger.info("Device found. bus: " + bus.getDirname()
+								+ ", filename: " + device.getFilename());
+						updateMaxPacketSize(device);
+						return device;
+					}
+				} else if (filename != null) {
+					if (filename.compareTo(device.getFilename()) == 0
+							&& devDesc.getIdVendor() == idVendor
+							&& devDesc.getIdProduct() == idProduct) {
+						logger.info("Device found. bus: " + bus.getDirname()
+								+ ", filename: " + device.getFilename());
+						updateMaxPacketSize(device);
+						return device;
+					}
+				} else if (busName != null) {
+					if (busName.compareTo(bus.getDirname()) == 0
+							&& devDesc.getIdVendor() == idVendor
+							&& devDesc.getIdProduct() == idProduct) {
+						logger.info("Device found. bus: " + bus.getDirname()
+								+ ", filename: " + device.getFilename());
+						updateMaxPacketSize(device);
+						return device;
+					}
+				} else if (devDesc.getIdVendor() == idVendor
+						&& devDesc.getIdProduct() == idProduct) {
+					logger.info("Device found. bus: " + bus.getDirname()
+							+ ", filename: " + device.getFilename());
 					updateMaxPacketSize(device);
 					return device;
 				}
@@ -129,7 +157,7 @@ public class Device {
 	 * @throws USBException
 	 */
 	public void updateDescriptors() throws USBException {
-		dev = initDevice(idVendor, idProduct, filename);
+		dev = initDevice(idVendor, idProduct, busName, filename);
 	}
 
 	/**
@@ -166,8 +194,8 @@ public class Device {
 	 * Opens the device and claims the specified configuration, interface and
 	 * altinterface.<br>
 	 * First the bus is enumerated. If the device is found its descriptors are
-	 * read and the <code>maxPacketSize</code> value is updated. If no
-	 * endpoints are found in the descriptors an exception is thrown.
+	 * read and the <code>maxPacketSize</code> value is updated. If no endpoints
+	 * are found in the descriptors an exception is thrown.
 	 * 
 	 * @param configuration
 	 *            the configuration, see
@@ -177,8 +205,8 @@ public class Device {
 	 *            {@link Usb_Interface_Descriptor#getBInterfaceNumber()}
 	 * @param altinterface
 	 *            the alternate interface, see
-	 *            {@link Usb_Interface_Descriptor#getBAlternateSetting()}. If
-	 *            no alternate interface must be set <i>-1</i> can be used.
+	 *            {@link Usb_Interface_Descriptor#getBAlternateSetting()}. If no
+	 *            alternate interface must be set <i>-1</i> can be used.
 	 * @throws USBException
 	 */
 	public void open(int configuration, int interface_, int altinterface)
@@ -191,7 +219,7 @@ public class Device {
 			throw new USBException("device opened, close or reset first");
 		}
 
-		dev = initDevice(idVendor, idProduct, filename);
+		dev = initDevice(idVendor, idProduct, busName, filename);
 
 		if (dev != null) {
 			long res = LibusbJava.usb_open(dev);
@@ -203,10 +231,8 @@ public class Device {
 		}
 
 		if (dev == null || usbDevHandle == 0) {
-			throw new USBException("USB device with idVendor 0x"
-					+ Integer.toHexString(idVendor & 0xFFFF)
-					+ " and idProduct 0x"
-					+ Integer.toHexString(idProduct & 0xFFFF) + " not found");
+			throw new USBException("USB device with " + toString()
+					+ " not found on USB");
 		}
 		claim_interface(usbDevHandle, configuration, interface_, altinterface);
 		if (resetOnFirstOpen & !resetDone) {
@@ -245,7 +271,13 @@ public class Device {
 	/**
 	 * Sends an USB reset to the device. The device handle will no longer be
 	 * valid. To use the device again, {@link #open(int, int, int)} must be
-	 * called.
+	 * called.<br>
+	 * Note that the device is re-attached to the USB which may cause the bus
+	 * and filename to be changed. If the bus and filename parameters are used
+	 * in {@link USB#getDevice(short, short, String, String)} unregister the
+	 * device using {@link USB#unregisterDevice(Device)}, re-enumerate the bus
+	 * and create a new device instance. If that is not done the device may not
+	 * be found.
 	 * 
 	 * @throws USBException
 	 */
@@ -742,13 +774,25 @@ public class Device {
 	/**
 	 * Returns the optional filename which is set when there are multiple
 	 * devices with the same vendor and product id. See
-	 * {@link USB#getDevice(short, short, String)}. Use
+	 * {@link USB#getDevice(short, short, String, String)}. Use
 	 * {@link Usb_Device#getFilename()} to read the filename of a device.
 	 * 
-	 * @return the filename if set or null
+	 * @return the filename or null
 	 */
 	protected String getFilename() {
 		return filename;
+	}
+
+	/**
+	 * Returns the optional bus name which is set when there are multiple
+	 * devices with the same vendor and product id. See
+	 * {@link USB#getDevice(short, short, String, String)}. Use
+	 * {@link Usb_Bus#getDirname()} to read the name of a bus.
+	 * 
+	 * @return the bus name or null
+	 */
+	protected String getBusName() {
+		return busName;
 	}
 
 	/**
@@ -760,4 +804,13 @@ public class Device {
 	public Usb_Device getDevice() {
 		return dev;
 	}
+
+	@Override
+	public String toString() {
+		return "idVendor: 0x" + Integer.toHexString(getIdVendor() & 0xffff)
+				+ ", idProduct: 0x"
+				+ Integer.toHexString(getIdProduct() & 0xffff) + ", busName: "
+				+ getBusName() + ", filename: " + getFilename();
+	}
+
 }
