@@ -17,8 +17,7 @@
 	<property file="project.properties" />
 	<property file="version.properties" />
 	<property name="version.win.rc" value="${version.major},${version.minor},${version.micro},${version.nano}" />
-	<property name="version.win.str" value="${version.major}.${version.minor}.${version.micro}.${version.nano}" />
-	<property name="version.linux" value="${version.major}.${version.minor}.${version.micro}" />
+	<property name="version" value="${version.major}.${version.minor}.${version.micro}.${version.nano}" />
 
 	<patternset id="buildfiles">
 		<include name="**/*.o" />
@@ -45,7 +44,7 @@
 			<arg value="-DRC_VERSION_STR=&apos;\&quot;${version.str}\&quot;&apos;" />
 		</exec>
 		-->
-		<echo level="warning" message="WARNING: If the version has changed -> change the RC_VERSION_STR define in resource.rc to &quot;${version.win.str}&quot;" />
+		<echo level="warning" message="WARNING: If the version has changed -> change the RC_VERSION_STR define in resource.rc to &quot;${version}&quot;" />
 		<exec dir="." executable="${build.win.windres}">
 			<arg value="-o${build.win.resource.obj}" />
 			<arg value="${build.win.resource.rc}" />
@@ -74,7 +73,7 @@
 			<arg value="-I${build.linux.includes2}" />
 			<arg value="-I${build.linux.includes3}" />
 			<arg value="${build.shlib.srcname}" />
-			<arg value="-o${build.shlib.linux.shlibname}.${version.linux}" />
+			<arg value="-o${build.shlib.linux.shlibname}.${version}" />
 			<arg value="${build.linux.includes}/${build.linux.lib.libusb}" />
 			<arg value="${build.linux.includes}/${build.linux.lib.libusbpp}" />
 		</exec>
@@ -88,7 +87,7 @@
 			<arg line="-I ${build.mac.jni}" />
 			<arg value="${build.shlib.srcname}" />
 			<arg line="-o ${build.shlib.mac.shlibname}" />
-			<arg line="-current_version ${version.mac}" />
+			<arg line="-current_version ${version}" />
 			<arg line="-l ${build.mac.stdclib}" />
 			<arg value="${build.mac.includes}/${build.mac.lib.libusb}" />
 			<arg value="${build.mac.includes}/${build.mac.lib.libusbpp}" />
