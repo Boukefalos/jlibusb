@@ -372,7 +372,7 @@ int main(int argc, char *argv[])
 
 	usb_set_debug(255);
 	
-	printf("initialize libraray, find busses and devices\n");
+	printf("initialize library, find busses and devices\n");
 	usb_init();
 
 	usb_find_busses();
