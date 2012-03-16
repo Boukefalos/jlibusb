@@ -5,7 +5,7 @@
  * http://libusbjava.sourceforge.net
  * This library is covered by the LGPL, read LGPL.txt for details.
  */
-package ch.ntb.libusbJava.demo;
+package ch.ntb.inf.libusbJava.demo;
 
 import ch.ntb.inf.libusbJava.Device;
 import ch.ntb.inf.libusbJava.USB;
