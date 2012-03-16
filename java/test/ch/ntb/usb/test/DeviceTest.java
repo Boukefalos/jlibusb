@@ -26,16 +26,16 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import ch.ntb.usb.Device;
-import ch.ntb.usb.LibusbJava;
-import ch.ntb.usb.USB;
-import ch.ntb.usb.USBException;
-import ch.ntb.usb.Usb_Bus;
-import ch.ntb.usb.Usb_Config_Descriptor;
-import ch.ntb.usb.Usb_Device_Descriptor;
-import ch.ntb.usb.Utils;
-import ch.ntb.usb.testApp.AbstractDeviceInfo;
-import ch.ntb.usb.testApp.AbstractDeviceInfo.TransferMode;
+import ch.ntb.inf.libusbJava.Device;
+import ch.ntb.inf.libusbJava.LibusbJava;
+import ch.ntb.inf.libusbJava.USB;
+import ch.ntb.inf.libusbJava.USBException;
+import ch.ntb.inf.libusbJava.Usb_Bus;
+import ch.ntb.inf.libusbJava.Usb_Config_Descriptor;
+import ch.ntb.inf.libusbJava.Usb_Device_Descriptor;
+import ch.ntb.inf.libusbJava.Utils;
+import ch.ntb.inf.libusbJava.testApp.AbstractDeviceInfo;
+import ch.ntb.inf.libusbJava.testApp.AbstractDeviceInfo.TransferMode;
 
 public class DeviceTest {
 

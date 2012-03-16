@@ -5,7 +5,7 @@
  * http://libusbjava.sourceforge.net
  * This library is covered by the LGPL, read LGPL.txt for details.
  */
-package ch.ntb.usb.logger;
+package ch.ntb.inf.libusbJava.logger;
 
 import java.io.InputStream;
 import java.util.Properties;
@@ -20,7 +20,7 @@ public class LogUtil {
 	// debug this class
 	private static final boolean debugLogUtil = false;
 
-	private static final String PLUGIN_ID = "ch.ntb.usb";
+	private static final String PLUGIN_ID = "ch.ntb.inf.libusbJava";
 	private static final String PROPERTIES_FILE = ".configure";
 	private static final String LOGGER_WARNING = "Warning in class "
 			+ LogUtil.class.getName()

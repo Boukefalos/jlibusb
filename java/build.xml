@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
 <!-- ====================================================================== 
-     ch.ntb.usb 
-     Ant tasks for ch.ntb.usb
+     ch.ntb.inf.libusbJava 
+     Ant tasks for ch.ntb.inf.libusbJava
 
      ====================================================================== -->
-<project name="ch.ntb.usb" basedir="." default="javadoc">
+<project name="ch.ntb.inf.libusbJava" basedir="." default="javadoc">
 	<description>
-		Ant tasks for ch.ntb.usb
+		Ant tasks for ch.ntb.inf.libusbJava
 	</description>
 
 	<tstamp />

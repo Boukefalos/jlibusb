@@ -7,9 +7,9 @@
  */
 package ch.ntb.usb.demo;
 
-import ch.ntb.usb.LibusbJava;
-import ch.ntb.usb.Usb_Bus;
-import ch.ntb.usb.Utils;
+import ch.ntb.inf.libusbJava.LibusbJava;
+import ch.ntb.inf.libusbJava.Usb_Bus;
+import ch.ntb.inf.libusbJava.Utils;
 
 /**
  * Initalises Libusb and prints the bus(ses) with attached devices to the
@@ -20,7 +20,7 @@ import ch.ntb.usb.Utils;
 public class LogBus {
 
 	private static void logBus() {
-		// if you don't use the ch.ntb.usb.Device class you must initialise
+		// if you don't use the ch.ntb.inf.libusbJava.Device class you must initialise
 		// Libusb before use
 		LibusbJava.usb_init();
 		LibusbJava.usb_find_busses();

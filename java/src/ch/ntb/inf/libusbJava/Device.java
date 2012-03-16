@@ -5,12 +5,12 @@
  * http://libusbjava.sourceforge.net
  * This library is covered by the LGPL, read LGPL.txt for details.
  */
-package ch.ntb.usb;
+package ch.ntb.inf.libusbJava;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import ch.ntb.usb.logger.LogUtil;
+import ch.ntb.inf.libusbJava.logger.LogUtil;
 
 /**
  * This class represents an USB device.<br>
@@ -19,7 +19,7 @@ import ch.ntb.usb.logger.LogUtil;
  */
 public class Device {
 
-	private static final Logger logger = LogUtil.getLogger("ch.ntb.usb");
+	private static final Logger logger = LogUtil.getLogger("ch.ntb.inf.libusbJava");
 
 	private int maxPacketSize;
 
@@ -545,11 +545,11 @@ public class Device {
 	 * 
 	 * @param requestType
 	 *            USB device request type (USB specification 9.3,
-	 *            bmRequestType). Use constants from {@link ch.ntb.usb.USB}
+	 *            bmRequestType). Use constants from {@link ch.ntb.inf.libusbJava.USB}
 	 *            (REQ_TYPE_xxx).
 	 * @param request
 	 *            specific request (USB specification 9.4, bRequest). Use
-	 *            constants from {@link ch.ntb.usb.USB} (REQ_xxx).
+	 *            constants from {@link ch.ntb.inf.libusbJava.USB} (REQ_xxx).
 	 * @param value
 	 *            field that varies according to request (USB specification 9.4,
 	 *            wValue)

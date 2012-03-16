@@ -5,15 +5,15 @@
  * http://libusbjava.sourceforge.net
  * This library is covered by the LGPL, read LGPL.txt for details.
  */
-package ch.ntb.usb;
+package ch.ntb.inf.libusbJava;
 
 /**
  * Represents the descriptor of a USB configuration.<br>
  * A USB device can have several different configuration.<br>
  * <br>
  * The length of the configuration descriptor is
- * {@link ch.ntb.usb.Usb_Descriptor#USB_DT_CONFIG_SIZE} and the type is
- * {@link ch.ntb.usb.Usb_Descriptor#USB_DT_CONFIG}.
+ * {@link ch.ntb.inf.libusbJava.Usb_Descriptor#USB_DT_CONFIG_SIZE} and the type is
+ * {@link ch.ntb.inf.libusbJava.Usb_Descriptor#USB_DT_CONFIG}.
  * 
  */
 public class Usb_Config_Descriptor extends Usb_Descriptor {

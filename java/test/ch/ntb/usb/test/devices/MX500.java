@@ -7,7 +7,7 @@
  */
 package ch.ntb.usb.test.devices;
 
-import ch.ntb.usb.testApp.AbstractDeviceInfo;
+import ch.ntb.inf.libusbJava.testApp.AbstractDeviceInfo;
 
 public class MX500 extends AbstractDeviceInfo {
 

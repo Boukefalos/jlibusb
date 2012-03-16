@@ -5,13 +5,13 @@
  * http://libusbjava.sourceforge.net
  * This library is covered by the LGPL, read LGPL.txt for details.
  */
-package ch.ntb.usb;
+package ch.ntb.inf.libusbJava;
 
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.logging.Logger;
 
-import ch.ntb.usb.logger.LogUtil;
+import ch.ntb.inf.libusbJava.logger.LogUtil;
 
 /**
  * This class manages all USB devices and defines some USB specific constants.<br>
@@ -23,7 +23,7 @@ public class USB {
 	/**
 	 * This request returns status for the specified recipient (USB spec 9.4.5).
 	 * 
-	 * @see ch.ntb.usb.Device#controlMsg(int, int, int, int, byte[], int, int,
+	 * @see ch.ntb.inf.libusbJava.Device#controlMsg(int, int, int, int, byte[], int, int,
 	 *      boolean)
 	 */
 	public static final int REQ_GET_STATUS = 0x00;
@@ -31,7 +31,7 @@ public class USB {
 	 * This request is used to clear or disable a specific feature (USB spec
 	 * 9.4.1).
 	 * 
-	 * @see ch.ntb.usb.Device#controlMsg(int, int, int, int, byte[], int, int,
+	 * @see ch.ntb.inf.libusbJava.Device#controlMsg(int, int, int, int, byte[], int, int,
 	 *      boolean)
 	 */
 	public static final int REQ_CLEAR_FEATURE = 0x01;
@@ -40,7 +40,7 @@ public class USB {
 	 * This request is used to set or enable a specific feature (USB spec
 	 * 9.4.9).
 	 * 
-	 * @see ch.ntb.usb.Device#controlMsg(int, int, int, int, byte[], int, int,
+	 * @see ch.ntb.inf.libusbJava.Device#controlMsg(int, int, int, int, byte[], int, int,
 	 *      boolean)
 	 */
 	public static final int REQ_SET_FEATURE = 0x03;
@@ -49,7 +49,7 @@ public class USB {
 	 * This request sets the device address for all future device accesses (USB
 	 * spec 9.4.6).
 	 * 
-	 * @see ch.ntb.usb.Device#controlMsg(int, int, int, int, byte[], int, int,
+	 * @see ch.ntb.inf.libusbJava.Device#controlMsg(int, int, int, int, byte[], int, int,
 	 *      boolean)
 	 */
 	public static final int REQ_SET_ADDRESS = 0x05;
@@ -57,7 +57,7 @@ public class USB {
 	 * This request returns the specified descriptor if the descriptor exists
 	 * (USB spec 9.4.3).
 	 * 
-	 * @see ch.ntb.usb.Device#controlMsg(int, int, int, int, byte[], int, int,
+	 * @see ch.ntb.inf.libusbJava.Device#controlMsg(int, int, int, int, byte[], int, int,
 	 *      boolean)
 	 */
 	public static final int REQ_GET_DESCRIPTOR = 0x06;
@@ -65,7 +65,7 @@ public class USB {
 	 * This request is optional and may be used to update existing descriptors
 	 * or new descriptors may be added (USB spec 9.4.8).
 	 * 
-	 * @see ch.ntb.usb.Device#controlMsg(int, int, int, int, byte[], int, int,
+	 * @see ch.ntb.inf.libusbJava.Device#controlMsg(int, int, int, int, byte[], int, int,
 	 *      boolean)
 	 */
 	public static final int REQ_SET_DESCRIPTOR = 0x07;
@@ -73,14 +73,14 @@ public class USB {
 	 * This request returns the current device configuration value (USB spec
 	 * 9.4.2).
 	 * 
-	 * @see ch.ntb.usb.Device#controlMsg(int, int, int, int, byte[], int, int,
+	 * @see ch.ntb.inf.libusbJava.Device#controlMsg(int, int, int, int, byte[], int, int,
 	 *      boolean)
 	 */
 	public static final int REQ_GET_CONFIGURATION = 0x08;
 	/**
 	 * This request sets the device configuration (USB spec 9.4.7).
 	 * 
-	 * @see ch.ntb.usb.Device#controlMsg(int, int, int, int, byte[], int, int,
+	 * @see ch.ntb.inf.libusbJava.Device#controlMsg(int, int, int, int, byte[], int, int,
 	 *      boolean)
 	 */
 	public static final int REQ_SET_CONFIGURATION = 0x09;
@@ -88,7 +88,7 @@ public class USB {
 	 * This request returns the selected alternate setting for the specified
 	 * interface (USB spec 9.4.4).
 	 * 
-	 * @see ch.ntb.usb.Device#controlMsg(int, int, int, int, byte[], int, int,
+	 * @see ch.ntb.inf.libusbJava.Device#controlMsg(int, int, int, int, byte[], int, int,
 	 *      boolean)
 	 */
 	public static final int REQ_GET_INTERFACE = 0x0A;
@@ -96,7 +96,7 @@ public class USB {
 	 * This request allows the host to select an alternate setting for the
 	 * specified interface (USB spec 9.4.10).
 	 * 
-	 * @see ch.ntb.usb.Device#controlMsg(int, int, int, int, byte[], int, int,
+	 * @see ch.ntb.inf.libusbJava.Device#controlMsg(int, int, int, int, byte[], int, int,
 	 *      boolean)
 	 */
 	public static final int REQ_SET_INTERFACE = 0x0B;
@@ -104,7 +104,7 @@ public class USB {
 	 * This request is used to set and then report an endpoint’s synchronization
 	 * frame (USB spec 9.4.11).
 	 * 
-	 * @see ch.ntb.usb.Device#controlMsg(int, int, int, int, byte[], int, int,
+	 * @see ch.ntb.inf.libusbJava.Device#controlMsg(int, int, int, int, byte[], int, int,
 	 *      boolean)
 	 */
 	public static final int REQ_SYNCH_FRAME = 0x0C;
@@ -117,7 +117,7 @@ public class USB {
 	 * signifying there is no Data stage.<br>
 	 * Specifies bit 7 of bmRequestType.
 	 * 
-	 * @see ch.ntb.usb.Device#controlMsg(int, int, int, int, byte[], int, int,
+	 * @see ch.ntb.inf.libusbJava.Device#controlMsg(int, int, int, int, byte[], int, int,
 	 *      boolean)
 	 */
 	public static final int REQ_TYPE_DIR_HOST_TO_DEVICE = (0x00 << 7),
@@ -128,7 +128,7 @@ public class USB {
 	 * Specifies the type of the request.<br>
 	 * Specifies bits 6..5 of bmRequestType.
 	 * 
-	 * @see ch.ntb.usb.Device#controlMsg(int, int, int, int, byte[], int, int,
+	 * @see ch.ntb.inf.libusbJava.Device#controlMsg(int, int, int, int, byte[], int, int,
 	 *      boolean)
 	 */
 	public static final int REQ_TYPE_TYPE_STANDARD = (0x00 << 5),
@@ -144,7 +144,7 @@ public class USB {
 	 * specified, the wIndex field identifies the interface or endpoint.<br>
 	 * Specifies bits 4..0 of bmRequestType.
 	 * 
-	 * @see ch.ntb.usb.Device#controlMsg(int, int, int, int, byte[], int, int,
+	 * @see ch.ntb.inf.libusbJava.Device#controlMsg(int, int, int, int, byte[], int, int,
 	 *      boolean)
 	 */
 	public static final int REQ_TYPE_RECIP_DEVICE = 0x00,
@@ -163,7 +163,7 @@ public class USB {
 	 */
 	public static int FULLSPEED_MAX_BULK_PACKET_SIZE = 64;
 
-	private static final Logger logger = LogUtil.getLogger("ch.ntb.usb");
+	private static final Logger logger = LogUtil.getLogger("ch.ntb.inf.libusbJava");
 
 	private static LinkedList<Device> devices = new LinkedList<Device>();
 

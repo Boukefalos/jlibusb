@@ -5,7 +5,7 @@
  * http://libusbjava.sourceforge.net
  * This library is covered by the LGPL, read LGPL.txt for details.
  */
-package ch.ntb.usb;
+package ch.ntb.inf.libusbJava;
 
 /**
  * Represents the descriptor of an USB endpoint.<br>
@@ -16,8 +16,8 @@ package ch.ntb.usb;
  * the bus.<br>
  * <br>
  * The length of the configuration descriptor is
- * {@link ch.ntb.usb.Usb_Descriptor#USB_DT_ENDPOINT_SIZE} and the type is
- * {@link ch.ntb.usb.Usb_Descriptor#USB_DT_ENDPOINT}.
+ * {@link ch.ntb.inf.libusbJava.Usb_Descriptor#USB_DT_ENDPOINT_SIZE} and the type is
+ * {@link ch.ntb.inf.libusbJava.Usb_Descriptor#USB_DT_ENDPOINT}.
  * 
  */
 public class Usb_Endpoint_Descriptor extends Usb_Descriptor {

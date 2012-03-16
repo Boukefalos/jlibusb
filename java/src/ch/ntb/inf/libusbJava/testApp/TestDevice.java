@@ -5,20 +5,20 @@
  * http://libusbjava.sourceforge.net
  * This library is covered by the LGPL, read LGPL.txt for details.
  */
-package ch.ntb.usb.testApp;
+package ch.ntb.inf.libusbJava.testApp;
 
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import ch.ntb.usb.Device;
-import ch.ntb.usb.USB;
-import ch.ntb.usb.USBException;
-import ch.ntb.usb.logger.LogUtil;
+import ch.ntb.inf.libusbJava.Device;
+import ch.ntb.inf.libusbJava.USB;
+import ch.ntb.inf.libusbJava.USBException;
+import ch.ntb.inf.libusbJava.logger.LogUtil;
 
 public class TestDevice extends AbstractDeviceInfo {
 
-	private static final Logger logger = LogUtil.getLogger("ch.ntb.usb.test");
+	private static final Logger logger = LogUtil.getLogger("ch.ntb.inf.libusbJava.test");
 
 	private String sendData = "0x5b 0x02 0x01 0x00 0x03 0x03 0xf0 0xf0 0x1f";
 

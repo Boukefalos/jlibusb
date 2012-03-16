@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!-- ====================================================================== 
-     ch.ntb.usb
-     Ant deployment tasks for ch.ntb.usb
+     ch.ntb.inf.libusbJava
+     Ant deployment tasks for ch.ntb.inf.libusbJava
 
 	 NOTE: for deployment the properties
 	 	project.server.username
@@ -10,9 +10,9 @@
 	 (e.g. -Dproject.server.username=X as jvm command line argument).
 
      ====================================================================== -->
-<project name="ch.ntb.usb.deployment" basedir=".">
+<project name="ch.ntb.inf.libusbJava.deployment" basedir=".">
 	<description>
-		Ant deployment tasks for ch.ntb.usb
+		Ant deployment tasks for ch.ntb.inf.libusbJava
 	</description>
 
 	<import file="build.xml" />

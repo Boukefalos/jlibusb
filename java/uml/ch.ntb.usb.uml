@@ -64,7 +64,7 @@
 <XPD:REF name="Model">BWFMxN62oEGNP+kKcODiEgAA</XPD:REF>
 <XPD:OBJ name="NameCompartment" type="UMLNameCompartmentView" guid="esczXY/2mk6uGBG2OciBTgAA">
 <XPD:OBJ name="NameLabel" type="LabelView" guid="w8ATpis9z0qGD3X44EmcUgAA">
-<XPD:ATTR name="Text" type="string">ch.ntb.usb</XPD:ATTR>
+<XPD:ATTR name="Text" type="string">ch.ntb.inf.libusbJava</XPD:ATTR>
 </XPD:OBJ>
 <XPD:OBJ name="StereotypeLabel" type="LabelView" guid="KtLxztNaak+48vZTNB7UNwAA">
 <XPD:ATTR name="Visible" type="boolean">False</XPD:ATTR>
@@ -1441,7 +1441,7 @@ type Usb_Device
 </XPD:OBJ>
 <XPD:ATTR name="#OwnedElements" type="integer">16</XPD:ATTR>
 <XPD:OBJ name="OwnedElements[0]" type="UMLPackage" guid="BWFMxN62oEGNP+kKcODiEgAA">
-<XPD:ATTR name="Name" type="string">ch.ntb.usb</XPD:ATTR>
+<XPD:ATTR name="Name" type="string">ch.ntb.inf.libusbJava</XPD:ATTR>
 <XPD:REF name="Namespace">+VhQCvPWpkq9N+U+GjchOQAA</XPD:REF>
 <XPD:ATTR name="#Views" type="integer">1</XPD:ATTR>
 <XPD:REF name="Views[0]">3aqcGmdQBU2yR8XWwbH6wgAA</XPD:REF>

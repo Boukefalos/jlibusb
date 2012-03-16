@@ -7,13 +7,13 @@
  */
 package ch.ntb.usb.test;
 
-import ch.ntb.usb.LibusbJava;
-import ch.ntb.usb.Usb_Bus;
-import ch.ntb.usb.Usb_Config_Descriptor;
-import ch.ntb.usb.Usb_Device;
-import ch.ntb.usb.Usb_Endpoint_Descriptor;
-import ch.ntb.usb.Usb_Interface;
-import ch.ntb.usb.Usb_Interface_Descriptor;
+import ch.ntb.inf.libusbJava.LibusbJava;
+import ch.ntb.inf.libusbJava.Usb_Bus;
+import ch.ntb.inf.libusbJava.Usb_Config_Descriptor;
+import ch.ntb.inf.libusbJava.Usb_Device;
+import ch.ntb.inf.libusbJava.Usb_Endpoint_Descriptor;
+import ch.ntb.inf.libusbJava.Usb_Interface;
+import ch.ntb.inf.libusbJava.Usb_Interface_Descriptor;
 
 /**
  * This class replicates the code from testlibusb.c supplied in the

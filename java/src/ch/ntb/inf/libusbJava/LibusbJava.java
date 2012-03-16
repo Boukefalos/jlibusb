@@ -5,7 +5,7 @@
  * http://libusbjava.sourceforge.net
  * This library is covered by the LGPL, read LGPL.txt for details.
  */
-package ch.ntb.usb;
+package ch.ntb.inf.libusbJava;
 
 /**
  * This class represents the Java Native Interface to the shared library which

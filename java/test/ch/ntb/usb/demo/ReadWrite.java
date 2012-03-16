@@ -7,9 +7,9 @@
  */
 package ch.ntb.usb.demo;
 
-import ch.ntb.usb.Device;
-import ch.ntb.usb.USB;
-import ch.ntb.usb.USBException;
+import ch.ntb.inf.libusbJava.Device;
+import ch.ntb.inf.libusbJava.USB;
+import ch.ntb.inf.libusbJava.USBException;
 
 /**
  * Demo class to demonstrate simple read and write operations to an USB device.<br>

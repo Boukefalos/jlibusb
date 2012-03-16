@@ -7,8 +7,8 @@
  */
 package ch.ntb.usb.test.devices;
 
-import ch.ntb.usb.USB;
-import ch.ntb.usb.testApp.AbstractDeviceInfo;
+import ch.ntb.inf.libusbJava.USB;
+import ch.ntb.inf.libusbJava.testApp.AbstractDeviceInfo;
 
 public class AT90USB1287 extends AbstractDeviceInfo {
 

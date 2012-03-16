@@ -5,7 +5,7 @@
  * http://libusbjava.sourceforge.net
  * This library is covered by the LGPL, read LGPL.txt for details.
  */
-package ch.ntb.usb;
+package ch.ntb.inf.libusbJava;
 
 /**
  * Represents the descriptor of a USB interface.<br>
@@ -13,8 +13,8 @@ package ch.ntb.usb;
  * endpoints into a functional group performing a single feature of the device.<br>
  * <br>
  * The length of the interface descriptor is
- * {@link ch.ntb.usb.Usb_Descriptor#USB_DT_INTERFACE_SIZE} and the type is
- * {@link ch.ntb.usb.Usb_Descriptor#USB_DT_INTERFACE}.
+ * {@link ch.ntb.inf.libusbJava.Usb_Descriptor#USB_DT_INTERFACE_SIZE} and the type is
+ * {@link ch.ntb.inf.libusbJava.Usb_Descriptor#USB_DT_INTERFACE}.
  * 
  */
 public class Usb_Interface_Descriptor extends Usb_Descriptor {

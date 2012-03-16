@@ -5,7 +5,7 @@
  * http://libusbjava.sourceforge.net
  * This library is covered by the LGPL, read LGPL.txt for details.
  */
-package ch.ntb.usb.usbView;
+package ch.ntb.inf.libusbJava.usbView;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -28,16 +28,16 @@ import javax.swing.JTree;
 import javax.swing.KeyStroke;
 import javax.swing.tree.TreePath;
 
-import ch.ntb.usb.LibusbJava;
-import ch.ntb.usb.Usb_Bus;
-import ch.ntb.usb.Usb_Config_Descriptor;
-import ch.ntb.usb.Usb_Device;
-import ch.ntb.usb.Usb_Device_Descriptor;
-import ch.ntb.usb.Usb_Endpoint_Descriptor;
-import ch.ntb.usb.Usb_Interface_Descriptor;
-import ch.ntb.usb.testApp.TestApp;
-import ch.ntb.usb.testApp.TestDevice;
-import ch.ntb.usb.testApp.AbstractDeviceInfo.TransferMode;
+import ch.ntb.inf.libusbJava.LibusbJava;
+import ch.ntb.inf.libusbJava.Usb_Bus;
+import ch.ntb.inf.libusbJava.Usb_Config_Descriptor;
+import ch.ntb.inf.libusbJava.Usb_Device;
+import ch.ntb.inf.libusbJava.Usb_Device_Descriptor;
+import ch.ntb.inf.libusbJava.Usb_Endpoint_Descriptor;
+import ch.ntb.inf.libusbJava.Usb_Interface_Descriptor;
+import ch.ntb.inf.libusbJava.testApp.TestApp;
+import ch.ntb.inf.libusbJava.testApp.TestDevice;
+import ch.ntb.inf.libusbJava.testApp.AbstractDeviceInfo.TransferMode;
 
 public class UsbView extends JFrame {
 
