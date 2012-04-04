@@ -44,15 +44,15 @@ public class TestDevice extends AbstractDeviceInfo {
 	@Override
 	public void initValues() {
 		setIdVendor((short) 0x8235);
-		setIdProduct((short) 0x0222);
+		setIdProduct((short) 0x0200);
 		setTimeout(2000);
 		setConfiguration(1);
 		setInterface(0);
 		setAltinterface(-1);
 		setOutEPBulk(0x01);
 		setInEPBulk(0x82);
-		setOutEPInt(0x03);
-		setInEPInt(0x84);
+		setOutEPInt(0x01);
+		setInEPInt(0x82);
 		setSleepTimeout(2000);
 		setMaxDataSize(USB.FULLSPEED_MAX_BULK_PACKET_SIZE);
 		setMode(TransferMode.Bulk);

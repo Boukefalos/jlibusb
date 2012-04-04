@@ -223,9 +223,9 @@ public class Device {
 
 		if (dev != null) {
 			long res = LibusbJava.usb_open(dev);
-			if (res == 0) {
+			if (res <= 0) {
 				throw new USBException("LibusbJava.usb_open: "
-						+ LibusbJava.usb_strerror());
+						+ LibusbJava.usb_strerror() + " (" + res + ")");
 			}
 			usbDevHandle = res;
 		}
@@ -743,14 +743,20 @@ public class Device {
 	}
 
 	/**
-	 * Check if the device is open.<br>
-	 * This checks only for a valid device handle. It doesn't check if the
-	 * device is still attached or working.
+	 * Check if the device is open, attached and work.<br>
 	 * 
-	 * @return true if the device is open
+	 * @return true if the device is open and work.
 	 */
 	public boolean isOpen() {
-		return usbDevHandle != 0;
+		if(usbDevHandle != 0){
+			try {
+				updateDescriptors();
+			} catch (USBException e) {
+				return false;
+			}
+			return dev != null;
+		}
+		return false;
 	}
 
 	/**

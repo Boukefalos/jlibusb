@@ -72,13 +72,13 @@ public class DeviceTest {
 		testData = new byte[devinfo.getMaxDataSize()];
 		readData = new byte[testData.length];
 		// initialise the device
-		LibusbJava.usb_set_debug(255);
 		dev = USB.getDevice(devinfo.getIdVendor(), devinfo.getIdProduct(),
 				devinfo.getBusName(), devinfo.getFilename());
 		assertNotNull(dev);
 
 		// print the devices
 		LibusbJava.usb_init();
+//		LibusbJava.usb_set_debug(255);
 		LibusbJava.usb_find_busses();
 		LibusbJava.usb_find_devices();
 		Usb_Bus bus = LibusbJava.usb_get_busses();

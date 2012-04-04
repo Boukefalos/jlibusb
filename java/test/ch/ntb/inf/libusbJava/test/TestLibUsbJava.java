@@ -217,10 +217,8 @@ public class TestLibUsbJava {
 		}
 
 		// used for debugging. 0 = no debugging, 255 = with debugging
-		//
-		LibusbJava.usb_set_debug(255);
-
 		LibusbJava.usb_init();
+		LibusbJava.usb_set_debug(255);
 
 		LibusbJava.usb_find_busses();
 		LibusbJava.usb_find_devices();

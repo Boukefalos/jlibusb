@@ -306,12 +306,12 @@ public class UsbView extends JFrame {
 						for (int i = 0; i < nofInEPs; i++) {
 							int type = inEPs[i].getBmAttributes() & 0x03;
 							switch (type) {
-							case Usb_Endpoint_Descriptor.USB_ENDPOINT_TYPE_BULK:
+							case Usb_Endpoint_Descriptor.USB_ENDPOINT_TRANSFER_TYPE_BULK:
 								testDevice.setInEPBulk(inEPs[i]
 										.getBEndpointAddress() & 0xff);
 								testDevice.setInMode(TransferMode.Bulk);
 								break;
-							case Usb_Endpoint_Descriptor.USB_ENDPOINT_TYPE_INTERRUPT:
+							case Usb_Endpoint_Descriptor.USB_ENDPOINT_TRANSFER_TYPE_INTERRUPT:
 								testDevice.setInEPInt(inEPs[i]
 										.getBEndpointAddress() & 0xff);
 								testDevice.setInMode(TransferMode.Interrupt);
@@ -325,12 +325,12 @@ public class UsbView extends JFrame {
 						for (int i = 0; i < nofOutEPs; i++) {
 							int type = outEPs[i].getBmAttributes() & 0x03;
 							switch (type) {
-							case Usb_Endpoint_Descriptor.USB_ENDPOINT_TYPE_BULK:
+							case Usb_Endpoint_Descriptor.USB_ENDPOINT_TRANSFER_TYPE_BULK:
 								testDevice.setOutEPBulk(outEPs[i]
 										.getBEndpointAddress() & 0xff);
 								testDevice.setOutMode(TransferMode.Bulk);
 								break;
-							case Usb_Endpoint_Descriptor.USB_ENDPOINT_TYPE_INTERRUPT:
+							case Usb_Endpoint_Descriptor.USB_ENDPOINT_TRANSFER_TYPE_INTERRUPT:
 								testDevice.setOutEPInt(outEPs[i]
 										.getBEndpointAddress() & 0xff);
 								testDevice.setOutMode(TransferMode.Interrupt);

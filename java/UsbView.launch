@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<launchConfiguration type="org.eclipse.jdt.launching.localJavaApplication">
+<listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
+<listEntry value="/ch.ntb.inf.libusbJava/src/ch/ntb/inf/libusbJava/usbView/UsbView.java"/>
+</listAttribute>
+<listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
+<listEntry value="1"/>
+</listAttribute>
+<stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="ch.ntb.inf.libusbJava.usbView.UsbView"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="ch.ntb.inf.libusbJava"/>
+<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Djava.library.path=&quot;D:\inf-ma\libusbjava\libusbjava\LibusbJava\out;${env_var:PATH}&quot;"/>
+</launchConfiguration>

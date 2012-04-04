@@ -65,13 +65,12 @@ public class MemoryLeakTest {
 		testData = new byte[devinfo.getMaxDataSize()];
 		readData = new byte[testData.length];
 		// initialise the device
-		LibusbJava.usb_set_debug(255);
 		dev = USB.getDevice(devinfo.getIdVendor(), devinfo.getIdProduct());
 		assertNotNull(dev);
 
 		// print the devices
 		LibusbJava.usb_init();
-		LibusbJava.usb_find_busses();
+//		LibusbJava.usb_find_busses();
 		LibusbJava.usb_find_devices();
 		Usb_Bus bus = LibusbJava.usb_get_busses();
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();

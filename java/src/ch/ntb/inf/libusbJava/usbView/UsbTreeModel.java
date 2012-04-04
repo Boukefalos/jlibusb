@@ -279,9 +279,7 @@ public class UsbTreeModel implements TreeModel, TreeSelectionListener {
 								break;
 							}
 							if (dev.getDescriptor().getIManufacturer() > 0) {
-								String manufacturer = LibusbJava
-										.usb_get_string_simple(handle, devDesc
-												.getIManufacturer());
+								String manufacturer = LibusbJava.usb_get_string_simple(handle, devDesc.getIManufacturer());
 								if (manufacturer == null)
 									manufacturer = "unable to fetch manufacturer string";
 								sb.append("\tiManufacturer: " + manufacturer

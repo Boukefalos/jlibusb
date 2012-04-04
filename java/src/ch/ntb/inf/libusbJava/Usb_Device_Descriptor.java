@@ -22,8 +22,9 @@ public class Usb_Device_Descriptor extends Usb_Descriptor {
 	 * Device and/or interface class codes.
 	 */
 	public static final int USB_CLASS_PER_INTERFACE = 0, USB_CLASS_AUDIO = 1,
-			USB_CLASS_COMM = 2, USB_CLASS_HID = 3, USB_CLASS_PRINTER = 7,
-			USB_CLASS_MASS_STORAGE = 8, USB_CLASS_HUB = 9, USB_CLASS_DATA = 10,
+			USB_CLASS_COMM = 2, USB_CLASS_HID = 3, LIBUSB_CLASS_PTP = 6,
+			USB_CLASS_PRINTER = 7, USB_CLASS_MASS_STORAGE = 8,
+			USB_CLASS_HUB = 9, USB_CLASS_DATA = 10,
 			USB_CLASS_VENDOR_SPEC = 0xff;
 
 	private short bcdUSB;

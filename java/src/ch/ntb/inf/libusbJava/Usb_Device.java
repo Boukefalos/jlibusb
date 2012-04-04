@@ -45,6 +45,9 @@ public class Usb_Device {
 	public Usb_Bus getBus() {
 		return bus;
 	}
+	protected void setBus(Usb_Bus bus){
+		this.bus = bus;
+	}
 
 	/**
 	 * Returns a reference to the first child.<br>
@@ -99,6 +102,10 @@ public class Usb_Device {
 	public Usb_Device getNext() {
 		return next;
 	}
+	
+	protected void setNext(Usb_Device dev){
+		next = dev;
+	}
 
 	/**
 	 * Returns the number of children of this device.<br>
@@ -116,6 +123,9 @@ public class Usb_Device {
 	 */
 	public Usb_Device getPrev() {
 		return prev;
+	}
+	protected void setPrev(Usb_Device dev){
+		prev = dev;
 	}
 
 	@Override

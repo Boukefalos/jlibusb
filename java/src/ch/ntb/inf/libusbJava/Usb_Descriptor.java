@@ -23,7 +23,9 @@ public class Usb_Descriptor {
 	/**
 	 * Descriptor types ({@link #bDescriptorType}).
 	 */
-	public static final int USB_DT_HID = 0x21, USB_DT_REPORT = 0x22,
+	public static final int LIBUSB_DT_DEVICE = 0x01, LIBUSB_DT_CONFIG = 0x02,
+			LIBUSB_DT_STRING = 0x03, LIBUSB_DT_INTERFACE = 0x04,
+			LIBUSB_DT_ENDPOINT = 0x05, USB_DT_HID = 0x21, USB_DT_REPORT = 0x22,
 			USB_DT_PHYSICAL = 0x23, USB_DT_HUB = 0x29;
 
 	/**

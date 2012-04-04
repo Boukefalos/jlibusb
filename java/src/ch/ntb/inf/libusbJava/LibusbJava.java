@@ -4,32 +4,22 @@
  *
  * http://libusbjava.sourceforge.net
  * This library is covered by the LGPL, read LGPL.txt for details.
+ * 
+ * Changes:
+ * 18.10.2010 NTB / Roger Millischer change from native interface to compatibility layer
+ * 
  */
 package ch.ntb.inf.libusbJava;
 
 /**
- * This class represents the Java Native Interface to the shared library which
- * is (with some exceptions) a one-to-one representation of the libusb API.<br>
- * <br>
- * <h1>Project Description</h1>
- * Java libusb is a Java wrapper for the libusb and libusb-win32 USB library.
- * 
- * <a href="http://libusb.sourceforge.net/">libusb</a> aim is to create a
- * library for use by user level applications to access USB devices regardless
- * of OS.<br>
- * <a href="http://libusb-win32.sourceforge.net/">Libusb-win32</a> is a port of
- * the USB library <a href="http://libusb.sourceforge.net/">libusb</a> to the
- * Windows operating systems. The library allows user space applications to
- * access any USB device on Windows in a generic way without writing any line of
- * kernel driver code.<br>
- * <br>
- * The API description of this class has been copied from the <a
- * href="http://libusb.sourceforge.net/documentation.html">libusb documentation</a>
- * and adapted where neccessary.<br>
+ * This class is used as compatibility layer for libusb 0.1 projects. For new
+ * projects use {@link LibusbJava1}
  * 
  */
 public class LibusbJava {
 
+	private static Usb_Bus busses = null;
+	private static long defaultCTX = 0;
 	/**
 	 * System error codes.<br>
 	 * This list is not complete! For more error codes see the file 'errorno.h'
@@ -49,15 +39,29 @@ public class LibusbJava {
 	 * @param level
 	 *            0 to 255
 	 */
-	public static native void usb_set_debug(int level);
+	public static void usb_set_debug(int level) {
+		LibusbJava1.libusb_set_debug(0, level);
+	}
 
 	// Core
 	/**
 	 * Just like the name implies, <code>usb_init</code> sets up some internal
-	 * structures. <code>usb_init</code> must be called before any other
-	 * libusb functions.
+	 * structures. <code>usb_init</code> must be called before any other libusb
+	 * functions.
 	 */
-	public static native void usb_init();
+	public static void usb_init() {
+		if (defaultCTX > 0) {
+			return;
+		}
+		defaultCTX = LibusbJava1.libusb_init();
+		LibusbJava1.libusb_set_debug(0, 0);
+		if (defaultCTX < 0) {
+			System.out.println("LibusbJava-1.0 init failed with errorcode: "
+					+ defaultCTX);
+			return;
+		}
+
+	}
 
 	/**
 	 * <code>usb_find_busses</code> will find all of the busses on the system.
@@ -65,7 +69,107 @@ public class LibusbJava {
 	 * @return the number of changes since previous call to this function (total
 	 *         of new busses and busses removed).
 	 */
-	public static native int usb_find_busses();
+	public static int usb_find_busses() {
+		int changes = 0;
+		long tmpBusNumber;
+		Usb_Bus nbusses = null;
+		Usb_Bus bus = nbusses, tmp;
+		boolean found = false;
+		Usb_Device devices = null;
+		devices = LibusbJava1.libusb_get_device_list(0);
+		
+		// no busses
+		if (devices.getDevnum() == -1) {
+			while (busses != null) {
+				changes++;
+				busses = busses.getNext();
+			}
+			return changes;
+		}
+		// find busses
+		while (devices != null) {
+			tmpBusNumber = (long) LibusbJava1.libusb_get_bus_number(devices);
+			while (bus != null) {
+				if (bus.getLocation() == tmpBusNumber) {
+					found = true;
+					break;
+				}
+				bus = bus.getNext();
+			}
+			if (found) {
+				devices = devices.getNext();
+				found = false;
+				continue;
+			}
+			if (nbusses == null) {
+				nbusses = new Usb_Bus(Long.toString(tmpBusNumber), tmpBusNumber);
+			} else {
+				tmp = new Usb_Bus(Long.toString(tmpBusNumber), tmpBusNumber);
+				bus = nbusses;
+				// append
+				while (bus.getNext() != null) {
+					bus = bus.getNext();
+				}
+				tmp.setPrev(bus);
+				bus.setNext(tmp);
+			}
+			bus = nbusses;
+			devices = devices.getNext();
+		}
+		// compare to existing bus-list
+		bus = busses;
+		tmp = nbusses;
+		found = false;
+		while (bus != null) {
+			tmpBusNumber = bus.getLocation();
+			while (tmp != null) {
+				if (tmpBusNumber == tmp.getLocation()) {
+					found = true;
+					// remove from nbusses list
+					if (tmp.getPrev() != null) {
+						tmp.getPrev().setNext(tmp.getNext());
+					} else {
+						nbusses = tmp.getNext();
+					}
+					if (tmp.getNext() != null) {
+						tmp.getNext().setPrev(tmp.getPrev());
+					}
+					break;
+				}
+				tmp = tmp.getNext();
+			}
+			if (!found) {
+				// remove from busses an increment changes
+				if (bus.getPrev() != null) {
+					bus.getPrev().setNext(bus.getNext());
+				} else {
+					busses = bus.getNext();
+				}
+				if (bus.getNext() != null) {
+					bus.getNext().setPrev(bus.getPrev());
+				}
+				changes++;
+			}
+			bus = bus.getNext();
+			tmp = nbusses;
+			found = false;
+		}
+		// add new busses
+		bus = busses;
+		while (tmp != null) {
+			tmp = tmp.getNext();
+			changes++;
+		}
+		if (busses != null) {
+			while (bus.getNext() != null) {
+				bus = bus.getNext();
+			}
+			bus.setNext(nbusses);
+		} else {
+			busses = nbusses;
+		}
+		return changes;
+	}
 
 	/**
 	 * <code>usb_find_devices</code> will find all of the devices on each bus.
@@ -74,7 +178,85 @@ public class LibusbJava {
 	 * @return the number of changes since the previous call to this function
 	 *         (total of new device and devices removed).
 	 */
-	public static native int usb_find_devices();
+	public static int usb_find_devices() {
+		int changes = 0;
+		byte tmpDevnum;
+		long tmpBusNumber;
+		Usb_Bus bus = busses;
+		boolean found = false;
+		Usb_Device devices, dev, ndev;
+
+		devices = LibusbJava1.libusb_get_device_list(0);
+		// Compare to existing bus-structure and remove removed devices
+		while (bus != null) {
+			dev = bus.getDevices();
+			while (dev != null) {
+				tmpDevnum = dev.getDevnum();
+				ndev = devices;
+				while (ndev != null) {
+					// if dev already exist remove from ndev list
+					if (tmpDevnum == ndev.getDevnum()) {
+						found = true;
+						if (ndev.getPrev() != null) {
+							ndev.getPrev().setNext(ndev.getNext());
+						} else {
+							devices = ndev.getNext();
+						}
+						if (ndev.getNext() != null) {
+							ndev.getNext().setPrev(ndev.getPrev());
+						}
+						break;
+					}
+					ndev = ndev.getNext();
+				}
+				if (!found) {
+					// remove device from bus an increment changes
+					if (dev.getPrev() != null) {
+						dev.getPrev().setNext(dev.getNext());
+					} else {
+						bus.setDevices(dev.getNext());
+					}
+					if (dev.getNext() != null) {
+						dev.getNext().setPrev(dev.getPrev());
+					}
+					changes++;
+				} else {
+					found = false;
+				}
+				dev = dev.getNext();
+			}
+			bus = bus.getNext();
+		}
+		// Add new Devices
+		bus = busses;
+		while (devices != null) {
+			ndev = devices.getNext();
+			// find correct bus
+			tmpBusNumber = (long) LibusbJava1.libusb_get_bus_number(devices);
+			while (bus != null) {
+				if (bus.getLocation() == tmpBusNumber) {
+					break;
+				}
+				bus = bus.getNext();
+			}
+			// insert device
+			if (bus != null) {
+				if (bus.getDevices() == null) {
+					devices.setNext(null);
+				} else {
+					devices.setNext(bus.getDevices());
+					devices.getNext().setPrev(devices);
+				}
+				devices.setPrev(null);
+				bus.setDevices(devices);
+				devices.setBus(bus);
+				changes++;
+			}
+			devices = ndev;
+			bus = busses;
+		}
+		return changes;
+	}
 
 	/**
 	 * <code>usb_get_busses</code> returns a tree of descriptor objects.<br>
@@ -87,7 +269,9 @@ public class LibusbJava {
 	 * @return the structure of all busses and devices. <code>Note:</code> The
 	 *         java objects are copies of the C structs.
 	 */
-	public static native Usb_Bus usb_get_busses();
+	public static Usb_Bus usb_get_busses() {
+		return busses;
+	}
 
 	// Device Operations
 	/**
@@ -100,17 +284,22 @@ public class LibusbJava {
 	 * @return a handle used in future communication with the device. 0 if an
 	 *         error has occurred.
 	 */
-	public static native long usb_open(Usb_Device dev);
+	public static long usb_open(Usb_Device dev) {
+//		return LibusbJava1.libusb_open_device_with_vid_pid(defaultCTX, dev.getDescriptor().getIdVendor(), dev.getDescriptor().getIdProduct());
+		return LibusbJava1.libusb_open(dev);
+	}
 
 	/**
-	 * <code>usb_close</code> closes a device opened with
-	 * <code>usb_open</code>.
+	 * <code>usb_close</code> closes a device opened with <code>usb_open</code>.
 	 * 
 	 * @param dev_handle
 	 *            The handle to the device.
-	 * @return 0 on success or < 0 on error.
+	 * @return 0
 	 */
-	public static native int usb_close(long dev_handle);
+	public static int usb_close(long dev_handle) {
+		LibusbJava1.libusb_close(dev_handle);
+		return 0;
+	}
 
 	/**
 	 * Sets the active configuration of a device
@@ -122,8 +311,9 @@ public class LibusbJava {
 	 *            bConfigurationValue.
 	 * @return 0 on success or < 0 on error.
 	 */
-	public static native int usb_set_configuration(long dev_handle,
-			int configuration);
+	public static int usb_set_configuration(long dev_handle, int configuration) {
+		return LibusbJava1.libusb_set_configuration(dev_handle, configuration);
+	}
 
 	/**
 	 * Sets the active alternate setting of the current interface
@@ -135,7 +325,26 @@ public class LibusbJava {
 	 *            bAlternateSetting.
 	 * @return 0 on success or < 0 on error.
 	 */
-	public static native int usb_set_altinterface(long dev_handle, int alternate);
+	public static int usb_set_altinterface(long dev_handle, int alternate) {
+		Usb_Device dev = LibusbJava1.libusb_get_device(dev_handle);
+		int nofInterfaces = LibusbJava1
+				.libusb_get_active_config_descriptor(dev).getBNumInterfaces();
+		int interface_number, success = -1;
+		for (interface_number = 0; interface_number < nofInterfaces; interface_number++) {
+			success = LibusbJava1.libusb_release_interface(dev_handle,
+					interface_number);
+			if (success >= 0) {
+				success = LibusbJava1.libusb_claim_interface(dev_handle,
+						interface_number);
+				if (success < 0) {
+					return success;
+				}
+				break;
+			}
+		}
+		return LibusbJava1.libusb_set_interface_alt_setting(dev_handle,
+				interface_number, alternate);
+	}
 
 	/**
 	 * Clears any halt status on an endpoint.
@@ -146,27 +355,37 @@ public class LibusbJava {
 	 *            The value specified in the descriptor field bEndpointAddress.
 	 * @return 0 on success or < 0 on error.
 	 */
-	public static native int usb_clear_halt(long dev_handle, int ep);
+	public static int usb_clear_halt(long dev_handle, int ep) {
+
+		return LibusbJava1.libusb_clear_halt(dev_handle, (short) ep);
+	}
 
 	/**
 	 * Resets a device by sending a RESET down the port it is connected to.<br>
 	 * <br>
-	 * <b>Causes re-enumeration:</b> After calling <code>usb_reset</code>,
-	 * the device will need to re-enumerate and thusly, requires you to find the
-	 * new device and open a new handle. The handle used to call
+	 * <b>Causes re-enumeration:</b> After calling <code>usb_reset</code>, the
+	 * device will need to re-enumerate and thusly, requires you to find the new
+	 * device and open a new handle. The handle used to call
 	 * <code>usb_reset</code> will no longer work.
 	 * 
 	 * @param dev_handle
 	 *            The handle to the device.
 	 * @return 0 on success or < 0 on error.
 	 */
-	public static native int usb_reset(long dev_handle);
+	public static int usb_reset(long dev_handle) {
+		LibusbJava1.libusb_claim_interface(dev_handle, 0);
+		int res = LibusbJava1.libusb_reset_device(dev_handle);
+		LibusbJava1.libusb_release_interface(dev_handle, 0);
+		LibusbJava1.libusb_close(dev_handle);
+		return res;
+
+	}
 
 	/**
 	 * Claim an interface of a device.<br>
 	 * <br>
-	 * <b>Must be called!:</b> <code>usb_claim_interface</code> must be
-	 * called before you perform any operations related to this interface (like
+	 * <b>Must be called!:</b> <code>usb_claim_interface</code> must be called
+	 * before you perform any operations related to this interface (like
 	 * <code>usb_set_altinterface, usb_bulk_write</code>, etc).
 	 * 
 	 * @param dev_handle
@@ -176,7 +395,9 @@ public class LibusbJava {
 	 *            bInterfaceNumber.
 	 * @return 0 on success or < 0 on error.
 	 */
-	public static native int usb_claim_interface(long dev_handle, int interface_);
+	public static int usb_claim_interface(long dev_handle, int interface_) {
+		return LibusbJava1.libusb_claim_interface(dev_handle, interface_);
+	}
 
 	/**
 	 * Releases a previously claimed interface
@@ -188,8 +409,9 @@ public class LibusbJava {
 	 *            bInterfaceNumber.
 	 * @return 0 on success or < 0 on error.
 	 */
-	public static native int usb_release_interface(long dev_handle,
-			int interface_);
+	public static int usb_release_interface(long dev_handle, int interface_) {
+		return LibusbJava1.libusb_release_interface(dev_handle, interface_);
+	}
 
 	// Control Transfers
 	/**
@@ -207,9 +429,12 @@ public class LibusbJava {
 	 * @param timeout
 	 * @return the number of bytes written/read or < 0 on error.
 	 */
-	public static native int usb_control_msg(long dev_handle, int requesttype,
+	public static int usb_control_msg(long dev_handle, int requesttype,
 			int request, int value, int index, byte[] bytes, int size,
-			int timeout);
+			int timeout) {
+		return LibusbJava1.libusb_control_transfer(dev_handle, requesttype,
+				request, value, index, bytes, size, timeout);
+	}
 
 	/**
 	 * Retrieves the string descriptor specified by index and langid from a
@@ -221,8 +446,10 @@ public class LibusbJava {
 	 * @param langid
 	 * @return the descriptor String or null
 	 */
-	public static native String usb_get_string(long dev_handle, int index,
-			int langid);
+	public static String usb_get_string(long dev_handle, int index, int langid) {
+
+		return LibusbJava1.libusb_get_string_descriptor(dev_handle, (short) index, langid, 255);
+	}
 
 	/**
 	 * <code>usb_get_string_simple</code> is a wrapper around
@@ -234,7 +461,9 @@ public class LibusbJava {
 	 * @param index
 	 * @return the descriptor String or null
 	 */
-	public static native String usb_get_string_simple(long dev_handle, int index);
+	public static String usb_get_string_simple(long dev_handle, int index) {
+		return LibusbJava1.libusb_get_string_descriptor_ascii(dev_handle,(short) index, 255);
+	}
 
 	/**
 	 * Retrieves a descriptor from the device identified by the type and index
@@ -252,8 +481,10 @@ public class LibusbJava {
 	 *            resulting String)
 	 * @return the descriptor String or null
 	 */
-	public static native String usb_get_descriptor(long dev_handle, byte type,
-			byte index, int size);
+	public static byte[] usb_get_descriptor(long dev_handle, byte type,
+			byte index, int size) {
+		return LibusbJava1.libusb_get_descriptor(dev_handle, type, index, size);
+	}
 
 	/**
 	 * Retrieves a descriptor from the device identified by the type and index
@@ -269,8 +500,24 @@ public class LibusbJava {
 	 *            resulting String)
 	 * @return the descriptor String or null
 	 */
-	public static native String usb_get_descriptor_by_endpoint(long dev_handle,
-			int ep, byte type, byte index, int size);
+	public static String usb_get_descriptor_by_endpoint(long dev_handle,
+			int ep, byte type, byte index, int size) {
+
+		// We just send a control message directly;
+		byte data[] = new byte[size];
+		char string[] = new char[size];
+		int transfered;
+		transfered = LibusbJava1.libusb_control_transfer(dev_handle,
+				0x80 | (ep & 0xFF), 0x07, (type << 8) | index, 0, data, size,
+				1000);
+		if (transfered > 0) {
+			for (int i = 0; i < transfered; i++) {
+				string[i] = (char) data[i];
+			}
+			return String.valueOf(string);
+		}
+		return null;
+	}
 
 	// Bulk Transfers
 	/**
@@ -284,8 +531,11 @@ public class LibusbJava {
 	 * @param timeout
 	 * @return the number of bytes written on success or < 0 on error.
 	 */
-	public static native int usb_bulk_write(long dev_handle, int ep,
-			byte[] bytes, int size, int timeout);
+	public static int usb_bulk_write(long dev_handle, int ep, byte[] bytes,
+			int size, int timeout) {
+		return LibusbJava1.libusb_bulk_transfer(dev_handle, (byte) ep, bytes,
+				size, timeout);
+	}
 
 	/**
 	 * Performs a bulk read request to the endpoint specified by ep.
@@ -298,8 +548,11 @@ public class LibusbJava {
 	 * @param timeout
 	 * @return the number of bytes read on success or < 0 on error.
 	 */
-	public static native int usb_bulk_read(long dev_handle, int ep,
-			byte[] bytes, int size, int timeout);
+	public static int usb_bulk_read(long dev_handle, int ep, byte[] bytes,
+			int size, int timeout) {
+		return LibusbJava1.libusb_bulk_transfer(dev_handle, (byte) ep, bytes,
+				size, timeout);
+	}
 
 	// Interrupt Transfers
 	/**
@@ -313,8 +566,11 @@ public class LibusbJava {
 	 * @param timeout
 	 * @return the number of bytes written on success or < 0 on error.
 	 */
-	public static native int usb_interrupt_write(long dev_handle, int ep,
-			byte[] bytes, int size, int timeout);
+	public static int usb_interrupt_write(long dev_handle, int ep,
+			byte[] bytes, int size, int timeout) {
+		return LibusbJava1.libusb_interrupt_transfer(dev_handle, (byte) ep,
+				bytes, size, timeout);
+	}
 
 	/**
 	 * Performs a interrupt read request to the endpoint specified by ep.
@@ -327,52 +583,19 @@ public class LibusbJava {
 	 * @param timeout
 	 * @return the number of bytes read on success or < 0 on error.
 	 */
-	public static native int usb_interrupt_read(long dev_handle, int ep,
-			byte[] bytes, int size, int timeout);
+	public static int usb_interrupt_read(long dev_handle, int ep, byte[] bytes,
+			int size, int timeout) {
+		return LibusbJava1.libusb_interrupt_transfer(dev_handle, (byte) ep,
+				bytes, size, timeout);
+	}
 
 	/**
 	 * Returns the error string after an error occured.
 	 * 
 	 * @return the last error sring.
 	 */
-	public static native String usb_strerror();
-
-	/** **************************************************************** */
-
-	/**
-	 * Maps the Java error code to the system error code.<br>
-	 * <br>
-	 * Note that not all error codes are be mapped by this method. For more
-	 * error codes see the file 'errno.h' on your system.<br>
-	 * <br>
-	 * 1: EBADF: Bad file descriptor.<br>
-	 * 2: ENXIO: No such device or address.<br>
-	 * 3: EBUSY: Device or resource busy.<br>
-	 * 4: EINVAL: Invalid argument.<br>
-	 * 5: ETIMEDOUT: Connection timed out.<br>
-	 * 6: EIO: I/O error.<br>
-	 * 7: ENOMEM: Not enough memory.<br>
-	 * 
-	 * 
-	 * @return the system error code or 100000 if no mapping has been found.
-	 */
-	private static native int usb_error_no(int value);
-
-	static {
-		String os = System.getProperty("os.name");
-		if (os.contains("Windows")) {
-			System.loadLibrary("LibusbJava");
-		} else {
-			System.loadLibrary("usbJava");
-		}
-		// define the error codes
-		ERROR_SUCCESS = 0;
-		ERROR_BAD_FILE_DESCRIPTOR = -usb_error_no(1);
-		ERROR_NO_SUCH_DEVICE_OR_ADDRESS = -usb_error_no(2);
-		ERROR_BUSY = -usb_error_no(3);
-		ERROR_INVALID_PARAMETER = -usb_error_no(4);
-		ERROR_TIMEDOUT = -usb_error_no(5);
-		ERROR_IO_ERROR = -usb_error_no(6);
-		ERROR_NOT_ENOUGH_MEMORY = -usb_error_no(7);
+	public static String usb_strerror() {
+		return LibusbJava1.libusb_strerror();
 	}
+
 }

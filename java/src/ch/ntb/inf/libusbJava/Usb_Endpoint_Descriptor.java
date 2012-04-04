@@ -36,15 +36,32 @@ public class Usb_Endpoint_Descriptor extends Usb_Descriptor {
 	/**
 	 * Endpoint type mask (in bmAttributes).
 	 */
-	public static final int USB_ENDPOINT_TYPE_MASK = 0x03;
+	public static final int USB_ENDPOINT_TRANSFER_TYPE_MASK = 0x03,
+			USB_ENDPOINT_ISO_SYNC_TYPE = 0x0C,
+			USB_ENDPOINT_ISO_USAGE_TYPE = 0x30;
 
 	/**
 	 * Possible endpoint types (in bmAttributes).
 	 */
-	public static final int USB_ENDPOINT_TYPE_CONTROL = 0,
-			USB_ENDPOINT_TYPE_ISOCHRONOUS = 1, USB_ENDPOINT_TYPE_BULK = 2,
-			USB_ENDPOINT_TYPE_INTERRUPT = 3;
+	public static final int USB_ENDPOINT_TRANSFER_TYPE_CONTROL = 0,
+			USB_ENDPOINT_TRANSFER_TYPE_ISOCHRONOUS = 1,
+			USB_ENDPOINT_TRANSFER_TYPE_BULK = 2,
+			USB_ENDPOINT_TRANSFER_TYPE_INTERRUPT = 3;
+	/**
+	 * Possible synchronization types for isochronous endpoints.
+	 */
+	public static final int USB_ENDPOINT_ISO_SYNC_TYPE_NONE = 0,
+			USB_ENDPOINT_ISO_SYNC_TYPE_ASYNC = 1,
+			USB_ENDPOINT_ISO_SYNC_TYPE_ADAPTIVE = 2,
+			USB_ENDPOINT_ISO_SYNC_TYPE_SYNC = 3;
 
+	/**
+	 * Possible usage types for isochronous endpoints
+	 */
+	public static final int USB_ENDPOINT_ISO_USAGE_TYPE_DATA = 0,
+			USB_ENDPOINT_ISO_USAGE_TYPE_FEEDBACK = 1,
+			USB_ENDPOINT_ISO_USAGE_TYPE_IMPLICIT = 2;
+	
 	private byte bEndpointAddress;
 
 	private byte bmAttributes;

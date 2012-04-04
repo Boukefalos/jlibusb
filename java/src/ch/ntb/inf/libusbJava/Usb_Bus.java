@@ -25,6 +25,11 @@ public class Usb_Bus {
 
 	private Usb_Device root_dev;
 
+	public Usb_Bus(String dirname, long location) {
+		this.dirname = dirname;
+		this.location = location;
+	}
+
 	/**
 	 * Get the first device ojects of the devices linked list.<br>
 	 * 
@@ -32,6 +37,10 @@ public class Usb_Bus {
 	 */
 	public Usb_Device getDevices() {
 		return devices;
+	}
+
+	protected void setDevices(Usb_Device devices) {
+		this.devices = devices;
 	}
 
 	/**
@@ -52,6 +61,10 @@ public class Usb_Bus {
 		return next;
 	}
 
+	protected void setNext(Usb_Bus bus) {
+		next = bus;
+	}
+
 	/**
 	 * Returns the previous bus object.<br>
 	 * 
@@ -59,6 +72,10 @@ public class Usb_Bus {
 	 */
 	public Usb_Bus getPrev() {
 		return prev;
+	}
+
+	protected void setPrev(Usb_Bus bus) {
+		prev = bus;
 	}
 
 	/**
@@ -77,6 +94,10 @@ public class Usb_Bus {
 	 */
 	public long getLocation() {
 		return location;
+	}
+
+	protected void setLocation(long busnumber) {
+		location = busnumber;
 	}
 
 	@Override

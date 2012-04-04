@@ -14,7 +14,7 @@
 	<property file="version.properties" />
 
 	<patternset id="classfiles">
-		<include name="**/usb/**/*.class" />
+		<include name="**/libusbJava/**/*.class" />
 		<exclude name="**/test/*" />
 	</patternset>
 

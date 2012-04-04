@@ -27,7 +27,7 @@ public class ReadWrite {
 
 	public static void main(String[] args) {
 		// get a device instance with vendor id and product id
-		Device dev = USB.getDevice((short) 0x8235, (short) 0x0222);
+		Device dev = USB.getDevice((short) 0x8235, (short) 0x0100);
 		try {
 			// data to write to the device
 			byte[] data = new byte[] { 0, 1, 2, 3 };
@@ -41,12 +41,12 @@ public class ReadWrite {
 			// write some data to the device
 			// 0x03 is the endpoint address of the OUT endpoint 3 (from PC to
 			// device)
-			dev.writeInterrupt(0x03, data, data.length, 2000, false);
+			dev.writeInterrupt(0x02, data, data.length, 2000, false);
 			// read some data from the device
 			// 0x84 is the endpoint address of the IN endpoint 4 (from PC to
 			// device)
 			// bit 7 (0x80) is set in case of an IN endpoint
-			dev.readInterrupt(0x84, readData, readData.length, 2000, false);
+			dev.readInterrupt(0x86, readData, readData.length, 2000, false);
 			// log the data from the device
 			logData(readData);
 			// close the device
