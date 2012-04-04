@@ -1,9 +1,6 @@
 @echo off
 echo #include ^<winver.h^> > %1
 echo.  >> %1
-echo #define RT_MANIFEST 24 >> %1
-echo #define ID_MANIFEST 1  >> %1
-echo.  >> %1
 echo VS_VERSION_INFO VERSIONINFO >> %1
 echo FILEVERSION    %2, %3, %4, %5 >> %1
 echo PRODUCTVERSION %2, %3, %4, %5 >> %1
@@ -18,7 +15,7 @@ echo     BEGIN >> %1
 echo         BLOCK "040904b0"   >> %1
 echo         BEGIN >> %1
 echo             VALUE "CompanyName",     "http://libusbjava.sourceforge.net" >> %1
-echo             VALUE "FileDescription", "JNI Library for LibusbJava" >> %1
+echo             VALUE "FileDescription", "JNI Library for LibusbJava stub" >> %1
 echo             VALUE "FileVersion",     "%2.%3.%4.%5\0" >> %1
 echo             VALUE "InternalName",    "LibusbJava-1_0.dll" >> %1
 echo             VALUE "LegalCopyright",  "2012 NTB Interstate University of Applied Sciences of Technology Buchs/Chur/St.Gallen" >> %1
