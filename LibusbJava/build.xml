@@ -89,6 +89,30 @@
             <arg value="-lusb-1.0" />
         </exec>
     </target>
+    
+    <target name="Windows 64Bit Debug" depends="clean, Windows Resource" description="--> Build LibusbJava-1_0.dll">
+        <echo level="info" message="Building Library" />
+        <exec dir="." executable="g++">
+            <arg value="-Wall" />
+            <arg value="-Wno-write-strings" />
+            <arg value="-D_JNI_IMPLEMENTATION_" />
+            <arg value="-Wl,--kill-at" />
+            <arg value="-O0" />
+            <arg value="-g" />
+            <arg value="-mwindows" />
+            <arg value="-static" />
+            <arg value="-shared" />
+            <arg value="-IC:/Program Files/Java/jdk${java.version}/include" />
+            <arg value="-IC:/Program Files/Java/jdk${java.version}/include/win32" />
+            <arg value="-I${basedir}" />
+            <arg value="${basedir}/LibusbJava.cpp" />
+            <arg value="${ver_info}" />
+            <arg value="-o" />
+            <arg value="${basedir}/out/LibusbJava-1_0.dll" />
+            <arg value="-L${basedir}/MinGW64/static" />
+            <arg value="-lusb-1.0" />
+        </exec>
+    </target>
 
     <target name="Windows Resource" description="--> Build Version resource">
         <property name="rc_file" value="${basedir}/out/LibusbJava.rc" />
