@@ -530,7 +530,7 @@ JNIEXPORT jobject JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1get_1de
 				if (conf_desc->interface == NULL) {
 					/* this shouldn't happen*/
 					printf("(*conf_desc)->usb_interface == NULL");
-					return root_usb_devObj;
+					continue;
 				}
 				usb_intObj = env->NewObject(usb_intClazz, usb_intMid);
 				if (!usb_intObj) {
@@ -552,7 +552,7 @@ JNIEXPORT jobject JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1get_1de
 					if (conf_desc->interface[h].altsetting == NULL) {
 						// this shouldn't happen
 						printf("LibusbJava: libusb_get_device_list: (*conf_desc)->interface->altsetting == NULL\n");
-						return root_usb_devObj;
+						continue;
 					}
 					usb_intDescObj = env->NewObject(usb_intDescClazz, usb_intDescMid);
 					if (!usb_intDescObj) {
@@ -838,7 +838,7 @@ JNIEXPORT jobject JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1get_1de
 			if (conf_desc->interface == NULL) {
 				// this shouldn't happen
 				printf("(*conf_desc)->usb_interface == NULL");
-				return usb_devObj;
+				continue;
 			}
 			usb_intObj = env->NewObject(usb_intClazz, usb_intMid);
 			if (!usb_intObj) {
@@ -861,7 +861,7 @@ JNIEXPORT jobject JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1get_1de
 				if (conf_desc->interface[h].altsetting == NULL) {
 					// this shouldn't happen
 					printf("LibusbJava: libusb_get_device_list: altsetting == NULL\n");
-					return usb_devObj;
+					continue;
 				}
 				usb_intDescObj = env->NewObject(usb_intDescClazz, usb_intDescMid);
 				if (!usb_intDescObj) {
@@ -1093,7 +1093,7 @@ JNIEXPORT jobject JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1get_1ac
 		if (conf_desc->interface == NULL) {
 			// this shouldn't happen
 			printf("conf_des->interface == NULL");
-			return usb_confDescObj;
+			continue;
 		}
 		usb_intObj = env->NewObject(usb_intClazz, usb_intMid);
 		if (!usb_intObj) {
@@ -1116,7 +1116,7 @@ JNIEXPORT jobject JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1get_1ac
 			if (conf_desc->interface[i].altsetting == NULL) {
 				// this shouldn't happen
 				printf("LibusbJava: libusb_get__activ_config_descriptor: altsetting == NULL\n");
-				return usb_confDescObj;
+				continue;
 			}
 			usb_intDescObj = env->NewObject(usb_intDescClazz, usb_intDescMid);
 			if (!usb_intDescObj) {
