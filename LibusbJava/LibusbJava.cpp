@@ -55,6 +55,13 @@ static void LIBUSB_CALL fd_removed_callback(int fd, void *user_data);
 
 /********************************************************************************************
  *
+ *      Local helper functions
+ *
+ *******************************************************************************************/
+static __inline jbyteArray 	JNICALL 	to_byteArray(JNIEnv *env, const void *data, size_t len);
+
+/********************************************************************************************
+ *
  *		References
  *
  *******************************************************************************************/
@@ -504,8 +511,7 @@ JNIEXPORT jobject JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1get_1de
 			env->SetByteField(usb_confDescObj, usb_confDescFID_MaxPower, conf_desc->MaxPower);
 			env->SetIntField(usb_confDescObj, usb_confDescFID_extralen, conf_desc->extra_length);
 			if (conf_desc->extra) {
-				jbyteArray jbExtraDesc = env->NewByteArray( conf_desc->extra_length);
-				env->SetByteArrayRegion(jbExtraDesc, 0, conf_desc->extra_length, (jbyte *) conf_desc->extra);
+				jbyteArray jbExtraDesc = to_byteArray(env, conf_desc->extra, conf_desc->extra_length);
 				env->SetObjectField(usb_confDescObj, usb_confDescFID_extra, jbExtraDesc);
 			} else {
 				env->SetObjectField(usb_confDescObj, usb_confDescFID_extra,	NULL);
@@ -566,8 +572,7 @@ JNIEXPORT jobject JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1get_1de
 					env->SetByteField(usb_intDescObj, usb_intDescFID_iInterface, conf_desc->interface[h].altsetting[a].iInterface);
 					env->SetIntField(usb_intDescObj, usb_intDescFID_extralen, conf_desc->interface[h].altsetting[a].extra_length);
 					if (conf_desc->interface[h].altsetting[a].extra) {
-						jbyteArray jbExtraDesc = env->NewByteArray( conf_desc->interface[h].altsetting[a].extra_length);
-						env->SetByteArrayRegion(jbExtraDesc, 0, conf_desc->interface[h].altsetting[a].extra_length, (jbyte *) conf_desc->interface[h].altsetting[a].extra);
+						jbyteArray jbExtraDesc = to_byteArray(env, conf_desc->interface[h].altsetting[a].extra, conf_desc->interface[h].altsetting[a].extra_length);
 						env->SetObjectField(usb_intDescObj, usb_intDescFID_extra, jbExtraDesc);
 					} else {
 						env->SetObjectField(usb_intDescObj,	usb_intDescFID_extra, NULL);
@@ -604,8 +609,7 @@ JNIEXPORT jobject JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1get_1de
 						env->SetByteField(usb_epDescObj, usb_epDescFID_bSynchAddress, conf_desc->interface[h].altsetting[a].endpoint[e].bSynchAddress);
 						env->SetIntField(usb_epDescObj, usb_epDescFID_extralen, conf_desc->interface[h].altsetting[a].endpoint[e].extra_length);
 						if (conf_desc->interface[h].altsetting[a].endpoint[e].extra) {
-							jbyteArray jbExtraDesc = env->NewByteArray(	conf_desc->interface[h].altsetting[a].endpoint[e].extra_length);
-							env->SetByteArrayRegion(jbExtraDesc, 0,	conf_desc->interface[h].altsetting[a].endpoint[e].extra_length, (jbyte *) conf_desc->interface[h].altsetting[a].endpoint[e].extra);
+							jbyteArray jbExtraDesc = to_byteArray(env,  conf_desc->interface[h].altsetting[a].endpoint[e].extra, conf_desc->interface[h].altsetting[a].endpoint[e].extra_length);
 							env->SetObjectField(usb_epDescObj, usb_epDescFID_extra, jbExtraDesc);
 						} else {
 							env->SetObjectField(usb_epDescObj, usb_epDescFID_extra, NULL);
@@ -815,8 +819,7 @@ JNIEXPORT jobject JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1get_1de
 		env->SetByteField(usb_confDescObj, usb_confDescFID_MaxPower, conf_desc->MaxPower);
 		env->SetIntField(usb_confDescObj, usb_confDescFID_extralen, conf_desc->extra_length);
 		if (conf_desc->extra) {
-			jbyteArray jbExtraDesc = env->NewByteArray(conf_desc->extra_length);
-			env->SetByteArrayRegion(jbExtraDesc, 0, conf_desc->extra_length, (jbyte *) conf_desc->extra);
+			jbyteArray jbExtraDesc = to_byteArray(env, conf_desc->extra, conf_desc->extra_length);
 			env->SetObjectField(usb_confDescObj, usb_confDescFID_extra, jbExtraDesc);
 		} else {
 			env->SetObjectField(usb_confDescObj, usb_confDescFID_extra, NULL);
@@ -878,8 +881,7 @@ JNIEXPORT jobject JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1get_1de
 				env->SetByteField(usb_intDescObj, usb_intDescFID_iInterface, conf_desc->interface[h].altsetting[a].iInterface);
 				env->SetIntField(usb_intDescObj, usb_intDescFID_extralen, conf_desc->interface[h].altsetting[a].extra_length);
 				if (conf_desc->interface[h].altsetting[a].extra) {
-					jbyteArray jbExtraDesc = env->NewByteArray(conf_desc->interface[h].altsetting[a].extra_length);
-					env->SetByteArrayRegion(jbExtraDesc, 0, conf_desc->interface[h].altsetting[a].extra_length,	(jbyte *) conf_desc->interface[h].altsetting[a].extra);
+					jbyteArray jbExtraDesc = to_byteArray(env, conf_desc->interface[h].altsetting[a].extra, conf_desc->interface[h].altsetting[a].extra_length);
 					env->SetObjectField(usb_intDescObj, usb_intDescFID_extra, jbExtraDesc);
 				} else {
 					env->SetObjectField(usb_intDescObj, usb_intDescFID_extra, NULL);
@@ -915,8 +917,7 @@ JNIEXPORT jobject JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1get_1de
 					env->SetByteField(usb_epDescObj, usb_epDescFID_bSynchAddress, conf_desc->interface[h].altsetting[a].endpoint[e].bSynchAddress);
 					env->SetIntField(usb_epDescObj, usb_epDescFID_extralen, conf_desc->interface[h].altsetting[a].endpoint[e].extra_length);
 					if (conf_desc->interface[h].altsetting[a].endpoint[e].extra) {
-						jbyteArray jbExtraDesc = env->NewByteArray(conf_desc->interface[h].altsetting[a].endpoint[e].extra_length);
-						env->SetByteArrayRegion(jbExtraDesc, 0, conf_desc->interface[h].altsetting[a].endpoint[e].extra_length, (jbyte *) conf_desc->interface[h].altsetting[a].endpoint[e].extra);
+						jbyteArray jbExtraDesc = to_byteArray(env, conf_desc->interface[h].altsetting[a].endpoint[e].extra, conf_desc->interface[h].altsetting[a].endpoint[e].extra_length);
 						env->SetObjectField(usb_epDescObj, usb_epDescFID_extra, jbExtraDesc);
 					} else {
 						env->SetObjectField(usb_epDescObj, usb_epDescFID_extra, NULL);
@@ -1074,8 +1075,7 @@ JNIEXPORT jobject JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1get_1ac
 	env->SetByteField(usb_confDescObj, usb_confDescFID_MaxPower, conf_desc->MaxPower);
 	env->SetIntField(usb_confDescObj, usb_confDescFID_extralen, conf_desc->extra_length);
 	if (conf_desc->extra) {
-		jbyteArray jbExtraDesc = env->NewByteArray(conf_desc->extra_length);
-		env->SetByteArrayRegion(jbExtraDesc, 0, conf_desc->extra_length, (jbyte *) conf_desc->extra);
+		jbyteArray jbExtraDesc = to_byteArray(env, conf_desc->extra, conf_desc->extra_length);
 		env->SetObjectField(usb_confDescObj, usb_confDescFID_extra, jbExtraDesc);
 	} else {
 		env->SetObjectField(usb_confDescObj, usb_confDescFID_extra, NULL);
@@ -1136,8 +1136,7 @@ JNIEXPORT jobject JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1get_1ac
 			env->SetByteField(usb_intDescObj, usb_intDescFID_iInterface, conf_desc->interface[i].altsetting[a].iInterface);
 			env->SetIntField(usb_intDescObj, usb_intDescFID_extralen, conf_desc->interface[i].altsetting[a].extra_length);
 			if (conf_desc->interface[i].altsetting[a].extra) {
-				jbyteArray jbExtraDesc = env->NewByteArray(conf_desc->interface[i].altsetting[a].extra_length);
-				env->SetByteArrayRegion(jbExtraDesc, 0, conf_desc->interface[i].altsetting[a].extra_length, (jbyte *) conf_desc->interface[i].altsetting[a].extra);
+				jbyteArray jbExtraDesc = to_byteArray(env, conf_desc->interface[i].altsetting[a].extra, conf_desc->interface[i].altsetting[a].extra_length);
 				env->SetObjectField(usb_intDescObj, usb_intDescFID_extra, jbExtraDesc);
 			} else {
 				env->SetObjectField(usb_intDescObj, usb_intDescFID_extra, NULL);
@@ -1172,8 +1171,7 @@ JNIEXPORT jobject JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1get_1ac
 				env->SetByteField(usb_epDescObj, usb_epDescFID_bSynchAddress, conf_desc->interface[i].altsetting[a].endpoint[e].bSynchAddress);
 				env->SetIntField(usb_epDescObj, usb_epDescFID_extralen, conf_desc->interface[i].altsetting[a].endpoint[e].extra_length);
 				if (conf_desc->interface[i].altsetting[a].endpoint[e].extra) {
-					jbyteArray jbExtraDesc = env->NewByteArray(conf_desc->interface[i].altsetting[a].endpoint[e].extra_length);
-					env->SetByteArrayRegion(jbExtraDesc, 0, conf_desc->interface[i].altsetting[a].endpoint[e].extra_length, (jbyte *) conf_desc->interface[i].altsetting[a].endpoint[e].extra);
+					jbyteArray jbExtraDesc = to_byteArray(env, conf_desc->interface[i].altsetting[a].endpoint[e].extra, conf_desc->interface[i].altsetting[a].endpoint[e].extra_length);
 					env->SetObjectField(usb_epDescObj, usb_epDescFID_extra, jbExtraDesc);
 				} else {
 					env->SetObjectField(usb_epDescObj, usb_epDescFID_extra, NULL);
@@ -1228,15 +1226,7 @@ JNIEXPORT jbyteArray JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1get_
 		return NULL;
 	}
 
-	jbyte *byteArrayElements;
-	jbyteArray bArray = env->NewByteArray(res);
-
-	byteArrayElements = env->GetByteArrayElements(bArray, NULL);
-	memcpy(byteArrayElements, data, res);
-	env->ReleaseByteArrayElements(bArray, byteArrayElements, 0);
-
-	return bArray;
-
+	return to_byteArray(env, data, res);
 }
 /********************************************************************************************
  * Class:     ch_ntb_inf_libusbJava_LibusbJava1
@@ -1309,16 +1299,12 @@ JNIEXPORT jbyteArray JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1cont
 	clearLibusbJavaError();
 	unsigned char *data;
 	libusb_transfer* trans = (libusb_transfer*) (unsigned long) transfernumber;
-	jbyte *byteArrayElements;
-	jbyteArray bArray = env->NewByteArray(trans->actual_length - 8);
+
+	if (trans == NULL)
+		return NULL;
 
 	data = libusb_control_transfer_get_data(trans);
-
-	byteArrayElements = env->GetByteArrayElements(bArray, NULL);
-	memcpy(byteArrayElements, data, trans->actual_length - 8);
-	env->ReleaseByteArrayElements(bArray, byteArrayElements, 0);
-
-	return bArray;
+	return to_byteArray(env, data, trans->actual_length - 8);
 }
 
 /*********************************************************************************************
@@ -1330,16 +1316,14 @@ JNIEXPORT jbyteArray JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1cont
 	clearLibusbJavaError();
 	unsigned char *data;
 	libusb_transfer* trans = (libusb_transfer*) (unsigned long) transfernumber;
-	jbyte *byteArrayElements;
-	jbyteArray bArray = env->NewByteArray(8);
 
-	data = (unsigned char*) libusb_control_transfer_get_setup(trans);
+	if (trans == NULL) {
+		return NULL;
+	}
 
-	byteArrayElements = env->GetByteArrayElements(bArray, NULL);
-	memcpy(byteArrayElements, data, 8);
-	env->ReleaseByteArrayElements(bArray, byteArrayElements, 0);
+	data = (unsigned char*)libusb_control_transfer_get_setup(trans);
 
-	return bArray;
+	return to_byteArray(env, data, 8);
 }
 /********************************************************************************************
  * Class:     ch_ntb_inf_libusbJava_LibusbJava1
@@ -1349,17 +1333,10 @@ JNIEXPORT jbyteArray JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1cont
 JNIEXPORT jbyteArray JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1fill_1control_1setup(JNIEnv *env, jclass obj, jint bmRequestType, jint bRequest, jint wValue, jint wIndex, jint wLength) {
 	clearLibusbJavaError();
 	unsigned char setup[8];
-	jbyte *byteArrayElements;
-	jbyteArray bArray = env->NewByteArray(8);
 
 	libusb_fill_control_setup(setup, bmRequestType, bRequest, wValue, wIndex, wLength);
 
-	byteArrayElements = env->GetByteArrayElements(bArray, NULL);
-	memcpy(byteArrayElements, setup, 8);
-	env->ReleaseByteArrayElements(bArray, byteArrayElements, 0);
-
-	return bArray;
-
+	return to_byteArray(env, setup, 8);
 }
 
 /********************************************************************************************
@@ -1428,25 +1405,28 @@ JNIEXPORT void JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1set_1iso_1
 
 JNIEXPORT jbyteArray JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1get_1iso_1packet_1buffer(JNIEnv *env, jclass obj, jlong transfernumber, jint packet) {
 	clearLibusbJavaError();
-	int size;
-	unsigned char *data;
+	int size = 0;
+	unsigned char *data = NULL;
 	libusb_transfer* transfer =	(libusb_transfer*) (unsigned long) transfernumber;
+
+	if (transfer == NULL) {
+		setLibusbJavaError("libusb_get_iso_packet_buffer: ilegal transfernumber");
+		return NULL;
+	}
 
 	if (packet < transfer->num_iso_packets) {
 		size = transfer->iso_packet_desc[packet].actual_length;
 	}
-	jbyteArray bArray = env->NewByteArray(size);
-	jbyte *byteArrayElements = env->GetByteArrayElements(bArray, NULL);
 
 	data = libusb_get_iso_packet_buffer((libusb_transfer*) (unsigned long) transfernumber, packet);
 	if (data == NULL) {
+		setLibusbJavaError("libusb_get_iso_packet_buffer: packet does not exist");
 		return NULL;
 	}
-	memcpy(byteArrayElements, data, size);
-	env->ReleaseByteArrayElements(bArray, byteArrayElements, 0);
 
-	return bArray;
+	return to_byteArray(env, data, size);
 }
+
 /********************************************************************************************
  * Class:     ch_ntb_inf_libusbJava_LibusbJava1
  * Method:    libusb_get_iso_packet_buffer_simple
@@ -1454,24 +1434,27 @@ JNIEXPORT jbyteArray JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1get_
  ********************************************************************************************/
 JNIEXPORT jbyteArray JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1get_1iso_1packet_1buffer_1simple(JNIEnv *env, jclass obj, jlong transfernumber, jint packet) {
 	clearLibusbJavaError();
-	int size;
-	unsigned char *data;
+	int size = 0;
+	unsigned char *data = NULL;
 	libusb_transfer* transfer =	(libusb_transfer*) (unsigned long) transfernumber;
+
+	if (transfer == NULL) {
+		setLibusbJavaError("libusb_get_iso_packet_buffer_simple: ilegal transfernumber");
+		return NULL;
+	}
 
 	if (packet < transfer->num_iso_packets) {
 		size = transfer->iso_packet_desc[packet].actual_length;
 	}
-	jbyteArray bArray = env->NewByteArray(size);
-	jbyte *byteArrayElements = env->GetByteArrayElements(bArray, NULL);
 
 	data = libusb_get_iso_packet_buffer_simple((libusb_transfer*) (unsigned long) transfernumber, packet);
+
 	if (data == NULL) {
+		setLibusbJavaError("libusb_get_iso_packet_buffer_simple: packet does not exist");
 		return NULL;
 	}
-	memcpy(byteArrayElements, data, size);
-	env->ReleaseByteArrayElements(bArray, byteArrayElements, 0);
 
-	return bArray;
+	return to_byteArray(env, data, size);
 }
 
 /********************************************************************************************
@@ -1794,3 +1777,40 @@ static void LIBUSB_CALL fd_removed_callback(int fd, void *user_data) {
 	((JNIEnv*) user_data)->CallVoidMethod(usb_cb_clazz, usb_fd_removed_cb_Mid,
 			(jint) fd);
 }
+
+/*!	\brief Turns a memory section into a java byte array that can be returned to the java
+ *         environment.
+ *
+ *	\param	env		Environment to create the array for
+ *	\param 	data	Pointer to the data to be put in the array
+ *	\param	len		[bytes] Length of the data to be put into the array
+ *
+ *	\return	The pointer to the newly created byte array. NULL if an error occured
+ *
+ *	\note	If NULL is returned, #libusbJavaError is set to a matching error string.
+ */
+static __inline jbyteArray JNICALL to_byteArray(JNIEnv *env, const void *data, size_t len)
+{
+	jbyteArray result = env->NewByteArray(len);
+
+	if (result != NULL) {
+		/* Using SetByteArrayRegion, we avoid that the JNI layer first copies the data already
+		 * available in the array in our space just to overwrite them. As we just allocated the
+		 * byte aray with a length of "len", the set operation can never fail. The check for an
+		 * exception can be omitted. */
+		env->SetByteArrayRegion(result, 0, len, (const signed char *)data);
+#if 0 /* No need to check for exceptions here... */
+		if (env->ExceptionOccurred()){
+			setLibusbJavaError("to_byteArray: unable to copy data to array");
+			env->DeleteLocalRef(result);
+			result = NULL;
+		}
+#endif
+	}
+	else {
+		setLibusbJavaError("to_byteArray: out of memory");
+	}
+
+	return result;
+}
+
