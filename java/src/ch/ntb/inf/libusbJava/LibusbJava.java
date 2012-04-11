@@ -16,6 +16,7 @@ package ch.ntb.inf.libusbJava;
  * projects use {@link LibusbJava1}
  * 
  */
+@Deprecated
 public class LibusbJava {
 
 	private static Usb_Bus busses = null;
