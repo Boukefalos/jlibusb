@@ -6,10 +6,13 @@
  * This library is covered by the LGPL, read LGPL.txt for details.
  * 
  * Changes:
+ * 12.04.2012 NTB / Ueli Niederer implemented exception handling
  * 18.10.2010 NTB / Roger Millischer change from native interface to compatibility layer
  * 
  */
 package ch.ntb.inf.libusbJava;
+
+import ch.ntb.inf.libusbJava.exceptions.LibusbError;
 
 /**
  * This class is used as compatibility layer for libusb 0.1 projects. For new
@@ -26,10 +29,12 @@ public class LibusbJava {
 	 * This list is not complete! For more error codes see the file 'errorno.h'
 	 * on your system.
 	 */
-	public static int ERROR_SUCCESS, ERROR_BAD_FILE_DESCRIPTOR,
-			ERROR_NO_SUCH_DEVICE_OR_ADDRESS, ERROR_BUSY,
-			ERROR_INVALID_PARAMETER, ERROR_TIMEDOUT, ERROR_IO_ERROR,
-			ERROR_NOT_ENOUGH_MEMORY;;
+	public static final int ERROR_SUCCESS = LibusbError.ERROR_NONE;
+	public static final int ERROR_BUSY = LibusbError.ERROR_BUSY;
+	public static final int ERROR_INVALID_PARAMETER = LibusbError.ERROR_INVALID_PARAM;
+	public static final int ERROR_TIMEDOUT = LibusbError.ERROR_TIMEOUT;
+	public static final int ERROR_IO_ERROR = LibusbError.ERROR_IO;
+	public static final int ERROR_NOT_ENOUGH_MEMORY = LibusbError.ERROR_NO_MEM;
 
 	/**
 	 * Sets the debugging level of libusb.<br>
@@ -51,17 +56,18 @@ public class LibusbJava {
 	 * functions.
 	 */
 	public static void usb_init() {
-		if (defaultCTX > 0) {
+		if (defaultCTX != 0) {
 			return;
 		}
-		defaultCTX = LibusbJava1.libusb_init();
+		try {
+			defaultCTX = LibusbJava1.libusb_init();
+		} catch (LibusbError e) {
+			System.err.println("LibusbJava-1.0 init failed with errorcode: "
+					+ e.getMessage());
+			e.printStackTrace();
+			defaultCTX = 0;
+		}
 		LibusbJava1.libusb_set_debug(0, 0);
-		if (defaultCTX < 0) {
-			System.out.println("LibusbJava-1.0 init failed with errorcode: "
-					+ defaultCTX);
-			return;
-		}
-
 	}
 
 	/**
@@ -78,7 +84,7 @@ public class LibusbJava {
 		boolean found = false;
 		Usb_Device devices = null;
 		devices = LibusbJava1.libusb_get_device_list(0);
-		
+
 		// no busses
 		if (devices.getDevnum() == -1) {
 			while (busses != null) {
@@ -286,8 +292,19 @@ public class LibusbJava {
 	 *         error has occurred.
 	 */
 	public static long usb_open(Usb_Device dev) {
-//		return LibusbJava1.libusb_open_device_with_vid_pid(defaultCTX, dev.getDescriptor().getIdVendor(), dev.getDescriptor().getIdProduct());
-		return LibusbJava1.libusb_open(dev);
+		long handle = 0;
+		
+		try {
+			handle = LibusbJava1.libusb_open(dev);
+		}
+		catch (LibusbError e) {
+			System.err.println("LibusbJava-1.0 init failed with errorcode: "
+					+ e.getMessage());
+			e.printStackTrace();
+			handle = 0;
+		}
+		
+		return handle;
 	}
 
 	/**
@@ -313,7 +330,15 @@ public class LibusbJava {
 	 * @return 0 on success or < 0 on error.
 	 */
 	public static int usb_set_configuration(long dev_handle, int configuration) {
-		return LibusbJava1.libusb_set_configuration(dev_handle, configuration);
+		int result = 0;
+		
+		try {
+			LibusbJava1.libusb_set_configuration(dev_handle, configuration);
+		} catch (LibusbError e) {
+			result = -1;
+		}
+		
+		return result;
 	}
 
 	/**
@@ -330,21 +355,37 @@ public class LibusbJava {
 		Usb_Device dev = LibusbJava1.libusb_get_device(dev_handle);
 		int nofInterfaces = LibusbJava1
 				.libusb_get_active_config_descriptor(dev).getBNumInterfaces();
-		int interface_number, success = -1;
+		int interface_number, success = 0;
 		for (interface_number = 0; interface_number < nofInterfaces; interface_number++) {
-			success = LibusbJava1.libusb_release_interface(dev_handle,
-					interface_number);
-			if (success >= 0) {
-				success = LibusbJava1.libusb_claim_interface(dev_handle,
-						interface_number);
-				if (success < 0) {
-					return success;
+			try
+			{
+				LibusbJava1.libusb_release_interface(dev_handle, interface_number);
+				
+				try
+				{
+					LibusbJava1.libusb_claim_interface(dev_handle, interface_number);
+				}
+				catch (LibusbError e)
+				{
+					return e.getErrorCode();
 				}
 				break;
 			}
+			catch (LibusbError e)
+			{
+				/* Move ahead. */
+			}
 		}
-		return LibusbJava1.libusb_set_interface_alt_setting(dev_handle,
-				interface_number, alternate);
+		
+		try {
+			LibusbJava1.libusb_set_interface_alt_setting(dev_handle, interface_number, alternate);
+			success = 0;
+		} 
+		catch (LibusbError e) {
+			success = -1;
+		}
+		
+		return success;
 	}
 
 	/**
@@ -357,8 +398,15 @@ public class LibusbJava {
 	 * @return 0 on success or < 0 on error.
 	 */
 	public static int usb_clear_halt(long dev_handle, int ep) {
-
-		return LibusbJava1.libusb_clear_halt(dev_handle, (short) ep);
+		int result = 0;
+		
+		try {
+			LibusbJava1.libusb_clear_halt(dev_handle, (short) ep);
+		} catch (LibusbError e) {
+			result = e.getErrorCode();
+		}
+		
+		return result;
 	}
 
 	/**
@@ -374,10 +422,22 @@ public class LibusbJava {
 	 * @return 0 on success or < 0 on error.
 	 */
 	public static int usb_reset(long dev_handle) {
-		LibusbJava1.libusb_claim_interface(dev_handle, 0);
-		int res = LibusbJava1.libusb_reset_device(dev_handle);
-		LibusbJava1.libusb_release_interface(dev_handle, 0);
-		LibusbJava1.libusb_close(dev_handle);
+		int res = 0;
+		
+		try {
+			LibusbJava1.libusb_claim_interface(dev_handle, 0);
+			try {
+				LibusbJava1.libusb_reset_device(dev_handle);
+			}
+			catch (LibusbError e) {
+				res = e.getErrorCode();
+			}
+			LibusbJava1.libusb_release_interface(dev_handle, 0);
+			LibusbJava1.libusb_close(dev_handle);
+		} catch (LibusbError e) {
+			/* Ignore all errors of these calls */
+		}
+		
 		return res;
 
 	}
@@ -397,7 +457,15 @@ public class LibusbJava {
 	 * @return 0 on success or < 0 on error.
 	 */
 	public static int usb_claim_interface(long dev_handle, int interface_) {
-		return LibusbJava1.libusb_claim_interface(dev_handle, interface_);
+		int result = 0;
+		
+		try {
+			LibusbJava1.libusb_claim_interface(dev_handle, interface_);
+		} catch (LibusbError e) {
+			result = e.getErrorCode();
+		}
+		
+		return result;
 	}
 
 	/**
@@ -411,7 +479,15 @@ public class LibusbJava {
 	 * @return 0 on success or < 0 on error.
 	 */
 	public static int usb_release_interface(long dev_handle, int interface_) {
-		return LibusbJava1.libusb_release_interface(dev_handle, interface_);
+		int result = 0;
+		
+		try {
+			LibusbJava1.libusb_release_interface(dev_handle, interface_);
+		} catch (LibusbError e) {
+			result = e.getErrorCode();
+		}
+		
+		return result;
 	}
 
 	// Control Transfers
@@ -448,8 +524,15 @@ public class LibusbJava {
 	 * @return the descriptor String or null
 	 */
 	public static String usb_get_string(long dev_handle, int index, int langid) {
-
-		return LibusbJava1.libusb_get_string_descriptor(dev_handle, (short) index, langid, 255);
+		String result;
+		
+		try {
+			result = LibusbJava1.libusb_get_string_descriptor(dev_handle, (short) index, langid, 255);
+		} catch (LibusbError e) {
+			result = null;
+		}
+		
+		return result;
 	}
 
 	/**
@@ -463,7 +546,15 @@ public class LibusbJava {
 	 * @return the descriptor String or null
 	 */
 	public static String usb_get_string_simple(long dev_handle, int index) {
-		return LibusbJava1.libusb_get_string_descriptor_ascii(dev_handle,(short) index, 255);
+		String result = null;
+		
+		try {
+			result = LibusbJava1.libusb_get_string_descriptor_ascii(dev_handle,(short) index, 255);
+		} catch (LibusbError e) {
+			result = null;
+		}
+		
+		return result;
 	}
 
 	/**
@@ -484,7 +575,14 @@ public class LibusbJava {
 	 */
 	public static byte[] usb_get_descriptor(long dev_handle, byte type,
 			byte index, int size) {
-		return LibusbJava1.libusb_get_descriptor(dev_handle, type, index, size);
+		byte[] result = null;
+		
+		try {
+			result = LibusbJava1.libusb_get_descriptor(dev_handle, type, index, size);
+		} catch (LibusbError e) {
+		}
+		
+		return result;
 	}
 
 	/**
@@ -534,8 +632,16 @@ public class LibusbJava {
 	 */
 	public static int usb_bulk_write(long dev_handle, int ep, byte[] bytes,
 			int size, int timeout) {
-		return LibusbJava1.libusb_bulk_transfer(dev_handle, (byte) ep, bytes,
-				size, timeout);
+		int result = LibusbError.ERROR_OTHER;
+
+		try {
+			result = LibusbJava1.libusb_bulk_transfer(dev_handle, (byte) ep,
+					bytes, size, timeout);
+		} catch (LibusbError e) {
+			result = e.getErrorCode();
+		}
+
+		return result;
 	}
 
 	/**
@@ -551,8 +657,16 @@ public class LibusbJava {
 	 */
 	public static int usb_bulk_read(long dev_handle, int ep, byte[] bytes,
 			int size, int timeout) {
-		return LibusbJava1.libusb_bulk_transfer(dev_handle, (byte) ep, bytes,
-				size, timeout);
+		int result = LibusbError.ERROR_OTHER;
+
+		try {
+			result = LibusbJava1.libusb_bulk_transfer(dev_handle, (byte) ep,
+					bytes, size, timeout);
+		} catch (LibusbError e) {
+			result = e.getErrorCode();
+		}
+
+		return result;
 	}
 
 	// Interrupt Transfers
@@ -569,8 +683,16 @@ public class LibusbJava {
 	 */
 	public static int usb_interrupt_write(long dev_handle, int ep,
 			byte[] bytes, int size, int timeout) {
-		return LibusbJava1.libusb_interrupt_transfer(dev_handle, (byte) ep,
-				bytes, size, timeout);
+		int result = LibusbError.ERROR_OTHER;
+
+		try {
+			result = LibusbJava1.libusb_interrupt_transfer(dev_handle, (byte) ep, 
+					bytes, size, timeout);
+		} catch (LibusbError e) {
+			result = e.getErrorCode();
+		}
+
+		return result;
 	}
 
 	/**
@@ -586,8 +708,16 @@ public class LibusbJava {
 	 */
 	public static int usb_interrupt_read(long dev_handle, int ep, byte[] bytes,
 			int size, int timeout) {
-		return LibusbJava1.libusb_interrupt_transfer(dev_handle, (byte) ep,
-				bytes, size, timeout);
+		int result = LibusbError.ERROR_OTHER;
+
+		try {
+			result = LibusbJava1.libusb_interrupt_transfer(dev_handle, (byte) ep, 
+					bytes, size, timeout);
+		} catch (LibusbError e) {
+			result = e.getErrorCode();
+		}
+
+		return result;
 	}
 
 	/**

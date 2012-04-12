@@ -106,57 +106,57 @@ JNIEXPORT jobject JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1get_1de
 /*
  * Class:     ch_ntb_inf_libusbJava_LibusbJava1
  * Method:    libusb_get_configuration
- * Signature: (J)B
+ * Signature: (J)I
  */
-JNIEXPORT jbyte JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1get_1configuration
+JNIEXPORT jint JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1get_1configuration
   (JNIEnv *, jclass, jlong);
 
 /*
  * Class:     ch_ntb_inf_libusbJava_LibusbJava1
  * Method:    libusb_set_configuration
- * Signature: (JI)I
+ * Signature: (JI)V
  */
-JNIEXPORT jint JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1set_1configuration
+JNIEXPORT void JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1set_1configuration
   (JNIEnv *, jclass, jlong, jint);
 
 /*
  * Class:     ch_ntb_inf_libusbJava_LibusbJava1
  * Method:    libusb_claim_interface
- * Signature: (JI)I
+ * Signature: (JI)V
  */
-JNIEXPORT jint JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1claim_1interface
+JNIEXPORT void JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1claim_1interface
   (JNIEnv *, jclass, jlong, jint);
 
 /*
  * Class:     ch_ntb_inf_libusbJava_LibusbJava1
  * Method:    libusb_release_interface
- * Signature: (JI)I
+ * Signature: (JI)V
  */
-JNIEXPORT jint JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1release_1interface
+JNIEXPORT void JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1release_1interface
   (JNIEnv *, jclass, jlong, jint);
 
 /*
  * Class:     ch_ntb_inf_libusbJava_LibusbJava1
  * Method:    libusb_set_interface_alt_setting
- * Signature: (JII)I
+ * Signature: (JII)V
  */
-JNIEXPORT jint JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1set_1interface_1alt_1setting
+JNIEXPORT void JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1set_1interface_1alt_1setting
   (JNIEnv *, jclass, jlong, jint, jint);
 
 /*
  * Class:     ch_ntb_inf_libusbJava_LibusbJava1
  * Method:    libusb_clear_halt
- * Signature: (JS)I
+ * Signature: (JS)V
  */
-JNIEXPORT jint JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1clear_1halt
+JNIEXPORT void JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1clear_1halt
   (JNIEnv *, jclass, jlong, jshort);
 
 /*
  * Class:     ch_ntb_inf_libusbJava_LibusbJava1
  * Method:    libusb_reset_device
- * Signature: (J)I
+ * Signature: (J)V
  */
-JNIEXPORT jint JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1reset_1device
+JNIEXPORT void JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1reset_1device
   (JNIEnv *, jclass, jlong);
 
 /*
@@ -170,17 +170,17 @@ JNIEXPORT jint JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1kernel_1dr
 /*
  * Class:     ch_ntb_inf_libusbJava_LibusbJava1
  * Method:    libusb_detach_kernel_driver
- * Signature: (JI)I
+ * Signature: (JI)V
  */
-JNIEXPORT jint JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1detach_1kernel_1driver
+JNIEXPORT void JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1detach_1kernel_1driver
   (JNIEnv *, jclass, jlong, jint);
 
 /*
  * Class:     ch_ntb_inf_libusbJava_LibusbJava1
  * Method:    libusb_attach_kernel_driver
- * Signature: (JI)I
+ * Signature: (JI)V
  */
-JNIEXPORT jint JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1attach_1kernel_1driver
+JNIEXPORT void JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1attach_1kernel_1driver
   (JNIEnv *, jclass, jlong, jint);
 
 /*
@@ -234,17 +234,17 @@ JNIEXPORT void JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1free_1tran
 /*
  * Class:     ch_ntb_inf_libusbJava_LibusbJava1
  * Method:    libusb_submit_transfer
- * Signature: (J)I
+ * Signature: (J)V
  */
-JNIEXPORT jint JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1submit_1transfer
+JNIEXPORT void JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1submit_1transfer
   (JNIEnv *, jclass, jlong);
 
 /*
  * Class:     ch_ntb_inf_libusbJava_LibusbJava1
  * Method:    libusb_cancel_transfer
- * Signature: (J)I
+ * Signature: (J)V
  */
-JNIEXPORT jint JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1cancel_1transfer
+JNIEXPORT void JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1cancel_1transfer
   (JNIEnv *, jclass, jlong);
 
 /*
@@ -394,25 +394,25 @@ JNIEXPORT jint JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1wait_1for_
 /*
  * Class:     ch_ntb_inf_libusbJava_LibusbJava1
  * Method:    libusb_handle_events_timeout
- * Signature: (JJ)I
+ * Signature: (JJ)V
  */
-JNIEXPORT jint JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1handle_1events_1timeout
+JNIEXPORT void JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1handle_1events_1timeout
   (JNIEnv *, jclass, jlong, jlong);
 
 /*
  * Class:     ch_ntb_inf_libusbJava_LibusbJava1
  * Method:    libusb_handle_events
- * Signature: (J)I
+ * Signature: (J)V
  */
-JNIEXPORT jint JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1handle_1events
+JNIEXPORT void JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1handle_1events
   (JNIEnv *, jclass, jlong);
 
 /*
  * Class:     ch_ntb_inf_libusbJava_LibusbJava1
  * Method:    libusb_handle_events_locked
- * Signature: (JJ)I
+ * Signature: (JJ)V
  */
-JNIEXPORT jint JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1handle_1events_1locked
+JNIEXPORT void JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1handle_1events_1locked
   (JNIEnv *, jclass, jlong, jlong);
 
 /*
@@ -478,6 +478,14 @@ JNIEXPORT jint JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1interrupt_
  */
 JNIEXPORT jstring JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1strerror
   (JNIEnv *, jclass);
+
+/*
+ * Class:     ch_ntb_inf_libusbJava_LibusbJava1
+ * Method:    libusb_exceptionTest
+ * Signature: (I)V
+ */
+JNIEXPORT void JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1exceptionTest
+  (JNIEnv *, jclass, jint);
 
 #ifdef __cplusplus
 }

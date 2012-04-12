@@ -274,7 +274,7 @@ public class UsbTreeModel implements TreeModel, TreeSelectionListener {
 						if (tmpDevDesc.equals(devDesc)) {
 							long handle = LibusbJava.usb_open(dev);
 							sb.append("\nString descriptors\n");
-							if (handle <= 0) {
+							if (handle == 0) {
 								sb.append("\terror opening the device\n");
 								break;
 							}
@@ -348,7 +348,7 @@ public class UsbTreeModel implements TreeModel, TreeSelectionListener {
 								&& (confDesc.getIConfiguration() > 0)) {
 							long handle = LibusbJava.usb_open(dev);
 							sb.append("\nString descriptors\n");
-							if (handle <= 0) {
+							if (handle == 0) {
 								sb.append("\terror opening the device\n");
 								break;
 							}
@@ -426,7 +426,7 @@ public class UsbTreeModel implements TreeModel, TreeSelectionListener {
 										&& (intDesc.getIInterface() > 0)) {
 									long handle = LibusbJava.usb_open(dev);
 									sb.append("\nString descriptors\n");
-									if (handle <= 0) {
+									if (handle == 0) {
 										sb
 												.append("\terror opening the device\n");
 										break;

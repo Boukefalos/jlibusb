@@ -223,9 +223,9 @@ public class Device {
 
 		if (dev != null) {
 			long res = LibusbJava.usb_open(dev);
-			if (res <= 0) {
+			if (res == 0) {
 				throw new USBException("LibusbJava.usb_open: "
-						+ LibusbJava.usb_strerror() + " (" + res + ")");
+						+ LibusbJava.usb_strerror());
 			}
 			usbDevHandle = res;
 		}

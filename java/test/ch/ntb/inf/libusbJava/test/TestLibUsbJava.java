@@ -120,7 +120,7 @@ public class TestLibUsbJava {
 
 		udev = LibusbJava.usb_open(dev);
 
-		if (udev <= 0) {
+		if (udev != 0) {
 			if (dev.getDescriptor().getIManufacturer() != 0) {
 				mfr = LibusbJava.usb_get_string_simple(udev, dev
 						.getDescriptor().getIManufacturer());

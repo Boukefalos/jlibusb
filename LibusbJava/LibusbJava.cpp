@@ -1,9 +1,23 @@
-/********************************************************************************************
- * Java libusb1.0 wrapper
- * Copyright (c) 2010-2011 Roger Millischer <roger.millischer at ntb.ch>
+/*!	\file
+ * 	\brief Java libusb1.0 wrapper
  *
- * This libary is covered by the LGPL, read LGPL.txt for details
- *******************************************************************************************/
+ * 	\copyright	2010-2012 NTB Interstate University of Applied Sciences of Technology Buchs
+ * 				This libary is covered by the LGPL, read LGPL.txt for details
+ *
+ * 	\author 	Roger Millischer <roger.millischer at ntb.ch> (original author)
+ * 	\author		Ueli Niederer <ueli.niederer at ntb.ch> (modifications and enhancements)
+ *
+ * 	\todo Currently all the pointers and handles passed to and received from libusb are coded
+ * 		  in long values to get them in JVM.
+ * 		  Clebert Suconic ( http://planet.jboss.org/post/pointers_in_jni_c ) suggests a
+ * 		  possibly more elegant way to deal with this issue:
+ *			Make use of the ByteBuffer-Class delivered by with the native IO package.
+ *			(java.nio). As this class is made to store the start pointer to native buffers
+ *			we could create a "ByteBuffer" of length 0 where the start address represents
+ *			e.g. the handle.  This can  be done using the following JNI Call:
+ *			  env->NewDirectByteBuffer(myPointer, 0); // size = 0, you don't want anyone to change it
+ */
+
 /********************************************************************************************
  *
  *		Includes
@@ -59,6 +73,8 @@ static void LIBUSB_CALL fd_removed_callback(int fd, void *user_data);
  *
  *******************************************************************************************/
 static __inline jbyteArray 	JNICALL 	to_byteArray(JNIEnv *env, const void *data, size_t len);
+static __inline void 		JNICALL 	ThrowIfUnsuccessful(JNIEnv *env, int libusb_result);
+static __inline void 		JNICALL		ThrowLibusbError(JNIEnv *env, jint code);
 
 /********************************************************************************************
  *
@@ -695,13 +711,17 @@ JNIEXPORT void JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1unref_1dev
  ********************************************************************************************/
 JNIEXPORT jlong JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1open( JNIEnv *env, jclass obj, jobject dev) {
 	clearLibusbJavaError();
-	libusb_device_handle *handle;
+	libusb_device_handle *handle = NULL;
 	libusb_device *libusb_dev =	(libusb_device *) (unsigned long) env->GetLongField(dev, usb_devFID_devStructAddr);
 	int res = libusb_open(libusb_dev, &handle);
-	if(!res){
-		return (jlong) handle;
+
+	if(res != 0)
+	{
+		ThrowLibusbError(env, res);
+		handle = NULL;
 	}
-	return (jlong)res;
+
+	return (jlong)handle;
 }
 
 /********************************************************************************************
@@ -940,76 +960,82 @@ JNIEXPORT jobject JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1get_1de
 /********************************************************************************************
  * Class:     ch_ntb_inf_libusbJava_LibusbJava1
  * Method:    libusb_get_configuration
- * Signature: (J)B
+ * Signature: (J)I
  ********************************************************************************************/
-JNIEXPORT jbyte JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1get_1configuration(JNIEnv *env, jclass obj, jlong handle) {
-	int config;
+JNIEXPORT jint JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1get_1configuration(JNIEnv *env, jclass obj, jlong handle) {
+	int config = 0;
+	int libusb_result = 0;
+
 	clearLibusbJavaError();
-	if (libusb_get_configuration((libusb_device_handle*) (unsigned long) handle, &config)) {
+	libusb_result = libusb_get_configuration((libusb_device_handle*) (unsigned long) handle, &config);
+
+	if (libusb_result != 0) {
 		setLibusbJavaError("shared library error: get_configuration failed");
-		return -1;
+		ThrowLibusbError(env, libusb_result);
+		config = 0;
 	}
+
 	return config;
 }
 
 /********************************************************************************************
  * Class:     ch_ntb_inf_libusbJava_LibusbJava1
  * Method:    libusb_set_configuration
- * Signature: (JI)I
+ * Signature: (JI)V
  ********************************************************************************************/
-JNIEXPORT jint JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1set_1configuration(JNIEnv *env, jclass obj, jlong handle, jint config) {
+JNIEXPORT void JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1set_1configuration(JNIEnv *env, jclass obj, jlong handle, jint config) {
 	clearLibusbJavaError();
-	return libusb_set_configuration((libusb_device_handle*) (unsigned long) handle, config);
+	ThrowIfUnsuccessful(env, libusb_set_configuration((libusb_device_handle*) (unsigned long) handle, config));
 }
 
 /********************************************************************************************
  * Class:     ch_ntb_inf_libusbJava_LibusbJava1
  * Method:    libusb_claim_interface
- * Signature: (JI)I
+ * Signature: (JI)V
  ********************************************************************************************/
-JNIEXPORT jint JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1claim_1interface(JNIEnv *env, jclass obj, jlong handle, jint iNumber) {
+JNIEXPORT void JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1claim_1interface(JNIEnv *env, jclass obj, jlong handle, jint iNumber) {
 	clearLibusbJavaError();
-	return libusb_claim_interface((libusb_device_handle*) (unsigned long) handle, iNumber);
+	ThrowIfUnsuccessful(env, libusb_claim_interface((libusb_device_handle*) (unsigned long) handle, iNumber));
 }
 
 /********************************************************************************************
  * Class:     ch_ntb_inf_libusbJava_LibusbJava1
  * Method:    libusb_release_interface
- * Signature: (JI)I
+ * Signature: (JI)V
  ********************************************************************************************/
-JNIEXPORT jint JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1release_1interface(JNIEnv *env, jclass obj, jlong handle, jint iNumber) {
+JNIEXPORT void JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1release_1interface(JNIEnv *env, jclass obj, jlong handle, jint iNumber) {
 	clearLibusbJavaError();
-	return libusb_release_interface((libusb_device_handle*) (unsigned long) handle, iNumber);
+	ThrowIfUnsuccessful(env, libusb_release_interface((libusb_device_handle*) (unsigned long) handle, iNumber));
 }
 
 /********************************************************************************************
  * Class:     ch_ntb_inf_libusbJava_LibusbJava1
  * Method:    libusb_set_interface_alt_setting
- * Signature: (JII)I
+ * Signature: (JII)V
  ********************************************************************************************/
-JNIEXPORT jint JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1set_1interface_1alt_1setting(JNIEnv *env, jclass obj, jlong handle, jint iNumber, jint altSet) {
+JNIEXPORT void JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1set_1interface_1alt_1setting(JNIEnv *env, jclass obj, jlong handle, jint iNumber, jint altSet) {
 	clearLibusbJavaError();
-	return libusb_set_interface_alt_setting((libusb_device_handle*) (unsigned long) handle, iNumber, altSet);
+	ThrowIfUnsuccessful(env, libusb_set_interface_alt_setting((libusb_device_handle*) (unsigned long) handle, iNumber, altSet));
 }
 
 /********************************************************************************************
  * Class:     ch_ntb_inf_libusbJava_LibusbJava1
  * Method:    libusb_clear_halt
- * Signature: (JS)I
+ * Signature: (JS)V
  ********************************************************************************************/
-JNIEXPORT jint JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1clear_1halt(JNIEnv *env, jclass obj, jlong handle, jshort ep) {
+JNIEXPORT void JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1clear_1halt(JNIEnv *env, jclass obj, jlong handle, jshort ep) {
 	clearLibusbJavaError();
-	return libusb_clear_halt((libusb_device_handle*) (unsigned long) handle, ep);
+	ThrowIfUnsuccessful(env, libusb_clear_halt((libusb_device_handle*) (unsigned long) handle, ep));
 }
 
 /********************************************************************************************
  * Class:     ch_ntb_inf_libusbJava_LibusbJava1
  * Method:    libusb_reset_device
- * Signature: (J)I
+ * Signature: (J)V
  ********************************************************************************************/
-JNIEXPORT jint JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1reset_1device(JNIEnv *env, jclass obj, jlong handle) {
+JNIEXPORT void JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1reset_1device(JNIEnv *env, jclass obj, jlong handle) {
 	clearLibusbJavaError();
-	return libusb_reset_device((libusb_device_handle*) (unsigned long) handle);
+	ThrowIfUnsuccessful(env, libusb_reset_device((libusb_device_handle*) (unsigned long) handle));
 }
 
 /********************************************************************************************
@@ -1018,28 +1044,38 @@ JNIEXPORT jint JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1reset_1dev
  * Signature: (JI)I
  ********************************************************************************************/
 JNIEXPORT jint JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1kernel_1driver_1active(JNIEnv *env, jclass obj, jlong handle, jint iNumber) {
+	int libusb_result = 0;
+
 	clearLibusbJavaError();
-	return libusb_kernel_driver_active((libusb_device_handle*) (unsigned long) handle, iNumber);
+	libusb_result = libusb_kernel_driver_active((libusb_device_handle*) (unsigned long) handle, iNumber);
+
+	if (libusb_result < 0)
+	{
+		ThrowLibusbError(env, libusb_result);
+		libusb_result = 0;
+	}
+
+	return libusb_result;
 }
 
 /********************************************************************************************
  * Class:     ch_ntb_inf_libusbJava_LibusbJava1
  * Method:    libusb_detach_kernel_driver
- * Signature: (JI)I
+ * Signature: (JI)V
  ********************************************************************************************/
-JNIEXPORT jint JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1detach_1kernel_1driver(JNIEnv *env, jclass obj, jlong handle, jint iNumber) {
+JNIEXPORT void JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1detach_1kernel_1driver(JNIEnv *env, jclass obj, jlong handle, jint iNumber) {
 	clearLibusbJavaError();
-	return libusb_detach_kernel_driver((libusb_device_handle*) (unsigned long) handle, iNumber);
+	ThrowIfUnsuccessful(env, libusb_detach_kernel_driver((libusb_device_handle*) (unsigned long) handle, iNumber));
 }
 
 /********************************************************************************************
  * Class:     ch_ntb_inf_libusbJava_LibusbJava1
  * Method:    libusb_attach_kernel_driver
- * Signature: (JI)I
+ * Signature: (JI)V
  ********************************************************************************************/
-JNIEXPORT jint JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1attach_1kernel_1driver(JNIEnv *env, jclass obj, jlong handle, jint iNumber) {
+JNIEXPORT void JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1attach_1kernel_1driver(JNIEnv *env, jclass obj, jlong handle, jint iNumber) {
 	clearLibusbJavaError();
-	return libusb_attach_kernel_driver((libusb_device_handle*) (unsigned long) handle, iNumber);
+	ThrowIfUnsuccessful(env, libusb_attach_kernel_driver((libusb_device_handle*) (unsigned long) handle, iNumber));
 }
 
 /********************************************************************************************
@@ -1196,13 +1232,20 @@ JNIEXPORT jstring JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1get_1st
 	jstring string;
 	int res = 0;
 	clearLibusbJavaError();
-	unsigned char data[(int)length];
+	unsigned char data[(int)length + 1];
+
 	res = libusb_get_string_descriptor_ascii((libusb_device_handle*) (unsigned long) handle, desc_index, data, (int)length);
-	if (res > 0) {
+
+	if (res >= 0)
+	{
+		data[res] = '\0';
 		string = env->NewStringUTF((const char*)data);
-	} else {
+	}
+	else
+	{
 		setLibusbJavaError("get_string_descriptor_ascii: retrieve String failed");
 		string = NULL;
+		ThrowLibusbError(env, res);
 	}
 	return string;
 }
@@ -1223,6 +1266,7 @@ JNIEXPORT jbyteArray JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1get_
 	res = libusb_get_descriptor((libusb_device_handle*) (unsigned long) handle,	desc_type, desc_index, data, size);
 	if (res < 0) {
 		setLibusbJavaError("libusb_get_descriptor: retrieve data failed");
+		ThrowLibusbError(env, res);
 		return NULL;
 	}
 
@@ -1238,16 +1282,19 @@ JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1get_1string_1descriptor(J
 	clearLibusbJavaError();
 	int res;
 	jstring string;
-	unsigned char data[(int)size];
+	unsigned char data[(int)size + 1];
 
 	res = libusb_get_string_descriptor((libusb_device_handle*) (unsigned long) handle, desc_index, langid, data, size);
-	res = 0;
-	if (res > 0) {
+
+	if (res >= 0) {
+		data[res] = '\0';
 		string = env->NewStringUTF((const char*) data);
 	} else {
 		setLibusbJavaError("get_string_descriptor: retrieve String failed");
 		string = NULL;
+		ThrowLibusbError(env, res);
 	}
+
 	return string;
 
 }
@@ -1274,21 +1321,21 @@ JNIEXPORT void JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1free_1tran
 /********************************************************************************************
  * Class:     ch_ntb_inf_libusbJava_LibusbJava1
  * Method:    libusb_submit_transfer
- * Signature: (J)I
+ * Signature: (J)V
  ********************************************************************************************/
-JNIEXPORT jint JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1submit_1transfer(JNIEnv *env, jclass obj, jlong transfernumber) {
+JNIEXPORT void JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1submit_1transfer(JNIEnv *env, jclass obj, jlong transfernumber) {
 	clearLibusbJavaError();
-	return libusb_submit_transfer((libusb_transfer*) (unsigned long) transfernumber);
+	ThrowIfUnsuccessful(env, libusb_submit_transfer((libusb_transfer*) (unsigned long) transfernumber));
 }
 
 /********************************************************************************************
  * Class:     ch_ntb_inf_libusbJava_LibusbJava1
  * Method:    libusb_cancel_transfer
- * Signature: (J)I
+ * Signature: (J)V
  ********************************************************************************************/
-JNIEXPORT jint JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1cancel_1transfer(JNIEnv *env, jclass obj, jlong transfernumber) {
+JNIEXPORT void JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1cancel_1transfer(JNIEnv *env, jclass obj, jlong transfernumber) {
 	clearLibusbJavaError();
-	return libusb_cancel_transfer((libusb_transfer*) (unsigned long) transfernumber);
+	ThrowIfUnsuccessful(env, libusb_cancel_transfer((libusb_transfer*) (unsigned long) transfernumber));
 }
 /********************************************************************************************
  * Class:     ch_ntb_inf_libusbJava_LibusbJava1
@@ -1304,7 +1351,7 @@ JNIEXPORT jbyteArray JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1cont
 		return NULL;
 
 	data = libusb_control_transfer_get_data(trans);
-	return to_byteArray(env, data, trans->actual_length - 8);
+	return to_byteArray(env, data, trans->actual_length - LIBUSB_CONTROL_SETUP_SIZE );
 }
 
 /*********************************************************************************************
@@ -1547,43 +1594,50 @@ JNIEXPORT jint JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1wait_1for_
 /********************************************************************************************
  * Class:     ch_ntb_inf_libusbJava_LibusbJava1
  * Method:    libusb_handle_events_timeout
- * Signature: (JJ)I
+ * Signature: (JJ)V
  ********************************************************************************************/
-JNIEXPORT jint JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1handle_1events_1timeout(JNIEnv *env, jclass obj, jlong ctx, jlong timevalue) {
+JNIEXPORT void JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1handle_1events_1timeout(JNIEnv *env, jclass obj, jlong ctx, jlong timevalue) {
 	clearLibusbJavaError();
-	if (timevalue) {
+	if (timevalue != 0)
+	{
 		timeval tv;
 		tv.tv_sec = timevalue;
 		tv.tv_usec = 0;
-		return libusb_handle_events_timeout((libusb_context*) (unsigned long) ctx, &tv);
+		ThrowIfUnsuccessful(env, libusb_handle_events_timeout((libusb_context*) (unsigned long) ctx, &tv));
 	}
-	return libusb_handle_events_timeout((libusb_context*) (unsigned long) ctx, NULL);
+	else
+	{
+		ThrowIfUnsuccessful(env, libusb_handle_events_timeout((libusb_context*) (unsigned long) ctx, NULL));
+	}
 }
 
 /********************************************************************************************
  * Class:     ch_ntb_inf_libusbJava_LibusbJava1
  * Method:    libusb_handle_events
- * Signature: (J)I
+ * Signature: (J)V
  ********************************************************************************************/
-JNIEXPORT jint JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1handle_1events(JNIEnv *env, jclass obj, jlong ctx) {
+JNIEXPORT void JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1handle_1events(JNIEnv *env, jclass obj, jlong ctx) {
 	clearLibusbJavaError();
-	return libusb_handle_events((libusb_context*) (unsigned long) ctx);
+	ThrowIfUnsuccessful(env, libusb_handle_events((libusb_context*) (unsigned long) ctx));
 }
 
 /********************************************************************************************
  * Class:     ch_ntb_inf_libusbJava_LibusbJava1
  * Method:    libusb_handle_events_locked
- * Signature: (JJ)I
+ * Signature: (JJ)V
  ********************************************************************************************/
-JNIEXPORT jint JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1handle_1events_1locked(JNIEnv *env, jclass obj, jlong ctx, jlong timevalue) {
+JNIEXPORT void JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1handle_1events_1locked(JNIEnv *env, jclass obj, jlong ctx, jlong timevalue) {
 	clearLibusbJavaError();
 	if (timevalue) {
 		timeval tv;
 		tv.tv_sec = timevalue;
 		tv.tv_usec = 0;
-		return libusb_handle_events_locked((libusb_context*) (unsigned long) ctx, &tv);
+		ThrowIfUnsuccessful(env, libusb_handle_events_locked((libusb_context*) (unsigned long) ctx, &tv));
 	}
-	return libusb_handle_events_locked((libusb_context*) (unsigned long) ctx, NULL);
+	else
+	{
+		ThrowIfUnsuccessful(env, libusb_handle_events_locked((libusb_context*) (unsigned long) ctx, NULL));
+	}
 }
 
 /********************************************************************************************
@@ -1604,20 +1658,26 @@ JNIEXPORT jint JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1pollfds_1h
 JNIEXPORT jint JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1get_1next_1timeout(JNIEnv *env, jclass obj, jlong ctx) {
 	clearLibusbJavaError();
 	int res;
-	long time;
-	timeval* tv = (timeval*) malloc(sizeof(struct timeval));
+	timeval tv;
 
-	res = libusb_get_next_timeout((libusb_context*) (unsigned long) ctx, tv);
+	/*!	\todo	Is this code working correctly if we use it in a 64-Bit environment? Actually
+	 * 			it's unlikely to have a timeout of more than 2^(31)-1 seconds. But it is a
+	 * 			possible value. */
+	res = libusb_get_next_timeout((libusb_context*) (unsigned long) ctx, &tv);
 
-	if (res > 0) {
-		time = tv->tv_sec;
-		free(tv);
-		return time;
+	if (res > 0)
+	{
+		res = tv.tv_sec;
 	}
-	free(tv);
-	if (res == 0) {
-		return -999;
+	else if (res == 0) {
+		res = -1;
 	}
+	else
+	{
+		ThrowLibusbError(env, res);
+		res = -2;
+	}
+
 	return res;
 }
 
@@ -1628,11 +1688,14 @@ JNIEXPORT jint JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1get_1next_
  ********************************************************************************************/
 JNIEXPORT void JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1set_1pollfd_1notifiers(JNIEnv *env, jclass obj, jlong ctx, jboolean remove) {
 	clearLibusbJavaError();
-	if (remove) {
+	if (remove)
+	{
 		libusb_set_pollfd_notifiers((libusb_context*) (unsigned long) ctx, NULL, NULL, env);
-		return;
 	}
-	libusb_set_pollfd_notifiers((libusb_context*) (unsigned long) ctx, fd_added_callback, fd_removed_callback, env);
+	else
+	{
+		libusb_set_pollfd_notifiers((libusb_context*) (unsigned long) ctx, fd_added_callback, fd_removed_callback, env);
+	}
 }
 
 /********************************************************************************************
@@ -1697,16 +1760,20 @@ JNIEXPORT jint JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1control_1t
  ********************************************************************************************/
 JNIEXPORT jint JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1bulk_1transfer(JNIEnv *env, jclass obj, jlong handle, jbyte endpoint, jbyteArray buffer, jint length, jint timeout) {
 	clearLibusbJavaError();
-	int res, actual_length;
-	unsigned char* data;
+	int libusb_result = 0;
+	int bytes_transferred = 0;
+	unsigned char* data = (unsigned char*) env->GetByteArrayElements(buffer, NULL);
 
-	data = (unsigned char*) env->GetByteArrayElements(buffer, NULL);
-	res = libusb_bulk_transfer((libusb_device_handle*) (unsigned long) handle,	endpoint, data, length, &actual_length, timeout);
+	libusb_result = libusb_bulk_transfer((libusb_device_handle*) (unsigned long) handle,	endpoint, data, length, &bytes_transferred, timeout);
 	env->ReleaseByteArrayElements(buffer, (jbyte*) data, 0);
-	if (res) {
-		return res;
+
+	if (libusb_result != 0)
+	{
+		ThrowLibusbError(env, libusb_result);
+		bytes_transferred = 0;
 	}
-	return actual_length;
+
+	return bytes_transferred;
 }
 
 /********************************************************************************************
@@ -1716,16 +1783,19 @@ JNIEXPORT jint JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1bulk_1tran
  ********************************************************************************************/
 JNIEXPORT jint JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1interrupt_1transfer(JNIEnv *env, jclass obj, jlong handle, jbyte endpoint, jbyteArray buffer, jint length, jint timeout) {
 	clearLibusbJavaError();
-	int res, actual_length;
-	unsigned char* data;
-
-	data = (unsigned char*) env->GetByteArrayElements(buffer, NULL);
-	res = libusb_interrupt_transfer((libusb_device_handle*) (unsigned long) handle, endpoint, data,	length, &actual_length, timeout);
+	int libusb_result;
+	int bytes_transferred = 0;
+	unsigned char* data = (unsigned char*) env->GetByteArrayElements(buffer, NULL);
+	libusb_result = libusb_interrupt_transfer((libusb_device_handle*) (unsigned long) handle, endpoint, data,	length, &bytes_transferred, timeout);
 	env->ReleaseByteArrayElements(buffer, (jbyte*) data, 0);
-	if (res) {
-		return res;
+
+	if (libusb_result != 0)
+	{
+		ThrowLibusbError(env, libusb_result);
+		bytes_transferred = 0;
 	}
-	return actual_length;
+
+	return bytes_transferred;
 }
 
 /********************************************************************************************
@@ -1734,15 +1804,25 @@ JNIEXPORT jint JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1interrupt_
  * Signature: ()Ljava/lang/String;
  ********************************************************************************************/
 JNIEXPORT jstring JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1strerror(JNIEnv *env, jclass obj) {
-	char *str;
+	char *str = "Libusb-1.0 Error";
+
 	/* check for LibusbJava specific errors first*/
 	if (libusbJavaError != NULL) {
 		str = libusbJavaError;
 		clearLibusbJavaError();
-	} else {
-		str = "Libusb-1.0 Error";
 	}
+
 	return env->NewStringUTF(str);
+}
+
+/*
+ * Class:     ch_ntb_inf_libusbJava_LibusbJava1
+ * Method:    libusb_exceptionTest
+ * Signature: (I)V
+ */
+JNIEXPORT void JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1exceptionTest(JNIEnv *env, jclass obj, jint code)
+{
+	ThrowLibusbError(env, code);
 }
 
 /********************************************************************************************
@@ -1814,3 +1894,74 @@ static __inline jbyteArray JNICALL to_byteArray(JNIEnv *env, const void *data, s
 	return result;
 }
 
+/*!	\brief	Convenience function that throws an exception in the callers environment if
+ *         	the given result is not "success"
+ *
+ *			This function can be used to wrap calls to the libusb if no further reaction
+ *			on a unsuccessful result is needed, than throwing an exception in the java
+ *			environment.
+ *
+ *	\param	env				Java environment of the caller
+ *	\param 	libusb_result	Result code of the libusb call
+ */
+static __inline void JNICALL ThrowIfUnsuccessful(JNIEnv *env, int libusb_result)
+{
+	if (libusb_result != 0)
+	{
+		ThrowLibusbError(env, libusb_result);
+	}
+}
+
+/*!	\brief Throws an exception of type LibusbError in the calling Java environment.
+ *
+ * 	\param	env		Environment to throw the exception in
+ * 	\param	code	Error code that represents the cause of the exception
+ */
+static __inline void JNICALL ThrowLibusbError(JNIEnv *env, jint code)
+{
+    jmethodID constructor = NULL;
+    jthrowable exception = NULL;
+
+    jclass clazz = env->FindClass("ch/ntb/inf/libusbJava/exceptions/LibusbError");
+    if (clazz == NULL)
+    {
+    	goto no_class;
+    }
+
+    constructor = env->GetMethodID(clazz, "<init>", "(I)V");
+	if (constructor == NULL)
+	{
+		goto no_constructor;
+	}
+
+	exception = (jthrowable)env->NewObject(clazz, constructor, code);
+	if (exception == NULL)
+	{
+		goto no_object;
+	}
+
+	if (env->Throw(exception) != 0)
+	{
+		goto throw_failed;
+	}
+
+	env->DeleteLocalRef(exception);
+	env->DeleteLocalRef(clazz);
+
+	return;
+
+/* Error Handling. All errors covered here are caused by JNI callbacks and have 
+ * therefore already thrown appropriate exceptions in the Java environment.
+ * Therefore we only have to cleanup what we constructed. */
+throw_failed:
+	env->DeleteLocalRef(exception);
+
+no_object:
+
+no_constructor:
+	env->DeleteLocalRef(clazz);
+
+no_class:
+
+	return;
+}
