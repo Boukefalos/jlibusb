@@ -15,11 +15,12 @@ package ch.ntb.inf.libusbJava;
 import ch.ntb.inf.libusbJava.exceptions.LibusbError;
 
 /**
- * This class is used as compatibility layer for libusb 0.1 projects. For new
- * projects use {@link LibusbJava1}
+ * This class is used as compatibility layer for libusb 0.1 projects. 
  * 
+ * @deprecated This class will not be subject to test anymore. Be aware that possible 
+ *             modifications could always break the functionality. For new
+ * 			   projects only use {@link LibusbJava1}. 
  */
-@Deprecated
 public class LibusbJava {
 
 	private static Usb_Bus busses = null;

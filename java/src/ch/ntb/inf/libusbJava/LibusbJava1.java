@@ -73,8 +73,8 @@ public class LibusbJava1 {
 	 * This function must be called before calling any other libusb function.<br>
 	 * <br>
 	 * 
-	 * @return a context to operate on<br>
-	 *         or a LIBUSB_ERROR code on failure
+	 * @return a context to operate on
+	 * @throws 	LibusbError if an error occured
 	 */
 	public static native long libusb_init() throws LibusbError;
 
@@ -86,7 +86,8 @@ public class LibusbJava1 {
 	 * <br>
 	 * 
 	 * @param ctx
-	 *            the context to deinitialize, or NULL for the default context
+	 *            the context to deinitialize, or 0 if the default context has
+	 *            been used.
 	 */
 	public static native void libusb_exit(long ctx);
 
@@ -102,7 +103,7 @@ public class LibusbJava1 {
 	 * @return Usb_Devices currently attached to the system<br>
 	 *         if no device is attached the devnum of the returned device is set
 	 *         to -1<br>
-	 *         or NULL if a failure occurs
+	 *         or NULL if an error occurs
 	 */
 	public static native Usb_Device libusb_get_device_list(long ctx);
 
@@ -355,12 +356,14 @@ public class LibusbJava1 {
 	 *            a device handle
 	 * @param interface_number
 	 *            the bInterfaceNumber of the interface you wish to claim
-	 * @throws  LibusbError in case of an error<br>
-	 * 			Possible causes for errors are:<br>
-	 *         	- ERROR_NOT_FOUND if the interface was not claimed<br>
-	 *         	- ERROR_NO_DEVICE if the device has been disconnected<br>
-	 *         	- ERROR_BUSY if another program or driver has claimed the interface<br>
-	 *         	- another LIBUSB_ERROR code on other failure<br>
+	 * @throws LibusbError
+	 *             in case of an error<br>
+	 *             Possible causes for errors are:<br>
+	 *             - ERROR_NOT_FOUND if the interface was not claimed<br>
+	 *             - ERROR_NO_DEVICE if the device has been disconnected<br>
+	 *             - ERROR_BUSY if another program or driver has claimed the
+	 *             interface<br>
+	 *             - another LIBUSB_ERROR code on other failure<br>
 	 */
 	public static native void libusb_claim_interface(long dev_handle,
 			int interface_number) throws LibusbError;
@@ -379,11 +382,12 @@ public class LibusbJava1 {
 	 *            a device handle
 	 * @param interface_number
 	 *            the bInterfaceNumber of the previously-claimed interface
-	 * @throws  LibusbError in case of an error<br>
-	 * 			Possible causes for errors are:<br>
-	 *        	- ERROR_NOT_FOUND if the interface was not claimed<br>
-	 *         	- ERROR_NO_DEVICE if the device has been disconnected<br>
-	 *        	- another ERROR code on other failure<br>
+	 * @throws LibusbError
+	 *             in case of an error<br>
+	 *             Possible causes for errors are:<br>
+	 *             - ERROR_NOT_FOUND if the interface was not claimed<br>
+	 *             - ERROR_NO_DEVICE if the device has been disconnected<br>
+	 *             - another ERROR code on other failure<br>
 	 */
 	public static native void libusb_release_interface(long dev_handle,
 			int interface_number) throws LibusbError;
@@ -407,11 +411,13 @@ public class LibusbJava1 {
 	 *            the bInterfaceNumber of the previously-claimed interface
 	 * @param alternate_setting
 	 *            the bAlternateSetting of the alternate setting to activate
-	 * @throws  LibusbError in case of an error<br>
-	 * 			Possible causes for errors are:<br>
-	 *        	- ERROR_NOT_FOUND if the interface was not claimed, or the requested alternate setting does not exist<br>
-	 *         	- ERROR_NO_DEVICE if the device has been disconnected<br>
-	 *         	- another LIBUSB_ERROR code on other failure<br>
+	 * @throws LibusbError
+	 *             in case of an error<br>
+	 *             Possible causes for errors are:<br>
+	 *             - ERROR_NOT_FOUND if the interface was not claimed, or the
+	 *             requested alternate setting does not exist<br>
+	 *             - ERROR_NO_DEVICE if the device has been disconnected<br>
+	 *             - another LIBUSB_ERROR code on other failure<br>
 	 */
 	public static native void libusb_set_interface_alt_setting(long dev_handle,
 			int interface_number, int alternate_setting) throws LibusbError;
@@ -432,13 +438,15 @@ public class LibusbJava1 {
 	 *            a device handle
 	 * @param endpoint
 	 *            the endpoint to clear halt status
-	 * @throws  LibusbError in case of an error<br>
-	 * 			Possible causes for errors are:<br>
-	 *        	- ERROR_NOT_FOUND if the endpoint does not exist<br>
-	 *         	- ERROR_NO_DEVICE if the device has been disconnected<br>
-	 *         	- another LIBUSB_ERROR code on other failure<br>
+	 * @throws LibusbError
+	 *             in case of an error<br>
+	 *             Possible causes for errors are:<br>
+	 *             - ERROR_NOT_FOUND if the endpoint does not exist<br>
+	 *             - ERROR_NO_DEVICE if the device has been disconnected<br>
+	 *             - another LIBUSB_ERROR code on other failure<br>
 	 */
-	public static native void libusb_clear_halt(long dev_handle, short endpoint) throws LibusbError;
+	public static native void libusb_clear_halt(long dev_handle, short endpoint)
+			throws LibusbError;
 
 	/**
 	 * Perform a USB port reset to reinitialize a device.<br>
@@ -457,12 +465,15 @@ public class LibusbJava1 {
 	 * 
 	 * @param dev_handle
 	 *            a handle of the device to reset
-	 * @throws  LibusbError in case of an error<br>
-	 * 			Possible causes for errors are:<br>
-	 *         	- ERROR_NOT_FOUND if re-enumeration is required, or if the device has been disconnected<br>
-	 *        	- another LIBUSB_ERROR code on other failure<br>
+	 * @throws LibusbError
+	 *             in case of an error<br>
+	 *             Possible causes for errors are:<br>
+	 *             - ERROR_NOT_FOUND if re-enumeration is required, or if the
+	 *             device has been disconnected<br>
+	 *             - another LIBUSB_ERROR code on other failure<br>
 	 */
-	public static native void libusb_reset_device(long dev_handle) throws LibusbError;
+	public static native void libusb_reset_device(long dev_handle)
+			throws LibusbError;
 
 	/**
 	 * Determine if a kernel driver is active on an interface.<br>
@@ -477,14 +488,15 @@ public class LibusbJava1 {
 	 *            the interface to check
 	 * @return 0 if no kernel driver is active<br>
 	 *         1 if a kernel driver is active<br>
-	 * @throws  LibusbError in case of an error<br>
-	 * 			Possible causes for errors are:<br>
-	 *        	- ERROR_NO_DEVICE if the device has been disconnected<br>
-	 *         	- another LIBUSB_ERROR code on other failure<br>
+	 * @throws LibusbError
+	 *             in case of an error<br>
+	 *             Possible causes for errors are:<br>
+	 *             - ERROR_NO_DEVICE if the device has been disconnected<br>
+	 *             - another LIBUSB_ERROR code on other failure<br>
 	 * @see #libusb_detach_kernel_driver(long, int)
 	 */
 	public static native int libusb_kernel_driver_active(long dev_handle,
-			int interface_number)throws LibusbError;
+			int interface_number) throws LibusbError;
 
 	/**
 	 * Detach a kernel driver from an interface.<br>
@@ -497,12 +509,13 @@ public class LibusbJava1 {
 	 *            a device handle
 	 * @param interface_number
 	 *            the interface to detach the driver from
-	 * @throws  LibusbError in case of an error<br>
-	 * 			Possible causes for errors are:<br>
-	 *         	- ERROR_NOT_FOUND if no kernel driver was active<br>
-	 *         	- ERROR_INVALID_PARAM if the interface does not exist<br>
-	 *          - ERROR_NO_DEVICE if the device has been disconnected<br>
-	 *         	- another ERROR code on other failure<br>
+	 * @throws LibusbError
+	 *             in case of an error<br>
+	 *             Possible causes for errors are:<br>
+	 *             - ERROR_NOT_FOUND if no kernel driver was active<br>
+	 *             - ERROR_INVALID_PARAM if the interface does not exist<br>
+	 *             - ERROR_NO_DEVICE if the device has been disconnected<br>
+	 *             - another ERROR code on other failure<br>
 	 * @see #libusb_kernel_driver_active(long, int)
 	 */
 	public static native void libusb_detach_kernel_driver(long dev_handle,
@@ -516,13 +529,15 @@ public class LibusbJava1 {
 	 *            a device handle
 	 * @param interface_number
 	 *            the interface to attach the driver from
-	 * @throws  LibusbError in case of an error<br>
-	 * 			Possible causes for errors are:<br>
-	 *         	- ERROR_NOT_FOUND if no kernel driver was active<br>
-	 *         	- ERROR_INVALID_PARAM if the interface does not exist<br>
-	 *         	- ERROR_NO_DEVICE if the device has been disconnected<br>
-	 *          - ERROR_BUSY if the driver cannot be attached because the interface is claimed by a program or driver<br> 
-	 *          - another ERROR code on other failure<br>
+	 * @throws LibusbError
+	 *             in case of an error<br>
+	 *             Possible causes for errors are:<br>
+	 *             - ERROR_NOT_FOUND if no kernel driver was active<br>
+	 *             - ERROR_INVALID_PARAM if the interface does not exist<br>
+	 *             - ERROR_NO_DEVICE if the device has been disconnected<br>
+	 *             - ERROR_BUSY if the driver cannot be attached because the
+	 *             interface is claimed by a program or driver<br>
+	 *             - another ERROR code on other failure<br>
 	 * @see #libusb_kernel_driver_active(long, int)
 	 */
 	public static native void libusb_attach_kernel_driver(long dev_handle,
@@ -558,7 +573,8 @@ public class LibusbJava1 {
 	 *            number of charactes which will be retrieved (the length of the
 	 *            resulting String)
 	 * @return a string which contains the string descriptor
-	 * @throws  LibusbError in case of an error<br>
+	 * @throws LibusbError
+	 *             in case of an error<br>
 	 */
 	public static native String libusb_get_string_descriptor_ascii(
 			long dev_handle, short desc_index, int size) throws LibusbError;
@@ -579,7 +595,8 @@ public class LibusbJava1 {
 	 *            number of bytes which will be retrieved (the length of the
 	 *            resulting byte[])
 	 * @return a byte[] which contains the descriptor or null on failure
-	 * @throws  LibusbError in case of an error<br>
+	 * @throws LibusbError
+	 *             in case of an error<br>
 	 * 
 	 */
 	public static native byte[] libusb_get_descriptor(long dev_handle,
@@ -602,7 +619,8 @@ public class LibusbJava1 {
 	 *            number of charactes which will be retrieved (the length of the
 	 *            resulting String)
 	 * @return a string which contains the string descriptor
-	 * @throws  LibusbError in case of an error<br>
+	 * @throws LibusbError
+	 *             in case of an error<br>
 	 * @see #libusb_get_string_descriptor_ascii(long, short, int)
 	 */
 	public static native String libusb_get_string_descriptor(long dev_handle,
@@ -661,13 +679,15 @@ public class LibusbJava1 {
 	 * 
 	 * @param transfernumber
 	 *            the transfer to submit
-	 * @throws  LibusbError in case of an error<br>
-	 * 			Possible causes for errors are:<br>
-	 *         	- ERROR_NO_DEVICE if the device has been disconnected<br>
-	 *         	- ERROR_BUSY if the transfer has already been submitted. <br>
-	 *         	- another LIBUSB_ERROR code on other failure <br>
+	 * @throws LibusbError
+	 *             in case of an error<br>
+	 *             Possible causes for errors are:<br>
+	 *             - ERROR_NO_DEVICE if the device has been disconnected<br>
+	 *             - ERROR_BUSY if the transfer has already been submitted. <br>
+	 *             - another LIBUSB_ERROR code on other failure <br>
 	 */
-	public static native void libusb_submit_transfer(long transfernumber) throws LibusbError;
+	public static native void libusb_submit_transfer(long transfernumber)
+			throws LibusbError;
 
 	/**
 	 * Asynchronously cancel a previously submitted transfer.<br>
@@ -678,12 +698,15 @@ public class LibusbJava1 {
 	 * 
 	 * @param transfernumber
 	 *            a transfer
-	 * @throws  LibusbError in case of an error<br>
-	 * 			Possible causes for errors are:<br>
-	 *         	- ERROR_NOT_FOUND if the transfer is already complete or cancelled. <br>
-	 *        	- a LIBUSB_ERROR code on failure <br>
+	 * @throws LibusbError
+	 *             in case of an error<br>
+	 *             Possible causes for errors are:<br>
+	 *             - ERROR_NOT_FOUND if the transfer is already complete or
+	 *             cancelled. <br>
+	 *             - a LIBUSB_ERROR code on failure <br>
 	 */
-	public static native void libusb_cancel_transfer(long transfernumber) throws LibusbError;
+	public static native void libusb_cancel_transfer(long transfernumber)
+			throws LibusbError;
 
 	/**
 	 * Get the data section of a control transfer.<br>
@@ -697,7 +720,8 @@ public class LibusbJava1 {
 	 * 
 	 * @param transfernumber
 	 *            a transfer
-	 * @return the data section from the transfer, null if the transfer number was invalid.
+	 * @return the data section from the transfer, null if the transfer number
+	 *         was invalid.
 	 */
 	public static native byte[] libusb_control_transfer_get_data(
 			long transfernumber);
@@ -714,7 +738,8 @@ public class LibusbJava1 {
 	 * 
 	 * @param transfernumber
 	 *            a transfer
-	 * @return the setup packet from the transfer, null if the transfer number was invalid.
+	 * @return the setup packet from the transfer, null if the transfer number
+	 *         was invalid.
 	 */
 	public static native byte[] libusb_control_transfer_get_setup(
 			long transfernumber);
@@ -1066,9 +1091,11 @@ public class LibusbJava1 {
 	 * @param timeval
 	 *            the maximum time to block waiting for events, or zero for
 	 *            non-blocking mode
-	 * @throws  LibusbError in case of an error<br>
+	 * @throws LibusbError
+	 *             in case of an error<br>
 	 */
-	public static native void libusb_handle_events_timeout(long ctx, long timeval) throws LibusbError;
+	public static native void libusb_handle_events_timeout(long ctx,
+			long timeval) throws LibusbError;
 
 	/**
 	 * Handle any pending events in blocking mode with a sensible timeout.<br>
@@ -1080,7 +1107,8 @@ public class LibusbJava1 {
 	 * 
 	 * @param ctx
 	 *            the context to operate on, or NULL for the default context
-	 * @throws  LibusbError in case of an error<br>
+	 * @throws LibusbError
+	 *             in case of an error<br>
 	 */
 	public static native void libusb_handle_events(long ctx) throws LibusbError;
 
@@ -1103,9 +1131,11 @@ public class LibusbJava1 {
 	 * @param timeval
 	 *            the maximum time in seconds to block waiting for events, or
 	 *            zero for non-blocking mode
-	 * @throws  LibusbError in case of an error<br>
+	 * @throws LibusbError
+	 *             in case of an error<br>
 	 */
-	public static native void libusb_handle_events_locked(long ctx, long timeval) throws LibusbError;
+	public static native void libusb_handle_events_locked(long ctx, long timeval)
+			throws LibusbError;
 
 	/**
 	 * Determines whether your application must apply special timing
