@@ -194,7 +194,7 @@ JNIEXPORT void JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1exit(JNIEn
  ********************************************************************************************/
 JNIEXPORT jobject JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1get_1device_1list( JNIEnv *env, jclass obj, jlong ctx) {
 	libusb_device **devs;
-	libusb_context *context = NULL;
+	libusb_context *context = (ctx != 0) ? (libusb_context*)ctx : NULL;
 	ssize_t cnt;
 	int res, a, i;
 	uint8_t c, h, e;
@@ -405,12 +405,8 @@ JNIEXPORT jobject JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1get_1de
 	clearLibusbJavaError();
 
 	libusb_config_descriptor *conf_desc;
-	if (ctx > 0) {
-		context = (libusb_context*) ((unsigned long) ctx);
-		cnt = libusb_get_device_list(context, &devs);
-	} else {
-		cnt = libusb_get_device_list(NULL, &devs);
-	}
+
+	cnt = libusb_get_device_list(context, &devs);
 	if (cnt < 0) {
 		setLibusbJavaError("libusb_get_device_list: Error on Memory allocation");
 		libusb_free_device_list(devs, 1);
@@ -1825,6 +1821,18 @@ JNIEXPORT void JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1exceptionT
 	ThrowLibusbError(env, code);
 }
 
+/*
+ * Class:     ch_ntb_inf_libusbJava_LibusbJava1
+ * Method:    to_byteArrayTest
+ * Signature: (Ljava/lang/String;I)[B
+ */
+JNIEXPORT jbyteArray JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_to_1byteArrayTest(JNIEnv *env, jclass obj, jstring str, jint size)
+{
+	jbyteArray result = to_byteArray(env, env->GetStringUTFChars (str, NULL), size);
+	env->ReleaseStringUTFChars(str, NULL);
+	return result;
+}
+
 /********************************************************************************************
  * Class:     LibusbJava_1_0.cpp
  * Method:    transfer_callback
@@ -1868,16 +1876,21 @@ static void LIBUSB_CALL fd_removed_callback(int fd, void *user_data) {
  *	\return	The pointer to the newly created byte array. NULL if an error occured
  *
  *	\note	If NULL is returned, #libusbJavaError is set to a matching error string.
+ *
+ * 	\test	Tested through the unit-test of the java part of this dll by passing a string
+ * 			with length 5 and checking the result.
+ * 	\test	Tested through the Unit-Test of the java part of this dll by passing a string
+ * 			with length 0 and checking the result.
  */
 static __inline jbyteArray JNICALL to_byteArray(JNIEnv *env, const void *data, size_t len)
 {
 	jbyteArray result = env->NewByteArray(len);
 
 	if (result != NULL) {
-		/* Using SetByteArrayRegion, we avoid that the JNI layer first copies the data already
-		 * available in the array in our space just to overwrite them. As we just allocated the
-		 * byte aray with a length of "len", the set operation can never fail. The check for an
-		 * exception can be omitted. */
+		/* By using SetByteArrayRegion, we avoid that the JNI layer first copies the data of
+		 * the array in our space just to overwrite them. As we just allocated the
+		 * byte array with a length of "len", the set operation can never fail. The check for an
+		 * exception can therefore be omitted. */
 		env->SetByteArrayRegion(result, 0, len, (const signed char *)data);
 #if 0 /* No need to check for exceptions here... */
 		if (env->ExceptionOccurred()){
@@ -1902,7 +1915,10 @@ static __inline jbyteArray JNICALL to_byteArray(JNIEnv *env, const void *data, s
  *			environment.
  *
  *	\param	env				Java environment of the caller
- *	\param 	libusb_result	Result code of the libusb call
+ *	\param 	libusb_result	Result code of the libusb call. If the result is != 0, a
+ *	       					LibusbError is thrown.
+ *
+ *	\test	Code-Review
  */
 static __inline void JNICALL ThrowIfUnsuccessful(JNIEnv *env, int libusb_result)
 {
@@ -1916,6 +1932,8 @@ static __inline void JNICALL ThrowIfUnsuccessful(JNIEnv *env, int libusb_result)
  *
  * 	\param	env		Environment to throw the exception in
  * 	\param	code	Error code that represents the cause of the exception
+ *
+ * 	\test	Tested through the unit-test of the java part of this dll
  */
 static __inline void JNICALL ThrowLibusbError(JNIEnv *env, jint code)
 {

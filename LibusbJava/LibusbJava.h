@@ -487,6 +487,14 @@ JNIEXPORT jstring JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1strerro
 JNIEXPORT void JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1exceptionTest
   (JNIEnv *, jclass, jint);
 
+/*
+ * Class:     ch_ntb_inf_libusbJava_LibusbJava1
+ * Method:    to_byteArrayTest
+ * Signature: (Ljava/lang/String;I)[B
+ */
+JNIEXPORT jbyteArray JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_to_1byteArrayTest
+  (JNIEnv *, jclass, jstring, jint);
+
 #ifdef __cplusplus
 }
 #endif
