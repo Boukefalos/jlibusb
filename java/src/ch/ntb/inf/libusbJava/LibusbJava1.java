@@ -1387,13 +1387,29 @@ public class LibusbJava1 {
 
 	/**
 	 * This method is only used for testing the DLL-code that throws exceptions
-	 * in the java environment.
+	 * in the java environment. 
 	 * 
 	 * @param code
 	 *            Code of the error to be simulated and hence the code of the
 	 *            exception that shall be thrown.
 	 * 
 	 * @throws LibusbError
+	 * @deprecated 	This function is only for testing purpose and should not be 
+	 * 				called in production code
 	 */
+	@Deprecated
 	public static native void libusb_exceptionTest(int code) throws LibusbError;
+	
+	/**
+	 * This method is only used for testing the DLL helpercode. It creates a 
+	 * byte Array of the given size from the given string.
+	 * 
+	 * @param str	String to be copied into the array
+	 * @param size	Size of the array to be created
+	 * 
+	 * @deprecated 	This function is only for testing purpose and should not be 
+	 * 				called in production code
+	 */
+	@Deprecated
+	public static native byte[] to_byteArrayTest(String str, int size);
 }

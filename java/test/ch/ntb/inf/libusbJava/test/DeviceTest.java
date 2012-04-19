@@ -37,6 +37,7 @@ import ch.ntb.inf.libusbJava.Utils;
 import ch.ntb.inf.libusbJava.testApp.AbstractDeviceInfo;
 import ch.ntb.inf.libusbJava.testApp.AbstractDeviceInfo.TransferMode;
 
+@SuppressWarnings("deprecation")
 public class DeviceTest {
 
 	private static final String testdevicePropertiesFile = "testdevice.properties";

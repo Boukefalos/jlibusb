@@ -19,6 +19,7 @@ import ch.ntb.inf.libusbJava.Usb_Interface_Descriptor;
  * This class replicates the code from testlibusb.c supplied in the
  * libusb-0.1.12 release.
  */
+@SuppressWarnings("deprecation")
 public class TestLibUsbJava {
 	static boolean verbose;
 
