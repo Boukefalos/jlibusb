@@ -15,7 +15,8 @@
  *			(java.nio). As this class is made to store the start pointer to native buffers
  *			we could create a "ByteBuffer" of length 0 where the start address represents
  *			e.g. the handle.  This can  be done using the following JNI Call:
- *			  env->NewDirectByteBuffer(myPointer, 0); // size = 0, you don't want anyone to change it
+ *			  env->NewDirectByteBuffer(myPointer, 0); // size = 0, you don't want anyone to
+ *			                                          // change the data you are pointing to...
  */
 
 /********************************************************************************************
@@ -28,6 +29,10 @@
 #include <string>
 #include <cstdlib>
 #include <ctime>
+
+#ifdef DO_UNIT_TEST
+#	include <test/CuTest.h>
+#endif
 
 #include <string.h>
 
@@ -128,6 +133,17 @@ static jfieldID usb_epDescFID_bLength, usb_epDescFID_bDescriptorType,
 /*Libusb_pollfd*/
 static jfieldID usb_pollfdFID_fd, usb_pollfdFID_events;
 
+#ifdef DO_UNIT_TEST
+	#if TEST_USING_JVM
+			static struct TestContext
+			{
+				JNIEnv *env;
+			}test_context = { NULL };
+
+		#	define	TEST_CONTEXT()	JNIEnv *env = test_context.env
+	#endif
+#endif
+
 /********************************************************************************************
  *
  *		Methods
@@ -208,7 +224,8 @@ JNIEXPORT jobject JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1get_1de
 
 		/*usb_device*/
 		jobject devClazz = env->FindClass("ch/ntb/inf/libusbJava/Usb_Device");//returns a local reference
-		usb_devClazz = (jclass)env->NewGlobalRef(devClazz);//make it global
+		usb_devClazz = (jclass)env->NewGlobalRef(devClazz); // make it global to avoid class unloading and therefore
+		                                                    // invalidating the references obtained.
 		if (usb_devClazz == NULL) {
 			return NULL; /* exception thrown */
 		}
@@ -1657,7 +1674,7 @@ JNIEXPORT jint JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1get_1next_
 	timeval tv;
 
 	/*!	\todo	Is this code working correctly if we use it in a 64-Bit environment? Actually
-	 * 			it's unlikely to have a timeout of more than 2^(31)-1 seconds. But it is a
+	 * 			it's unlikely to have a timeout of more than 2^(31)-1 seconds. But still it is a
 	 * 			possible value. */
 	res = libusb_get_next_timeout((libusb_context*) (unsigned long) ctx, &tv);
 
@@ -1983,3 +2000,39 @@ no_class:
 
 	return;
 }
+
+#ifdef DO_UNIT_TEST
+#	if TEST_USING_JVM
+		static void JVMTest(CuTest *tc)
+		{
+			TEST_CONTEXT();
+
+			ThrowLibusbError(env, -1);
+			CuAssert(tc, "LibusbError-Exception occured", env->ExceptionOccurred() != NULL);
+			env->ExceptionClear();
+		}
+#	endif
+
+	static void FailingTest(CuTest* tc)
+	{
+		CuAssert(tc, "test should fail", 3 == 1 + 1);
+	}
+#endif
+
+#ifdef DO_UNIT_TEST
+/*!	\brief Exports the test suite for the libraries helper functions
+ *
+ *	\test  */
+CuSuite* CuGetLibusbJavaSuite(JNIEnv *env)
+{
+	CuSuite* suite = CuSuiteNew();
+
+	SUITE_ADD_TEST(suite, FailingTest);
+#	if TEST_USING_JVM
+		SUITE_ADD_TEST(suite, JVMTest);
+#	endif
+
+	test_context.env = env;
+	return suite;
+}
+#endif

@@ -42,6 +42,7 @@
 								<option id="gnu.cpp.compiler.option.other.other.913778927" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" value=" -mwindows -c -fmessage-length=0" valueType="string"/>
 								<option id="gnu.cpp.compiler.option.preprocessor.def.1526583498" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="_JNI_IMPLEMENTATION_"/>
+									<listOptionValue builtIn="false" value="TEST_USING_JVM=1"/>
 									<listOptionValue builtIn="false" value="DO_UNIT_TEST=1"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.728081923" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
@@ -54,7 +55,7 @@
 									<listOptionValue builtIn="false" value="&quot;C:/Program Files/Java/jdk1.6.0_26/include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;C:/Program Files/Java/jdk1.6.0_26/include/win32&quot;"/>
 								</option>
-								<option id="gnu.c.compiler.option.preprocessor.def.symbols.645355643" superClass="gnu.c.compiler.option.preprocessor.def.symbols" valueType="definedSymbols">
+								<option id="gnu.c.compiler.option.preprocessor.def.symbols.645355643" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="DO_UNIT_TEST=1"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1861606347" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
@@ -111,7 +112,7 @@
 							<targetPlatform id="cdt.managedbuild.target.gnu.platform.mingw.so.release.265019246" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.mingw.so.release"/>
 							<builder buildPath="${workspace_loc:/LibusbJava-1.0/Release}" id="cdt.managedbuild.tool.gnu.builder.mingw.base.406358337" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="CDT Internal Builder" superClass="cdt.managedbuild.tool.gnu.builder.mingw.base"/>
 							<tool id="cdt.managedbuild.tool.gnu.assembler.mingw.so.release.437658652" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.mingw.so.release">
-								<option id="gnu.both.asm.option.include.paths.44964561" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
+								<option id="gnu.both.asm.option.include.paths.44964561" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;C:/Program Files/Java/jdk1.6.0_26/include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;C:/Program Files/Java/jdk1.6.0_26/include/win32&quot;"/>
 								</option>
@@ -134,7 +135,7 @@
 							<tool command="gcc" commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG}${OUTPUT_PREFIX}${OUTPUT} ${INPUTS}" id="cdt.managedbuild.tool.gnu.c.compiler.mingw.so.release.913614476" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.mingw.so.release">
 								<option defaultValue="gnu.c.optimization.level.most" id="gnu.c.compiler.mingw.so.release.option.optimization.level.385731035" name="Optimization Level" superClass="gnu.c.compiler.mingw.so.release.option.optimization.level" value="gnu.c.optimization.level.none" valueType="enumerated"/>
 								<option id="gnu.c.compiler.mingw.so.release.option.debugging.level.1110058173" name="Debug Level" superClass="gnu.c.compiler.mingw.so.release.option.debugging.level" value="gnu.c.debugging.level.none" valueType="enumerated"/>
-								<option id="gnu.c.compiler.option.include.paths.630929322" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
+								<option id="gnu.c.compiler.option.include.paths.630929322" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;C:/Program Files/Java/jdk1.6.0_26/include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;C:/Program Files/Java/jdk1.6.0_26/include/win32&quot;"/>
 								</option>
