@@ -39,6 +39,13 @@ typedef struct JVM {
 						 JVM */
 }tJVM;
 
+static inline	int				CreateVM(tJVM *vmdata);
+static inline	tCallbackPtr	JvmLibraryFunctionGet(const char *name);
+static inline	void			JvmLibraryFree(void);
+static inline	tLibHandle		JvmLibraryLoad(void);
+static inline	long int		JvmLibraryLastErrorGet(void);
+static inline 	int				RunAllTests(void);
+
 /*!	\brief Contains Environment data for the test program */
 static struct
 {
@@ -55,14 +62,6 @@ static struct
 										 used for the tests. (after the thread has been
 										 attached) */
 }globals = { { NULL, NULL }, { NULL, NULL }, NULL };
-
-static inline	int				CreateVM(tJVM *vmdata);
-static inline	tCallbackPtr	JvmLibraryFunctionGet(const char *name);
-static inline	void			JvmLibraryFree(void);
-static inline	tLibHandle		JvmLibraryLoad(void);
-static inline	long int		JvmLibraryLastErrorGet(void);
-static inline 	int				RunAllTests(void);
-
 int main(void)
 {
 	int test_fail_count = -1;
@@ -128,8 +127,10 @@ end_no_jvm_lib:
 
 }
 
-/*!	\brief Executes all the tests and returns the number of failed tests */
-static int RunAllTests(void)
+/*!	\brief Executes all the tests
+ *
+ * 	\return Number of tests that failed */
+static inline int RunAllTests(void)
 {
 	CuSuite *suite = CuGetLibusbJavaSuite(globals.thread_env);
 	CuString *output = CuStringNew();
@@ -179,7 +180,7 @@ static inline int CreateVM(tJVM *vmdata)
  * 			- NULL if the library could not be loaded. Use GetLastError() to determine
  * 			  the reason.
  */
-static tLibHandle JvmLibraryLoad(void)
+static inline tLibHandle JvmLibraryLoad(void)
 {
 	unsigned int pos = 0;
 	tLibHandle result = NULL;
@@ -197,7 +198,7 @@ static tLibHandle JvmLibraryLoad(void)
 }
 
 /*!	\brief	Wrapper for freeing a loaded JVM library */
-static void	JvmLibraryFree(void)
+static inline void	JvmLibraryFree(void)
 {
 #if defined(_WIN32) || defined(_WIN64)
 	FreeLibrary(globals.jni.lib);
@@ -212,7 +213,7 @@ static void	JvmLibraryFree(void)
  *
  * 	\return Function pointer to the given function or NULL if the function could not be found
  */
-static tCallbackPtr	JvmLibraryFunctionGet(const char *name)
+static inline tCallbackPtr	JvmLibraryFunctionGet(const char *name)
 {
 #if defined(_WIN32) || defined(_WIN64)
 	return GetProcAddress(globals.jni.lib, name);
