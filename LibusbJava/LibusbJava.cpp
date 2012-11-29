@@ -32,6 +32,8 @@
 
 #ifdef DO_UNIT_TEST
 #	include <test/CuTest.h>
+
+#	define TEST_CASE(name)			static void name(CuTest *tc)
 #endif
 
 #include <string.h>
@@ -77,6 +79,8 @@ static void LIBUSB_CALL fd_removed_callback(int fd, void *user_data);
  *      Local helper functions
  *
  *******************************************************************************************/
+static __inline int						ReferencesLoad(JNIEnv *env);
+static __inline void					ReferencesUnload(JNIEnv *env);
 static __inline jbyteArray 	JNICALL 	to_byteArray(JNIEnv *env, const void *data, size_t len);
 static __inline void 		JNICALL 	ThrowIfUnsuccessful(JNIEnv *env, int libusb_result);
 static __inline void 		JNICALL		ThrowLibusbError(JNIEnv *env, jint code);
@@ -134,15 +138,104 @@ static jfieldID usb_epDescFID_bLength, usb_epDescFID_bDescriptorType,
 static jfieldID usb_pollfdFID_fd, usb_pollfdFID_events;
 
 #ifdef DO_UNIT_TEST
-	#if TEST_USING_JVM
-			static struct TestContext
-			{
-				JNIEnv *env;
-			}test_context = { NULL };
+		static struct TestContext
+		{
+			JNIEnv *env;
+		}test_context = { NULL };
 
-		#	define	TEST_CONTEXT()	JNIEnv *env = test_context.env
-	#endif
+	#	define	TEST_CONTEXT()	JNIEnv *env = test_context.env
 #endif
+
+/*!	\brief Structure holding all the global information needed. */
+static struct {
+	struct {
+		int onLoadCalled;
+		int refs_loaded;
+
+		struct {
+			struct {
+				jclass usb_devClazz;
+			}Usb_Device;
+
+			struct {
+				jclass usb_devDescClazz;
+			}Usb_Device_Descriptor;
+
+			struct {
+				jclass usb_confDescClazz;
+			}Usb_Config_Descriptor;
+		}objs;
+	}jni;
+}info = { { 0 } };
+
+/********************************************************************************************
+ *
+ *		Library Events
+ *
+ *******************************************************************************************/
+
+/*!	\brief	The VM calls JNI_OnLoad when the native library is loaded (for example, through
+ * 			System.loadLibrary).
+ *
+ * 	\see 	http://docs.oracle.com/javase/6/docs/technotes/guides/jni/spec/invocation.html#JNI_OnLoad
+ *
+ *	\return The JNI version needed by the native library (use constants as JNI_VERSION_X_Y).
+ */
+jint JNI_OnLoad(JavaVM *vm, void *reserved)
+{
+	JNIEnv* env = NULL;
+
+	info.jni.onLoadCalled = -1;
+
+	if (vm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_1) != JNI_OK) {
+		return -1;
+	}
+
+	ReferencesLoad(env);
+
+	return JNI_VERSION_1_1;
+}
+
+#if defined(DO_UNIT_TEST)
+	TEST_CASE(JNI_OnLoad_test)
+	{
+		TEST_CONTEXT();
+
+		CuAssert(tc, "correct initialization", info.jni.onLoadCalled == 0);
+		info.jni.onLoadCalled=10;
+
+		/* Load the LibusbJava1 class to force the initialization of the library */
+		jclass clazz = env->FindClass("ch/ntb/inf/libusbJava/LibusbJava1");
+		CuAssert(tc, "ch/ntb/inf/libusbJava/LibusbJava1 loaded", clazz != NULL);
+
+		CuAssert(tc, "JNI_OnLoad was executed", info.jni.onLoadCalled != 0);
+		env->DeleteLocalRef(clazz);
+
+		/* As garbage collection is not necessarily run after freeing a reference
+		 * and there is no way to force the run of GC, we can't test this here. */
+//		CuAssert(tc, "JNI_OnUnload was executed", info.jni.onLoadCalled == 0);
+	}
+#endif
+
+/*!	\brief 	The VM calls JNI_OnUnload when the class loader containing the native library is
+ *          garbage collected.
+ *
+ *			This function can be used to perform cleanup operations. Because this function is
+ *			called in an unknown context (such as from a finalizer), the programmer should be
+ *			conservative on using Java VM services, and refrain from arbitrary Java call-backs.
+ *
+ * 	\see 	http://docs.oracle.com/javase/6/docs/technotes/guides/jni/spec/invocation.html#JNI_OnUnload
+ */
+void JNI_OnUnload(JavaVM *vm, void *reserved)
+{
+	JNIEnv* env = NULL;
+
+	if (vm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_1) == JNI_OK) {
+		ReferencesUnload(env);
+	}
+
+	info.jni.onLoadCalled = 0;
+}
 
 /********************************************************************************************
  *
@@ -182,10 +275,14 @@ JNIEXPORT jlong JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1init( JNI
 		printf("context = %p\n", &context);
 	#endif
 
-	if (!res) {
+	if (res != 0)
+	{
+		ThrowLibusbError(env, res);
+		return 0;
+	}
+	else
+	{
 		return (jlong) context;
-	} else {
-		return (jlong) res;
 	}
 }
 
@@ -1830,6 +1927,26 @@ JNIEXPORT jstring JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1strerro
 
 /*
  * Class:     ch_ntb_inf_libusbJava_LibusbJava1
+ * Method:    setup
+ * Signature: ()I
+ */
+JNIEXPORT jint JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_setup(JNIEnv *env, jclass obj)
+{
+	return ReferencesLoad(env);
+}
+
+/*
+ * Class:     ch_ntb_inf_libusbJava_LibusbJava1
+ * Method:    teardown
+ * Signature: ()V
+ */
+JNIEXPORT void JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_teardown(JNIEnv *env, jclass obj)
+{
+	ReferencesUnload(env);
+}
+
+/*
+ * Class:     ch_ntb_inf_libusbJava_LibusbJava1
  * Method:    libusb_exceptionTest
  * Signature: (I)V
  */
@@ -2001,36 +2118,67 @@ no_class:
 	return;
 }
 
-#ifdef DO_UNIT_TEST
-#	if TEST_USING_JVM
-		static void JVMTest(CuTest *tc)
-		{
-			TEST_CONTEXT();
+/*!	\brief Loads all class References from the environment.
+ *
+ * 	\param	env	Pointer to an environment enabling access to the jvm
+ *
+ * 	\return
+ * 			-  0 if the references could be loaded successfully
+ * 			- <0 if an error occured
+ */
+static __inline int ReferencesLoad(JNIEnv *env)
+{
+	int result = -1;
 
-			ThrowLibusbError(env, -1);
-			CuAssert(tc, "LibusbError-Exception occured", env->ExceptionOccurred() != NULL);
-			env->ExceptionClear();
-		}
-#	endif
-
-	static void FailingTest(CuTest* tc)
+	if (info.jni.refs_loaded != 0)
 	{
-		CuAssert(tc, "test should fail", 3 == 1 + 1);
+		info.jni.refs_loaded = -1;
+	}
+	else
+	{
+		result = 0;
+	}
+
+	return result;
+
+	return result;
+}
+
+static __inline void ReferencesUnload(JNIEnv *env)
+{
+	if (info.jni.refs_loaded == 0)
+		return;
+}
+
+#ifdef DO_UNIT_TEST
+	TEST_CASE(JVMTest)
+	{
+		TEST_CONTEXT();
+
+		ThrowLibusbError(env, -1);
+		jthrowable e = env->ExceptionOccurred();
+		CuAssert(tc, "LibusbError-Exception occured", e != NULL);
+		env->ExceptionClear();
 	}
 #endif
 
 #ifdef DO_UNIT_TEST
+	typedef CuSuite* (*tSuiteNew)(void);
+
+	extern "C" JNIEXPORT CuSuite* GetLibusbJavaSuite(tSuiteNew SuiteNew, JNIEnv *env);
+
 /*!	\brief Exports the test suite for the libraries helper functions
  *
- *	\test  */
-CuSuite* CuGetLibusbJavaSuite(JNIEnv *env)
+ *	\param	SuiteNew	Pointer to an allocator function for a CuTest instance
+ *	\param	env			JNI Environment for the test
+ *
+ *	\return	A fully setup test suite. */
+JNIEXPORT CuSuite* GetLibusbJavaSuite(tSuiteNew SuiteNew, JNIEnv *env)
 {
-	CuSuite* suite = CuSuiteNew();
+	CuSuite* suite = SuiteNew();
 
-	SUITE_ADD_TEST(suite, FailingTest);
-#	if TEST_USING_JVM
-		SUITE_ADD_TEST(suite, JVMTest);
-#	endif
+	SUITE_ADD_TEST(suite, JNI_OnLoad_test);
+	SUITE_ADD_TEST(suite, JVMTest);
 
 	test_context.env = env;
 	return suite;

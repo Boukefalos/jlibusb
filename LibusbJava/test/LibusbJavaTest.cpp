@@ -15,8 +15,6 @@
 #define PATH_SEPARATOR ';' /* define it to be ':' on Solaris */
 #define USER_CLASSPATH "../java/bin" /* where Prog.class is */
 
-extern CuSuite* CuGetLibusbJavaSuite(JNIEnv *env);
-
 const char *lib_paths[] = {
 #if defined(_WIN32) || defined(_WIN64)
 		"server\\jvm.dll",
@@ -66,7 +64,6 @@ int main(void)
 {
 	int test_fail_count = -1;
 
-#if TEST_USING_JVM
 	jint 	result = -1;
 
 	globals.jni.lib = JvmLibraryLoad();
@@ -98,11 +95,8 @@ int main(void)
 		goto end_no_attach;
 	}
 
-#endif
-
 	test_fail_count = RunAllTests();
 
-#if TEST_USING_JVM
 	/* Check if there is still a pending exception. Usually all the tests should clear the
 	 * exceptions if any have been expected. If this is not the case something went wrong... */
 	if (globals.jvm.env->ExceptionOccurred()) {
@@ -122,27 +116,58 @@ end_no_CreateJavaVM:
 	JvmLibraryFree();
 
 end_no_jvm_lib:
-#endif
 	return test_fail_count;
 
 }
+
+typedef CuSuite* (*tSuiteNew)(void);
+typedef CuSuite* (*tGetDLLtests)(tSuiteNew SuiteNew, JNIEnv *env);
 
 /*!	\brief Executes all the tests
  *
  * 	\return Number of tests that failed */
 static inline int RunAllTests(void)
 {
-	CuSuite *suite = CuGetLibusbJavaSuite(globals.thread_env);
-	CuString *output = CuStringNew();
+	int result = 0;
+	tGetDLLtests getTestSuite = NULL;
+	tLibHandle libusb = LoadLibrary("LibusbJava-1_0.dll");
+
+	if (libusb == NULL) {
+		printf("Failed to load LibusbJava-1_0.dll: %lu", GetLastError());
+		goto no_lib;
+	}
+
+	getTestSuite = (tGetDLLtests)GetProcAddress(libusb, "GetLibusbJavaSuite");
+	if (getTestSuite == NULL)
+	{
+		printf("Failed to get unit tests: %lu", GetLastError());
+		goto no_suite_new;
+	}
+
+	/* Run the test procedures */
+	{
+		CuSuite *suite = getTestSuite(&CuSuiteNew, globals.thread_env);
+		CuString *output = CuStringNew();
 
 
-	CuSuiteRun(suite);
-	CuSuiteSummary(suite, output);
-	CuSuiteDetails(suite, output);
+		CuSuiteRun(suite);
+		CuSuiteSummary(suite, output);
+		CuSuiteDetails(suite, output);
 
-	printf("%s\n", output->buffer);
+		printf("%s\n", output->buffer);
 
-	return suite->failCount;
+		result = suite->failCount;
+	}
+
+	FreeLibrary(libusb);
+
+	return result;
+
+no_suite_new:
+	FreeLibrary(libusb);
+
+no_lib:
+	return -1;
 }
 
 /*!	\brief Creates a java virtual machine and places all the received handles into
