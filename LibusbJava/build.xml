@@ -23,6 +23,7 @@
 	<property name="LIB_CCFLAGS_WIN" value="-I&quot;C:/Program Files/Java/jdk${java.version}/include&quot;
 											-I&quot;C:/Program Files/Java/jdk${java.version}/include/win32&quot;
 											-I${basedir}
+											-I${basedir}/libusb/include
 											-Wall 
 											-Wno-write-strings
 											-D_JNI_IMPLEMENTATION_ 
@@ -35,8 +36,8 @@
 											${basedir}/LibusbJava.cpp
 											${ver_info}
 											-o ${out_dir}/LibusbJava-1_0.dll
-											-L${basedir}/MinGW64/static
-											-L${basedir}/MinGW32/static
+											-L${basedir}/libusb/MinGW64/static
+											-L${basedir}/libusb/MinGW32/static
 											-lusb-1.0" />
 	<property name="APP_CCFLAGS_WIN" value="-Wall
 											-Wno-write-strings
@@ -55,7 +56,6 @@
 											${basedir}/test/LibusbJavaTest.cpp
 											-o
 											${Unit-Test Executable}
-											-L${basedir}/MinGW64/static
 											-L&quot;C:/Program Files/Java/jdk${java.version}/lib&quot;" />
 
 	<property name="LIB_CCFLAGS_LIN" value="-Wno-write-strings
