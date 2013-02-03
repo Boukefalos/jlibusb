@@ -74,7 +74,8 @@ public class LibusbJava1 {
 	 * <br>
 	 * 
 	 * @return a context to operate on
-	 * @throws 	LibusbError if an error occured
+	 * @throws LibusbError
+	 *             if an error occured
 	 */
 	public static native long libusb_init() throws LibusbError;
 
@@ -191,15 +192,15 @@ public class LibusbJava1 {
 	 * @param dev
 	 *            the device to open
 	 * 
-	 * @return a device handler
+	 * @return a device handle >= 0
 	 * 
 	 * @throws LibusbError
 	 *             in case of an error<br>
 	 *             Possible causes are:<br>
-	 *             - ERROR_NO_MEM on memory allocation failure - ERROR_ACCESS if
-	 *             the user has insufficient permissions - ERROR_NO_DEVICE if
-	 *             the device has been disconnected - another ERROR code on
-	 *             other failure
+	 *             - ERROR_NO_MEM on memory allocation failure<br>
+	 *             - ERROR_ACCESS if the user has insufficient permissions<br>
+	 *             - ERROR_NO_DEVICE if the device has been disconnected<br>
+	 *             - another ERROR code on other failure
 	 * 
 	 * @see #libusb_get_device(long)
 	 */
@@ -1383,33 +1384,44 @@ public class LibusbJava1 {
 		} else {
 			System.loadLibrary("usbJava-1.0");
 		}
+
+		/*
+		 * After loading the library, we register a "shutdown hook" to be called
+		 * for cleaning up stuff in the library when exiting.
+		 */
+		Runtime.getRuntime().addShutdownHook(new Thread() {
+			public void run() {
+				try {
+					LibusbJava1.teardown();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+
+		/*
+		 * After setting up the cleanup callback, it's now safe to call the code
+		 * that initializes stuff in the native library
+		 */
+		int setup_result = setup();
+
+		if (setup_result < 0) {
+			throw new UnsatisfiedLinkError("Could not setup the library. ("
+					+ setup_result + ")");
+		}
 	}
 
 	/**
-	 * This method is only used for testing the DLL-code that throws exceptions
-	 * in the java environment. 
+	 * This method is used to setup stuff in the native library. After calling
+	 * this function, {@link #teardown()} has to be called if the native library
+	 * is not used anymore.
 	 * 
-	 * @param code
-	 *            Code of the error to be simulated and hence the code of the
-	 *            exception that shall be thrown.
-	 * 
-	 * @throws LibusbError
-	 * @deprecated 	This function is only for testing purpose and should not be 
-	 * 				called in production code
+	 * @return - 0 if successful - <0 if an error occured
 	 */
-	@Deprecated
-	public static native void libusb_exceptionTest(int code) throws LibusbError;
-	
+	private static native int setup();
+
 	/**
-	 * This method is only used for testing the DLL helpercode. It creates a 
-	 * byte Array of the given size from the given string.
-	 * 
-	 * @param str	String to be copied into the array
-	 * @param size	Size of the array to be created
-	 * 
-	 * @deprecated 	This function is only for testing purpose and should not be 
-	 * 				called in production code
+	 * This method cleans up stuff initialized using {@link #setup()}.
 	 */
-	@Deprecated
-	public static native byte[] to_byteArrayTest(String str, int size);
+	private static native void teardown();
 }
