@@ -19,6 +19,11 @@
 	<property name="out_dir" value="${basedir}/out" />
 	<property name="ver_info" value="${out_dir}/LibusbJava.res" />
 	<property name="Unit-Test Executable" value="${out_dir}/LibusbJava-UnitTest.exe" />
+	<property name="Source Files" value="	${basedir}/LibusbJava.cpp
+											${basedir}/objects/Usb_Device.cpp" 
+											/>
+
+
 
 	<property name="LIB_CCFLAGS_WIN" value="-I&quot;C:/Program Files/Java/jdk${java.version}/include&quot;
 											-I&quot;C:/Program Files/Java/jdk${java.version}/include/win32&quot;
@@ -33,12 +38,12 @@
 											-m64
 											-static
 											-shared 
-											${basedir}/LibusbJava.cpp
-											${ver_info}
+											${Source Files}
 											-o ${out_dir}/LibusbJava-1_0.dll
 											-L${basedir}/libusb/MinGW64/static
 											-L${basedir}/libusb/MinGW32/static
-											-lusb-1.0" />
+											-lusb-1.0" 
+											/>
 	<property name="APP_CCFLAGS_WIN" value="-Wall
 											-Wno-write-strings
 											-D_JNI_IMPLEMENTATION_
@@ -51,9 +56,8 @@
 											-static
 											-I&quot;C:/Program Files/Java/jdk${java.version}/include&quot;
 											-I&quot;C:/Program Files/Java/jdk${java.version}/include/win32&quot;
-											-I${basedir}
-											${basedir}/test/CuTest.c
 											${basedir}/test/LibusbJavaTest.cpp
+											${basedir}/test/CuTest.c
 											-o
 											${Unit-Test Executable}
 											-L&quot;C:/Program Files/Java/jdk${java.version}/lib&quot;" />
@@ -64,9 +68,7 @@
 											-Wl,-soname,libusbJava-1.0.so
 											-I/usr/lib
 											-I/usr/lib/jvm/java-6-openjdk/include/
-											-I${basedir}
-											-I${basedir}/libusb/include
-											${basedir}/LibusbJava.cpp
+											${Source Files}
 											-o${out_dir}/libusbJava-1.0.so.${version}
 											/usr/lib/libusb-1.0.so" />
 	<property name="APP_CCFLAGS_LIN" value="-Wall

@@ -38,21 +38,49 @@
 
 #include <string.h>
 
-#include "libusb.h"
+#include <libusb.h>
+
 #include "LibusbJava.h"
+#include "objects/Usb_Device.h"
 
 //#define DEBUGON
+
+typedef struct JNIObject {
+	int		(*connect)(JNIEnv *env);
+	void	(*disconnect)(JNIEnv *env);
+}tJNIObject;
+
+#define ERROR_JAVA_REFERENCES_NOT_LOADED	-100
+#define ERROR_JAVA_WRONG_ENVIRONMENT		-101
+#define ERROR_JAVA_ILEGAL_DEVICE_HANDLE		-102
+
+#define OBJ(name)	{ name ## _connect, name ## _disconnect }
+
+/*!	\brief Structure holding all the global information needed. */
+typedef struct LUJ_Instance {
+	struct JNI{
+#ifdef DO_UNIT_TEST
+		int onLoadCalled;	/*!< Set after OnLoad is called, reset after OnUnload was called. Only
+		 	 	 	 	 	 	 used for unit tests */
+#endif
+		int 				refs_loaded;	/*!< 0 if references are NOT loaded. */
+		const tJNIObject *	objects;		/*!< Points to the table of connect/disconnect calls
+												 that are perfomed while loading/unloading */
+	}jni;
+}tLUJ_Instance;
 
 /********************************************************************************************
  *
  *		Globals
  *
  *******************************************************************************************/
-/* global flag for loading all class, method and field ID references*/
-int java_references_loaded = 0;
-
 /* if > 0 an LibusbJava specific error string is set*/
-char *libusbJavaError = NULL;
+static char *libusbJavaError = NULL;
+
+static const tJNIObject jniObjects[] = {
+	OBJ(Usb_Device),
+	{ NULL, NULL}
+};
 /********************************************************************************************
  *
  *		Macros
@@ -79,8 +107,9 @@ static void LIBUSB_CALL fd_removed_callback(int fd, void *user_data);
  *      Local helper functions
  *
  *******************************************************************************************/
-static __inline int						ReferencesLoad(JNIEnv *env);
-static __inline void					ReferencesUnload(JNIEnv *env);
+static __inline int						ReferencesCheck(tLUJ_Instance *instance, JNIEnv *env);
+static __inline int						ReferencesLoad(tLUJ_Instance *instance, JNIEnv *env, const tJNIObject *objects);
+static __inline void					ReferencesUnload(tLUJ_Instance *instance, JNIEnv *env);
 static __inline jbyteArray 	JNICALL 	to_byteArray(JNIEnv *env, const void *data, size_t len);
 static __inline void 		JNICALL 	ThrowIfUnsuccessful(JNIEnv *env, int libusb_result);
 static __inline void 		JNICALL		ThrowLibusbError(JNIEnv *env, jint code);
@@ -91,19 +120,15 @@ static __inline void 		JNICALL		ThrowLibusbError(JNIEnv *env, jint code);
  *
  *******************************************************************************************/
 /* class references*/
-static jclass usb_devClazz, usb_devDescClazz, usb_confDescClazz, usb_intClazz,
+static jclass usb_devDescClazz, usb_confDescClazz, usb_intClazz,
 		usb_intDescClazz, usb_epDescClazz, usb_cb_clazz, usb_pollfd_clazz;
 
 /* method ID references*/
-static jmethodID usb_devMid, usb_devDescMid, usb_confDescMid, usb_intMid,
+static jmethodID usb_devDescMid, usb_confDescMid, usb_intMid,
 		usb_intDescMid, usb_epDescMid, usb_transfer_cb_Mid,
 		usb_fd_added_cb_Mid, usb_fd_removed_cb_Mid, usb_pollfd_Mid;
 
 /* field ID references*/
-/* usb_device*/
-static jfieldID usb_devFID_next, usb_devFID_prev, usb_devFID_filename, usb_devFID_bus,
-		usb_devFID_descriptor, usb_devFID_config, usb_devFID_devnum,
-		usb_devFID_num_children, usb_devFID_children, usb_devFID_devStructAddr;
 /* usb_deviceDescriptor */
 static jfieldID usb_devDescFID_bLength, usb_devDescFID_bDescriptorType,
 		usb_devDescFID_bcdUSB, usb_devDescFID_bDeviceClass,
@@ -146,27 +171,7 @@ static jfieldID usb_pollfdFID_fd, usb_pollfdFID_events;
 	#	define	TEST_CONTEXT()	JNIEnv *env = test_context.env
 #endif
 
-/*!	\brief Structure holding all the global information needed. */
-static struct {
-	struct {
-		int onLoadCalled;
-		int refs_loaded;
-
-		struct {
-			struct {
-				jclass usb_devClazz;
-			}Usb_Device;
-
-			struct {
-				jclass usb_devDescClazz;
-			}Usb_Device_Descriptor;
-
-			struct {
-				jclass usb_confDescClazz;
-			}Usb_Config_Descriptor;
-		}objs;
-	}jni;
-}info = { { 0 } };
+static tLUJ_Instance info = {{0}};
 
 /********************************************************************************************
  *
@@ -185,13 +190,15 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved)
 {
 	JNIEnv* env = NULL;
 
+#ifdef DO_UNIT_TEST
 	info.jni.onLoadCalled = -1;
+#endif
 
 	if (vm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_1) != JNI_OK) {
 		return -1;
 	}
 
-	ReferencesLoad(env);
+	ReferencesLoad(&info, env, jniObjects);
 
 	return JNI_VERSION_1_1;
 }
@@ -231,10 +238,12 @@ void JNI_OnUnload(JavaVM *vm, void *reserved)
 	JNIEnv* env = NULL;
 
 	if (vm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_1) == JNI_OK) {
-		ReferencesUnload(env);
+		ReferencesUnload(&info, env);
 	}
 
+#ifdef DO_UNIT_TEST
 	info.jni.onLoadCalled = 0;
+#endif
 }
 
 /********************************************************************************************
@@ -312,202 +321,7 @@ JNIEXPORT jobject JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1get_1de
 	int res, a, i;
 	uint8_t c, h, e;
 
-	/* only load class references, method and field ID  once*/
-	if (!java_references_loaded) {
-		/* find classes and field ids*/
-#ifdef DEBUGON
-		printf("load references starts\n");
-#endif
-
-		/*usb_device*/
-		jobject devClazz = env->FindClass("ch/ntb/inf/libusbJava/Usb_Device");//returns a local reference
-		usb_devClazz = (jclass)env->NewGlobalRef(devClazz); // make it global to avoid class unloading and therefore
-		                                                    // invalidating the references obtained.
-		if (usb_devClazz == NULL) {
-			return NULL; /* exception thrown */
-		}
-		usb_devMid = env->GetMethodID(usb_devClazz, "<init>", "()V");
-		if (usb_devMid == NULL) {
-			return NULL;
-		}
-
-		usb_devFID_next = env->GetFieldID(usb_devClazz, "next", "Lch/ntb/inf/libusbJava/Usb_Device;");
-		usb_devFID_prev = env->GetFieldID(usb_devClazz, "prev", "Lch/ntb/inf/libusbJava/Usb_Device;");
-		usb_devFID_filename = env->GetFieldID(usb_devClazz, "filename", "Ljava/lang/String;");
-		usb_devFID_bus = env->GetFieldID(usb_devClazz, "bus", "Lch/ntb/inf/libusbJava/Usb_Bus;");
-		usb_devFID_descriptor = env->GetFieldID(usb_devClazz, "descriptor", "Lch/ntb/inf/libusbJava/Usb_Device_Descriptor;");
-		usb_devFID_config = env->GetFieldID(usb_devClazz, "config", "[Lch/ntb/inf/libusbJava/Usb_Config_Descriptor;");
-		usb_devFID_devnum = env->GetFieldID(usb_devClazz, "devnum", "B");
-		usb_devFID_num_children = env->GetFieldID(usb_devClazz, "num_children", "B");
-		usb_devFID_children = env->GetFieldID(usb_devClazz, "children", "Lch/ntb/inf/libusbJava/Usb_Device;");
-		usb_devFID_devStructAddr = env->GetFieldID(usb_devClazz, "devStructAddr", "J");
-
-#ifdef DEBUGON
-		printf("usb_device references loaded\n");
-#endif
-		/* usb_device_descriptor*/
-		jobject devDescClazz = env->FindClass("ch/ntb/inf/libusbJava/Usb_Device_Descriptor");//returns a local reference
-		usb_devDescClazz = (jclass)env->NewGlobalRef(devDescClazz);//make it global
-		if (usb_devDescClazz == NULL) {
-			return NULL; /* exception thrown */
-		}
-		usb_devDescMid = env->GetMethodID(usb_devDescClazz, "<init>", "()V");
-		if (usb_devDescMid == NULL) {
-			return NULL;
-		}
-		usb_devDescFID_bLength = env->GetFieldID(usb_devDescClazz, "bLength", "B");
-		usb_devDescFID_bDescriptorType = env->GetFieldID(usb_devDescClazz, "bDescriptorType", "B");
-		usb_devDescFID_bcdUSB = env->GetFieldID(usb_devDescClazz, "bcdUSB", "S");
-		usb_devDescFID_bDeviceClass = env->GetFieldID(usb_devDescClazz, "bDeviceClass", "B");
-		usb_devDescFID_bDeviceSubClass = env->GetFieldID(usb_devDescClazz, "bDeviceSubClass", "B");
-		usb_devDescFID_bDeviceProtocol = env->GetFieldID(usb_devDescClazz, "bDeviceProtocol", "B");
-		usb_devDescFID_bMaxPacketSize0 = env->GetFieldID(usb_devDescClazz, "bMaxPacketSize0", "B");
-		usb_devDescFID_idVendor = env->GetFieldID(usb_devDescClazz, "idVendor", "S");
-		usb_devDescFID_idProduct = env->GetFieldID(usb_devDescClazz, "idProduct", "S");
-		usb_devDescFID_bcdDevice = env->GetFieldID(usb_devDescClazz, "bcdDevice", "S");
-		usb_devDescFID_iManufacturer = env->GetFieldID(usb_devDescClazz, "iManufacturer", "B");
-		usb_devDescFID_iProduct = env->GetFieldID(usb_devDescClazz, "iProduct", "B");
-		usb_devDescFID_iSerialNumber = env->GetFieldID(usb_devDescClazz, "iSerialNumber", "B");
-		usb_devDescFID_bNumConfigurations = env->GetFieldID(usb_devDescClazz, "bNumConfigurations", "B");
-
-
-#ifdef DEBUGON
-		printf("usb_device_descriptor references loaded\n");
-#endif
-		/* usb_configuration_descriptor*/
-		jobject confDescClazz = env->FindClass("ch/ntb/inf/libusbJava/Usb_Config_Descriptor");//returns a local reference
-		usb_confDescClazz = (jclass)env->NewGlobalRef(confDescClazz);//make it global
-		if (usb_confDescClazz == NULL) {
-			return NULL; /* exception thrown */
-		}
-		usb_confDescMid = env->GetMethodID(usb_confDescClazz, "<init>", "()V");
-		if (usb_confDescMid == NULL) {
-			return NULL;
-		}
-
-		usb_confDescFID_bLength = env->GetFieldID(usb_confDescClazz, "bLength", "B");
-		usb_confDescFID_bDescriptorType = env->GetFieldID(usb_confDescClazz, "bDescriptorType", "B");
-		usb_confDescFID_wTotalLength = env->GetFieldID(usb_confDescClazz, "wTotalLength", "S");
-		usb_confDescFID_bNumInterfaces = env->GetFieldID(usb_confDescClazz, "bNumInterfaces", "B");
-		usb_confDescFID_bConfigurationValue = env->GetFieldID(usb_confDescClazz, "bConfigurationValue", "B");
-		usb_confDescFID_iConfiguration = env->GetFieldID(usb_confDescClazz, "iConfiguration", "B");
-		usb_confDescFID_bmAttributes = env->GetFieldID(usb_confDescClazz, "bmAttributes", "B");
-		usb_confDescFID_MaxPower = env->GetFieldID(usb_confDescClazz, "MaxPower", "B");
-		usb_confDescFID_interface_ = env->GetFieldID(usb_confDescClazz, "interface_", "[Lch/ntb/inf/libusbJava/Usb_Interface;");
-		usb_confDescFID_extra = env->GetFieldID(usb_confDescClazz, "extra", "[B");
-		usb_confDescFID_extralen = env->GetFieldID(usb_confDescClazz, "extralen", "I");
-#ifdef DEBUGON
-		printf("usb_configuration_descriptor references loaded\n");
-#endif
-		/* usb_interface*/
-		jobject intClazz = env->FindClass("ch/ntb/inf/libusbJava/Usb_Interface");//returns a local reference
-		usb_intClazz = (jclass)env->NewGlobalRef(intClazz);//make it global
-		if (usb_intClazz == NULL) {
-			return NULL; /* exception thrown */
-		}
-		usb_intMid = env->GetMethodID(usb_intClazz, "<init>", "()V");
-		if (usb_intMid == NULL) {
-			return NULL;
-		}
-		usb_intFID_altsetting = env->GetFieldID(usb_intClazz, "altsetting", "[Lch/ntb/inf/libusbJava/Usb_Interface_Descriptor;");
-		usb_intFID_num_altsetting = env->GetFieldID(usb_intClazz, "num_altsetting", "I");
-#ifdef DEBUGON
-		printf("usb_interface references loaded\n");
-#endif
-		/* usb_interface_descriptor*/
-		jobject intDescClazz = env->FindClass( "ch/ntb/inf/libusbJava/Usb_Interface_Descriptor");//returns a local reference
-		usb_intDescClazz = (jclass)env->NewGlobalRef(intDescClazz);//make it global
-		if (usb_intDescClazz == NULL) {
-			return NULL; /* exception thrown */
-		}
-		usb_intDescMid = env->GetMethodID(usb_intDescClazz, "<init>", "()V");
-		if (usb_intDescMid == NULL) {
-			return NULL;
-		}
-		usb_intDescFID_bLength = env->GetFieldID(usb_intDescClazz, "bLength", "B");
-		usb_intDescFID_bDescriptorType = env->GetFieldID(usb_intDescClazz, "bDescriptorType", "B");
-		usb_intDescFID_bInterfaceNumber = env->GetFieldID(usb_intDescClazz, "bInterfaceNumber", "B");
-		usb_intDescFID_bAlternateSetting = env->GetFieldID(usb_intDescClazz, "bAlternateSetting", "B");
-		usb_intDescFID_bNumEndpoints = env->GetFieldID(usb_intDescClazz, "bNumEndpoints", "B");
-		usb_intDescFID_bInterfaceClass = env->GetFieldID(usb_intDescClazz, "bInterfaceClass", "B");
-		usb_intDescFID_bInterfaceSubClass = env->GetFieldID(usb_intDescClazz, "bInterfaceSubClass", "B");
-		usb_intDescFID_bInterfaceProtocol = env->GetFieldID(usb_intDescClazz, "bInterfaceProtocol", "B");
-		usb_intDescFID_iInterface = env->GetFieldID(usb_intDescClazz, "iInterface", "B");
-		usb_intDescFID_endpoint = env->GetFieldID(usb_intDescClazz, "endpoint", "[Lch/ntb/inf/libusbJava/Usb_Endpoint_Descriptor;");
-		usb_intDescFID_extra = env->GetFieldID(usb_intDescClazz, "extra", "[B");
-		usb_intDescFID_extralen = env->GetFieldID(usb_intDescClazz, "extralen", "I");
-#ifdef DEBUGON
-		printf("usb_interface_descriptor references loaded\n");
-#endif
-		/* usb_endpoint_descriptor*/
-		jobject epDescClazz = env->FindClass("ch/ntb/inf/libusbJava/Usb_Endpoint_Descriptor");//returns a local reference
-		usb_epDescClazz = (jclass)env->NewGlobalRef(epDescClazz);//make it global
-		if (usb_epDescClazz == NULL) {
-			return NULL; /* exception thrown */
-		}
-		usb_epDescMid = env->GetMethodID(usb_epDescClazz, "<init>", "()V");
-		if (usb_epDescMid == NULL) {
-			return NULL;
-		}
-		usb_epDescFID_bLength = env->GetFieldID(usb_epDescClazz, "bLength", "B");
-		usb_epDescFID_bDescriptorType = env->GetFieldID(usb_epDescClazz, "bDescriptorType", "B");
-		usb_epDescFID_bEndpointAddress = env->GetFieldID(usb_epDescClazz, "bEndpointAddress", "B");
-		usb_epDescFID_bmAttributes = env->GetFieldID(usb_epDescClazz, "bmAttributes", "B");
-		usb_epDescFID_wMaxPacketSize = env->GetFieldID(usb_epDescClazz, "wMaxPacketSize", "S");
-		usb_epDescFID_bInterval = env->GetFieldID(usb_epDescClazz, "bInterval", "B");
-		usb_epDescFID_bRefresh = env->GetFieldID(usb_epDescClazz, "bRefresh", "B");
-		usb_epDescFID_bSynchAddress = env->GetFieldID(usb_epDescClazz, "bSynchAddress", "B");
-		usb_epDescFID_extra = env->GetFieldID(usb_epDescClazz, "extra", "[B");
-		usb_epDescFID_extralen = env->GetFieldID(usb_epDescClazz, "extralen", "I");
-#ifdef DEBUGON
-		printf("usb_endpoint_descriptor references loaded\n");
-#endif
-		/*libusb_event*/
-		jobject cb_clazz = env->FindClass("ch/ntb/inf/libusbJava/Libusb_event");//returns a local reference
-		usb_cb_clazz = (jclass)env->NewGlobalRef(cb_clazz);//make it global
-		if (usb_cb_clazz == NULL) {
-			printf("load Clazz failed\n");
-			return NULL; /*exception thrown*/
-		}
-		usb_transfer_cb_Mid = env->GetMethodID(usb_cb_clazz, "transferCallback", "()V");
-		if (usb_transfer_cb_Mid == NULL) {
-			printf("load method transferCallback failed\n");
-			return NULL; /* exception thrown */
-		}
-		usb_fd_added_cb_Mid = env->GetMethodID(usb_cb_clazz, "fdAddedCallback", "(I)V");
-		if (usb_fd_added_cb_Mid == NULL) {
-			printf("load method fdAddedCallback failed\n");
-			return NULL;/* exception thrown */
-		}
-		usb_fd_removed_cb_Mid = env->GetMethodID(usb_cb_clazz, "fdRemovedCallback", "(I)V");
-		if (usb_fd_removed_cb_Mid == NULL) {
-			printf("load method fdRemovedCallback failed\n");
-			return NULL;/* exception thrown */
-		}
-#ifdef DEBUGON
-		printf("usb_event_descriptor references loaded\n");
-#endif
-		/*Libusb_pollfd*/
-		jobject pollfd_clazz = env->FindClass("ch/ntb/inf/libusbJava/Libusb_pollfd");//returns a local reference
-		usb_pollfd_clazz = (jclass)env->NewGlobalRef(pollfd_clazz);//make it global
-		if (usb_pollfd_clazz == NULL) {
-			return NULL; /*exception thrown*/
-		}
-		usb_pollfd_Mid = env->GetMethodID(usb_pollfd_clazz, "<init>", "()V");
-		if (usb_devMid == NULL) {
-			return NULL; /*exception thrown*/
-		}
-		usb_pollfdFID_fd = env->GetFieldID(usb_pollfd_clazz, "fd", "I");
-		usb_pollfdFID_events = env->GetFieldID(usb_pollfd_clazz, "events", "B");
-#ifdef DEBUGON
-		printf("Libusb_pollfd_descriptor references loaded\n");
-#endif
-		java_references_loaded = 1;
-
-#ifdef DEBUGON
-		printf("libusb_init: Field initialization done \n");
-#endif
-	}
+	if (ReferencesCheck(&info, env) != 0) return NULL;
 
 	/* objects*/
 	jobject root_usb_devObj, usb_devObj, usb_devObj_next, usb_devObj_prev,
@@ -526,23 +340,20 @@ JNIEXPORT jobject JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1get_1de
 		libusb_free_device_list(devs, 1);
 		return NULL;
 	}
-
-	/*empty list*/
-	if (!cnt) {
+	else if (cnt == 0) {
 		libusb_free_device_list(devs, 1);
-		usb_devObj = env->NewObject(usb_devClazz, usb_devMid);
-		env->SetByteField(usb_devObj, usb_devFID_devnum, -1);
+		return NULL;
 	}
+
 	usb_devObj = NULL;
 	usb_devObj_next = NULL;
 	usb_devObj_prev = NULL;
-	/* create a new object for every device*/
+
+	/* create a new object for every device */
 	for (i = 0; i < cnt; i++) {
 #ifdef DEBUGON
 		printf("libusb_get_device_list: dev %u \n", i);
 #endif
-		char filename[3];
-
 		libusb_device_descriptor dev_desc;
 		res = libusb_get_device_descriptor(devs[i], &dev_desc);
 
@@ -551,36 +362,30 @@ JNIEXPORT jobject JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1get_1de
 			printf("\t libusb_get _device_list: dev %u coudn't read Devicedescriptor\n",i);
 			continue;
 		}
+
 		if (dev_desc.bLength != 18) {
 			printf("Corrupt Devicedescriptor dev %d\n", i);
 			continue;
 		}
 
-		if (!usb_devObj) {
-			usb_devObj = env->NewObject(usb_devClazz, usb_devMid);
-			if (!usb_devObj) {
-				setLibusbJavaError("shared library error: Error NewObject (usb_devObj)");
-				return NULL;
-			}
+		usb_devObj = Usb_Device_create(env, devs[i], libusb_get_device_address(devs[i]));
+		if (usb_devObj == NULL) {
+			setLibusbJavaError("shared library error: Error NewObject (usb_devObj)");
+			return NULL;
+		}
+
+		/* If it's the root element (no previous elements available) we set the root value */
+		if (usb_devObj_prev == NULL) {
 			root_usb_devObj = usb_devObj;
 		}
-		usb_devObj_next = NULL;
-		if (i < cnt - 1) {
-			usb_devObj_next = env->NewObject(usb_devClazz, usb_devMid);
-			if (!usb_devObj_next) {
-				setLibusbJavaError("shared library error: Error NewObject (usb_devObj_next)");
-				return NULL;
-			}
+		else {
+			/* If it's not the root element, simply enqueue the newly created device */
+			Usb_Device_NextSet(env, usb_devObj_prev, usb_devObj);
 		}
-		/*fill the fields of the object*/
-		env->SetObjectField(usb_devObj, usb_devFID_next, usb_devObj_next);
-		env->SetObjectField(usb_devObj, usb_devFID_prev, usb_devObj_prev);
-		sprintf(filename, "%03d", libusb_get_device_address(devs[i]));
-		env->SetObjectField(usb_devObj, usb_devFID_filename, env->NewStringUTF(filename));/*like the compatibility Layer*/
-		env->SetByteField(usb_devObj, usb_devFID_devnum, libusb_get_device_address(devs[i]));
-		env->SetByteField(usb_devObj, usb_devFID_num_children, 0);/*Hardcoded to 0, like the compatibility Layer*/
-		env->SetObjectField(usb_devObj, usb_devFID_children, NULL);/*Hardcoded to NULL, like the compatibility Layer*/
-		env->SetLongField(usb_devObj, usb_devFID_devStructAddr,	(jlong) devs[i]);
+
+		/* Fill the fields of the object */
+		Usb_Device_NextSet(env, usb_devObj, usb_devObj_next);
+		Usb_Device_PrevSet(env, usb_devObj, usb_devObj_prev);
 
 		/*device Descriptor*/
 		usb_devDescObj = env->NewObject(usb_devDescClazz, usb_devDescMid);
@@ -602,8 +407,10 @@ JNIEXPORT jobject JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1get_1de
 		env->SetByteField(usb_devDescObj, usb_devDescFID_iProduct, dev_desc.iProduct);
 		env->SetByteField(usb_devDescObj, usb_devDescFID_iSerialNumber,	dev_desc.iSerialNumber);
 		env->SetByteField(usb_devDescObj, usb_devDescFID_bNumConfigurations, dev_desc.bNumConfigurations);
-		env->SetObjectField(usb_devDescObj, usb_devFID_descriptor, usb_devDescObj);
-		env->SetObjectField(usb_devObj, usb_devFID_descriptor, usb_devDescObj);
+		// TODO @NIUE: Why a reference on itself?! And why should we use a field ID from the Usb_Device class
+		//			   for an instance of the Descriptor object?
+		//	env->SetObjectField(usb_devDescObj, usb_devFID_descriptor, usb_devDescObj);
+		Usb_Device_DescriptorSet(env, usb_devObj, usb_devDescObj);
 
 		/*configuration descriptor*/
 		/*Loop through all of the configurations*/
@@ -748,17 +555,17 @@ JNIEXPORT jobject JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1get_1de
 			env->SetObjectField(usb_confDescObj, usb_confDescFID_interface_, usb_intObjArray);
 			libusb_free_config_descriptor(conf_desc);
 		}
+
 		if (res) {
-			env->SetLongField(usb_devObj, usb_devFID_devStructAddr, (jlong) 0);
+			Usb_Device_HandleSet(env, usb_devObj, NULL);
 			continue;
 		}
-		env->SetObjectField(usb_devObj, usb_devFID_config, usb_confDescObjArray);
+		Usb_Device_ConfigSet(env, usb_devObj, usb_confDescObjArray);
 		usb_devObj_prev = usb_devObj;
-		usb_devObj = usb_devObj_next;
-
 	}
+
 	//Eliminate empty last device
-	env->SetObjectField(usb_devObj_prev, usb_devFID_next, NULL);
+	Usb_Device_NextSet(env, usb_devObj_prev, NULL);
 
 //	free(dev_desc);
 	libusb_free_device_list(devs, 0);
@@ -775,7 +582,15 @@ JNIEXPORT jobject JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1get_1de
  ********************************************************************************************/
 JNIEXPORT jshort JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1get_1bus_1number( JNIEnv *env, jclass obj, jobject dev) {
 	clearLibusbJavaError();
-	libusb_device *libusb_dev = (libusb_device *) (long) env->GetLongField(dev,	usb_devFID_devStructAddr);
+
+	if (ReferencesCheck(&info, env) != 0) return 0;
+
+	libusb_device *libusb_dev = Usb_Device_HandleGet(env, dev);
+	if (libusb_dev == NULL) {
+		ThrowLibusbError(env, ERROR_JAVA_ILEGAL_DEVICE_HANDLE);
+		return 0;
+	}
+
 	return libusb_get_bus_number(libusb_dev);
 }
 
@@ -787,7 +602,15 @@ JNIEXPORT jshort JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1get_1bus
 JNIEXPORT jint
 JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1get_1max_1iso_1packet_1size( JNIEnv *env, jclass obj, jobject dev, jshort epAddr) {
 	clearLibusbJavaError();
-	libusb_device *libusb_dev = (libusb_device *) (unsigned long) env->GetLongField(dev, usb_devFID_devStructAddr);
+
+	if (ReferencesCheck(&info, env) != 0) return 0;
+
+	libusb_device *libusb_dev = Usb_Device_HandleGet(env, dev);
+	if (libusb_dev == NULL) {
+		ThrowLibusbError(env, ERROR_JAVA_ILEGAL_DEVICE_HANDLE);
+		return 0;
+	}
+
 	return libusb_get_max_iso_packet_size(libusb_dev, epAddr);
 }
 
@@ -798,7 +621,15 @@ JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1get_1max_1iso_1packet_1si
  ********************************************************************************************/
 JNIEXPORT jobject JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1ref_1device(JNIEnv *env, jclass obj, jobject dev) {
 	clearLibusbJavaError();
-	libusb_device *libusb_dev =	(libusb_device *) (unsigned long) env->GetLongField(dev, usb_devFID_devStructAddr);
+
+	if (ReferencesCheck(&info, env) != 0) return NULL;
+
+	libusb_device *libusb_dev = Usb_Device_HandleGet(env, dev);
+	if (libusb_dev == NULL) {
+		ThrowLibusbError(env, ERROR_JAVA_ILEGAL_DEVICE_HANDLE);
+		return NULL;
+	}
+
 	libusb_ref_device(libusb_dev);
 	return dev;
 }
@@ -810,7 +641,13 @@ JNIEXPORT jobject JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1ref_1de
  ********************************************************************************************/
 JNIEXPORT void JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1unref_1device(JNIEnv *env, jclass obj, jobject dev) {
 	clearLibusbJavaError();
-	libusb_device *libusb_dev =	(libusb_device *) (unsigned long) env->GetLongField(dev,usb_devFID_devStructAddr);
+	if (ReferencesCheck(&info, env) != 0) return;
+	libusb_device *libusb_dev = Usb_Device_HandleGet(env, dev);
+	if (libusb_dev == NULL) {
+		ThrowLibusbError(env, ERROR_JAVA_ILEGAL_DEVICE_HANDLE);
+		return;
+	}
+
 	libusb_unref_device(libusb_dev);
 }
 
@@ -822,7 +659,13 @@ JNIEXPORT void JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1unref_1dev
 JNIEXPORT jlong JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1open( JNIEnv *env, jclass obj, jobject dev) {
 	clearLibusbJavaError();
 	libusb_device_handle *handle = NULL;
-	libusb_device *libusb_dev =	(libusb_device *) (unsigned long) env->GetLongField(dev, usb_devFID_devStructAddr);
+	if (ReferencesCheck(&info, env) != 0) return 0;
+	libusb_device *libusb_dev = Usb_Device_HandleGet(env, dev);
+	if (libusb_dev == NULL) {
+		ThrowLibusbError(env, ERROR_JAVA_ILEGAL_DEVICE_HANDLE);
+		return 0;
+	}
+
 	int res = libusb_open(libusb_dev, &handle);
 
 	if(res != 0)
@@ -863,10 +706,12 @@ JNIEXPORT void JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1close(JNIE
 JNIEXPORT jobject JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1get_1device(JNIEnv *env, jclass obj, jlong handle) {
 	int res, a;
 	uint8_t c, h, e;
-	char filename[3];
 	clearLibusbJavaError();
+	if (ReferencesCheck(&info, env) != 0) return NULL;
+
 	libusb_config_descriptor *conf_desc;
 	struct libusb_device_descriptor dev_desc;
+
 	libusb_device *lib_dev = libusb_get_device((libusb_device_handle*) (unsigned long) handle);
 
 	/* objects*/
@@ -874,30 +719,24 @@ JNIEXPORT jobject JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1get_1de
 	jobjectArray usb_confDescObjArray, usb_intObjArray, usb_intDescObjArray, usb_epDescObjArray;
 
 	/* create a new object for device*/
-	libusb_get_device_descriptor(lib_dev, &dev_desc);
-	usb_devObj = env->NewObject(usb_devClazz, usb_devMid);
-	if (!usb_devObj) {
-		setLibusbJavaError("shared library error: Error NewObject (usb_devObj)");
+	usb_devObj = Usb_Device_create(env, lib_dev, libusb_get_device_address(lib_dev));
+	if (usb_devObj == NULL) {
+		setLibusbJavaError("shared library error: Could not create new Usb_Device!");
 		return NULL;
 	}
 
 	/*fill the fields of the object*/
-	env->SetObjectField(usb_devObj, usb_devFID_next, NULL);
-	env->SetObjectField(usb_devObj, usb_devFID_prev, NULL);
-
-	sprintf(filename, "%03d", libusb_get_device_address(lib_dev));
-	env->SetObjectField(usb_devObj, usb_devFID_filename, env->NewStringUTF(filename));/*like the compatibility Layer*/
-	env->SetByteField(usb_devObj, usb_devFID_devnum, libusb_get_device_address(lib_dev));
-	env->SetByteField(usb_devObj, usb_devFID_num_children, 0);/*Hardcoded to 0, like the compatibility Layer*/
-	env->SetObjectField(usb_devObj, usb_devFID_children, NULL);/*Hardcoded to NULL, like the compatibility Layer*/
-	env->SetLongField(usb_devObj, usb_devFID_devStructAddr,(jlong) lib_dev);
+	Usb_Device_NextSet(env, usb_devObj, NULL);
+	Usb_Device_PrevSet(env, usb_devObj, NULL);
 
 	/*device Descriptor*/
+	libusb_get_device_descriptor(lib_dev, &dev_desc);
 	usb_devDescObj = env->NewObject(usb_devDescClazz, usb_devDescMid);
 	if (!usb_devDescObj) {
 		setLibusbJavaError("shared library error: Error NewObject (usb_devDescObj)");
 		return NULL;
 	}
+
 	env->SetByteField(usb_devDescObj, usb_devDescFID_bLength, dev_desc.bLength);
 	env->SetByteField(usb_devDescObj, usb_devDescFID_bDescriptorType, dev_desc.bDescriptorType);
 	env->SetShortField(usb_devDescObj, usb_devDescFID_bcdUSB, dev_desc.bcdUSB);
@@ -912,7 +751,10 @@ JNIEXPORT jobject JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1get_1de
 	env->SetByteField(usb_devDescObj, usb_devDescFID_iProduct, dev_desc.iProduct);
 	env->SetByteField(usb_devDescObj, usb_devDescFID_iSerialNumber, dev_desc.iSerialNumber);
 	env->SetByteField(usb_devDescObj, usb_devDescFID_bNumConfigurations, dev_desc.bNumConfigurations);
-	env->SetObjectField(usb_devDescObj, usb_devFID_descriptor, usb_devDescObj);
+	// TODO @NIUE: Why a reference on itself?! And why should we use a field ID from the Usb_Device class
+	//			   for an instance of the Descriptor object?
+	//	env->SetObjectField(usb_devDescObj, usb_devFID_descriptor, usb_devDescObj);
+	Usb_Device_DescriptorSet(env, usb_devObj, usb_devDescObj);
 
 	/*configuration descriptor*/
 	/*Loop through all of the configurations*/
@@ -1060,7 +902,7 @@ JNIEXPORT jobject JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1get_1de
 		env->SetObjectField(usb_confDescObj, usb_confDescFID_interface_, usb_intObjArray);
 		libusb_free_config_descriptor(conf_desc);
 	}
-	env->SetObjectField(usb_devObj, usb_devFID_config, usb_confDescObjArray);
+	Usb_Device_ConfigSet(env, usb_devObj, usb_confDescObjArray);
 
 #ifdef DEBUGON
 	printf("libusb_get_device: done\n");
@@ -1196,11 +1038,20 @@ JNIEXPORT void JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1attach_1ke
 JNIEXPORT jobject JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1get_1active_1config_1descriptor(JNIEnv *env, jclass obj, jobject dev) {
 	uint8_t a, e;
 	clearLibusbJavaError();
+	if (ReferencesCheck(&info, env) != 0) return NULL;
+	libusb_device *libusb_dev = Usb_Device_HandleGet(env, dev);
+	if (libusb_dev == NULL) {
+		ThrowLibusbError(env, ERROR_JAVA_ILEGAL_DEVICE_HANDLE);
+		return NULL;
+	}
+
 	libusb_config_descriptor *conf_desc;
 	jobject usb_confDescObj, usb_intObj, usb_intDescObj, usb_epDescObj;
 	jobjectArray usb_intObjArray, usb_intDescObjArray, usb_epDescObjArray;
 
-	libusb_device *lib_dev = (libusb_device*) (unsigned long) env->GetLongField(dev, usb_devFID_devStructAddr);
+	libusb_device *lib_dev = Usb_Device_HandleGet(env, dev);
+	if (lib_dev == NULL) return NULL;
+
 	if (libusb_get_active_config_descriptor(lib_dev, &conf_desc)) {
 		setLibusbJavaError("shared library error: get_configuration failed");
 		return NULL;
@@ -1932,7 +1783,7 @@ JNIEXPORT jstring JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1strerro
  */
 JNIEXPORT jint JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_setup(JNIEnv *env, jclass obj)
 {
-	return ReferencesLoad(env);
+	return ReferencesLoad(&info, env, jniObjects);
 }
 
 /*
@@ -1942,29 +1793,7 @@ JNIEXPORT jint JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_setup(JNIEnv *env,
  */
 JNIEXPORT void JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_teardown(JNIEnv *env, jclass obj)
 {
-	ReferencesUnload(env);
-}
-
-/*
- * Class:     ch_ntb_inf_libusbJava_LibusbJava1
- * Method:    libusb_exceptionTest
- * Signature: (I)V
- */
-JNIEXPORT void JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1exceptionTest(JNIEnv *env, jclass obj, jint code)
-{
-	ThrowLibusbError(env, code);
-}
-
-/*
- * Class:     ch_ntb_inf_libusbJava_LibusbJava1
- * Method:    to_byteArrayTest
- * Signature: (Ljava/lang/String;I)[B
- */
-JNIEXPORT jbyteArray JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_to_1byteArrayTest(JNIEnv *env, jclass obj, jstring str, jint size)
-{
-	jbyteArray result = to_byteArray(env, env->GetStringUTFChars (str, NULL), size);
-	env->ReleaseStringUTFChars(str, NULL);
-	return result;
+	ReferencesUnload(&info, env);
 }
 
 /********************************************************************************************
@@ -2062,6 +1891,26 @@ static __inline void JNICALL ThrowIfUnsuccessful(JNIEnv *env, int libusb_result)
 	}
 }
 
+#ifdef DO_UNIT_TEST
+	TEST_CASE(ThrowIfUnsuccessfulTest)
+	{
+		TEST_CONTEXT();
+
+		CuAssert(tc, "Pre-Condition: No exception pending", env->ExceptionCheck() == JNI_FALSE);
+
+		ThrowIfUnsuccessful(env, 0);
+		CuAssert(tc, "No exception pending", env->ExceptionCheck() == JNI_FALSE);
+
+		ThrowIfUnsuccessful(env, -1);
+		CuAssert(tc, "Exception pending < 0", env->ExceptionCheck() == JNI_TRUE);
+		env->ExceptionClear();
+
+		ThrowIfUnsuccessful(env, 1);
+		CuAssert(tc, "Exception pending > 0", env->ExceptionCheck() == JNI_TRUE);
+		env->ExceptionClear();
+	}
+#endif
+
 /*!	\brief Throws an exception of type LibusbError in the calling Java environment.
  *
  * 	\param	env		Environment to throw the exception in
@@ -2118,21 +1967,293 @@ no_class:
 	return;
 }
 
+#ifdef DO_UNIT_TEST
+	static void ThrowLibusbErrorTestEvaluate(CuTest *tc, JNIEnv *env, int code) {
+		/* Prepare the needed environment */
+		jclass clazz = env->FindClass("ch/ntb/inf/libusbJava/exceptions/LibusbError");
+		CuAssert(tc, "LibusbError class not found!", clazz != NULL);
+		jfieldID f_code = env->GetFieldID(clazz, "code", "I");
+		CuAssert(tc, "LibusbError has a field \"code\"", f_code != NULL);
+
+		/* Evaluate the effect of the call */
+		jthrowable e = env->ExceptionOccurred();
+		CuAssert(tc, "An exception occured", e != NULL);
+		CuAssert(tc, "The exception is of type LibusbError", env->IsInstanceOf(e, clazz) == JNI_TRUE);
+		CuAssertIntEquals_Msg(tc, "The exception error code is correct", code, env->GetIntField(e, f_code));
+		env->ExceptionClear();
+	}
+
+	TEST_CASE(ThrowLibusbErrorTest)
+	{
+		TEST_CONTEXT();
+
+		/* Test borders and run through a range of values including 0 */
+		int code = 0;
+		for (code = -5;code < 5;code++) {
+			ThrowLibusbError(env, code);
+			ThrowLibusbErrorTestEvaluate(tc, env, code);
+		}
+
+		ThrowLibusbError(env, 0x80000000);
+		ThrowLibusbErrorTestEvaluate(tc, env, 0x80000000);
+		ThrowLibusbError(env, 0x7FFFFFFF);
+		ThrowLibusbErrorTestEvaluate(tc, env, 0x7FFFFFFF);
+	}
+#endif
+
+/*!	\brief	Checks if the references are loaded correctly and throws an exception if not
+ *
+ * 			This function serves as a "paranoia" function to make sure, there are no calls
+ * 			to the library without loading the references first.
+ *
+ * 	\param	instance	Reference-Instance to be checked
+ * 	\param	env			JNI Environment the function can work with in case of an error
+ *
+ * 	\return
+ * 			-	0 if everything is ok
+ * 			-  <0 in case the references are not loaded
+ */
+static __inline int	ReferencesCheck(tLUJ_Instance *instance, JNIEnv *env)
+{
+	int result = -1;
+
+	if (instance->jni.refs_loaded == 0){
+		ThrowLibusbError(env, ERROR_JAVA_REFERENCES_NOT_LOADED);
+	}
+	else {
+		result = 0;
+	}
+
+	return result;
+}
+
 /*!	\brief Loads all class References from the environment.
  *
- * 	\param	env	Pointer to an environment enabling access to the jvm
+ * 	\param	instance	Pointer to an instance of a status data struct the action should be performed with
+ * 	\param	env			Pointer to an environment enabling access to the jvm
+ * 	\param	objects		An array of function calls for connecting / disconnecting
+ * 						the objects to the JNI layer. The array is expected to be
+ * 						NULL terminated. (tJNIObject::connect set to NULL).
  *
  * 	\return
  * 			-  0 if the references could be loaded successfully
  * 			- <0 if an error occured
+ *
+ * 	\note	For every valid row it is expected that neither connect nor disconnect is NULL
  */
-static __inline int ReferencesLoad(JNIEnv *env)
+static __inline int ReferencesLoad(tLUJ_Instance *instance, JNIEnv *env, const tJNIObject *objects)
 {
 	int result = -1;
 
-	if (info.jni.refs_loaded != 0)
+	/* If the references are not (yet) loaded, we start loading
+	 * the references for the classes used by this wrapper. */
+	if (instance->jni.refs_loaded == 0)
 	{
-		info.jni.refs_loaded = -1;
+		int i = 0;
+
+		result = 0;
+
+		/* Walk through all registered objects and try to connect
+		 * them. */
+		while (objects[i].connect != NULL) {
+			if (objects[i].connect(env) != 0) {
+				result = -1;
+				break;
+			}
+
+			++i;
+		}
+
+		/* If an error occured, we roll back all the previously
+		 * connected elements. */
+		if (result != 0) {
+			while (i > 0) {
+				--i;
+				objects[i].disconnect(env);
+			}
+
+			instance->jni.refs_loaded = 0;
+		}
+		else
+		{
+#ifndef DO_UNIT_TEST
+			{
+				/* find classes and field ids*/
+		#ifdef DEBUGON
+				printf("load references starts\n");
+		#endif
+
+		#ifdef DEBUGON
+				printf("usb_device references loaded\n");
+		#endif
+				/* usb_device_descriptor*/
+				jobject devDescClazz = env->FindClass("ch/ntb/inf/libusbJava/Usb_Device_Descriptor");//returns a local reference
+				usb_devDescClazz = (jclass)env->NewGlobalRef(devDescClazz);//make it global
+				if (usb_devDescClazz == NULL) {
+					return -1; /* exception thrown */
+				}
+				usb_devDescMid = env->GetMethodID(usb_devDescClazz, "<init>", "()V");
+				if (usb_devDescMid == NULL) {
+					return -1;
+				}
+				usb_devDescFID_bLength = env->GetFieldID(usb_devDescClazz, "bLength", "B");
+				usb_devDescFID_bDescriptorType = env->GetFieldID(usb_devDescClazz, "bDescriptorType", "B");
+				usb_devDescFID_bcdUSB = env->GetFieldID(usb_devDescClazz, "bcdUSB", "S");
+				usb_devDescFID_bDeviceClass = env->GetFieldID(usb_devDescClazz, "bDeviceClass", "B");
+				usb_devDescFID_bDeviceSubClass = env->GetFieldID(usb_devDescClazz, "bDeviceSubClass", "B");
+				usb_devDescFID_bDeviceProtocol = env->GetFieldID(usb_devDescClazz, "bDeviceProtocol", "B");
+				usb_devDescFID_bMaxPacketSize0 = env->GetFieldID(usb_devDescClazz, "bMaxPacketSize0", "B");
+				usb_devDescFID_idVendor = env->GetFieldID(usb_devDescClazz, "idVendor", "S");
+				usb_devDescFID_idProduct = env->GetFieldID(usb_devDescClazz, "idProduct", "S");
+				usb_devDescFID_bcdDevice = env->GetFieldID(usb_devDescClazz, "bcdDevice", "S");
+				usb_devDescFID_iManufacturer = env->GetFieldID(usb_devDescClazz, "iManufacturer", "B");
+				usb_devDescFID_iProduct = env->GetFieldID(usb_devDescClazz, "iProduct", "B");
+				usb_devDescFID_iSerialNumber = env->GetFieldID(usb_devDescClazz, "iSerialNumber", "B");
+				usb_devDescFID_bNumConfigurations = env->GetFieldID(usb_devDescClazz, "bNumConfigurations", "B");
+
+
+		#ifdef DEBUGON
+				printf("usb_device_descriptor references loaded\n");
+		#endif
+				/* usb_configuration_descriptor*/
+				jobject confDescClazz = env->FindClass("ch/ntb/inf/libusbJava/Usb_Config_Descriptor");//returns a local reference
+				usb_confDescClazz = (jclass)env->NewGlobalRef(confDescClazz);//make it global
+				if (usb_confDescClazz == NULL) {
+					return -1; /* exception thrown */
+				}
+				usb_confDescMid = env->GetMethodID(usb_confDescClazz, "<init>", "()V");
+				if (usb_confDescMid == NULL) {
+					return -1;
+				}
+
+				usb_confDescFID_bLength = env->GetFieldID(usb_confDescClazz, "bLength", "B");
+				usb_confDescFID_bDescriptorType = env->GetFieldID(usb_confDescClazz, "bDescriptorType", "B");
+				usb_confDescFID_wTotalLength = env->GetFieldID(usb_confDescClazz, "wTotalLength", "S");
+				usb_confDescFID_bNumInterfaces = env->GetFieldID(usb_confDescClazz, "bNumInterfaces", "B");
+				usb_confDescFID_bConfigurationValue = env->GetFieldID(usb_confDescClazz, "bConfigurationValue", "B");
+				usb_confDescFID_iConfiguration = env->GetFieldID(usb_confDescClazz, "iConfiguration", "B");
+				usb_confDescFID_bmAttributes = env->GetFieldID(usb_confDescClazz, "bmAttributes", "B");
+				usb_confDescFID_MaxPower = env->GetFieldID(usb_confDescClazz, "MaxPower", "B");
+				usb_confDescFID_interface_ = env->GetFieldID(usb_confDescClazz, "interface_", "[Lch/ntb/inf/libusbJava/Usb_Interface;");
+				usb_confDescFID_extra = env->GetFieldID(usb_confDescClazz, "extra", "[B");
+				usb_confDescFID_extralen = env->GetFieldID(usb_confDescClazz, "extralen", "I");
+		#ifdef DEBUGON
+				printf("usb_configuration_descriptor references loaded\n");
+		#endif
+				/* usb_interface*/
+				jobject intClazz = env->FindClass("ch/ntb/inf/libusbJava/Usb_Interface");//returns a local reference
+				usb_intClazz = (jclass)env->NewGlobalRef(intClazz);//make it global
+				if (usb_intClazz == NULL) {
+					return -1; /* exception thrown */
+				}
+				usb_intMid = env->GetMethodID(usb_intClazz, "<init>", "()V");
+				if (usb_intMid == NULL) {
+					return -1;
+				}
+				usb_intFID_altsetting = env->GetFieldID(usb_intClazz, "altsetting", "[Lch/ntb/inf/libusbJava/Usb_Interface_Descriptor;");
+				usb_intFID_num_altsetting = env->GetFieldID(usb_intClazz, "num_altsetting", "I");
+		#ifdef DEBUGON
+				printf("usb_interface references loaded\n");
+		#endif
+				/* usb_interface_descriptor*/
+				jobject intDescClazz = env->FindClass( "ch/ntb/inf/libusbJava/Usb_Interface_Descriptor");//returns a local reference
+				usb_intDescClazz = (jclass)env->NewGlobalRef(intDescClazz);//make it global
+				if (usb_intDescClazz == NULL) {
+					return -1; /* exception thrown */
+				}
+				usb_intDescMid = env->GetMethodID(usb_intDescClazz, "<init>", "()V");
+				if (usb_intDescMid == NULL) {
+					return -1;
+				}
+				usb_intDescFID_bLength = env->GetFieldID(usb_intDescClazz, "bLength", "B");
+				usb_intDescFID_bDescriptorType = env->GetFieldID(usb_intDescClazz, "bDescriptorType", "B");
+				usb_intDescFID_bInterfaceNumber = env->GetFieldID(usb_intDescClazz, "bInterfaceNumber", "B");
+				usb_intDescFID_bAlternateSetting = env->GetFieldID(usb_intDescClazz, "bAlternateSetting", "B");
+				usb_intDescFID_bNumEndpoints = env->GetFieldID(usb_intDescClazz, "bNumEndpoints", "B");
+				usb_intDescFID_bInterfaceClass = env->GetFieldID(usb_intDescClazz, "bInterfaceClass", "B");
+				usb_intDescFID_bInterfaceSubClass = env->GetFieldID(usb_intDescClazz, "bInterfaceSubClass", "B");
+				usb_intDescFID_bInterfaceProtocol = env->GetFieldID(usb_intDescClazz, "bInterfaceProtocol", "B");
+				usb_intDescFID_iInterface = env->GetFieldID(usb_intDescClazz, "iInterface", "B");
+				usb_intDescFID_endpoint = env->GetFieldID(usb_intDescClazz, "endpoint", "[Lch/ntb/inf/libusbJava/Usb_Endpoint_Descriptor;");
+				usb_intDescFID_extra = env->GetFieldID(usb_intDescClazz, "extra", "[B");
+				usb_intDescFID_extralen = env->GetFieldID(usb_intDescClazz, "extralen", "I");
+		#ifdef DEBUGON
+				printf("usb_interface_descriptor references loaded\n");
+		#endif
+				/* usb_endpoint_descriptor*/
+				jobject epDescClazz = env->FindClass("ch/ntb/inf/libusbJava/Usb_Endpoint_Descriptor");//returns a local reference
+				usb_epDescClazz = (jclass)env->NewGlobalRef(epDescClazz);//make it global
+				if (usb_epDescClazz == NULL) {
+					return -1; /* exception thrown */
+				}
+				usb_epDescMid = env->GetMethodID(usb_epDescClazz, "<init>", "()V");
+				if (usb_epDescMid == NULL) {
+					return -1;
+				}
+				usb_epDescFID_bLength = env->GetFieldID(usb_epDescClazz, "bLength", "B");
+				usb_epDescFID_bDescriptorType = env->GetFieldID(usb_epDescClazz, "bDescriptorType", "B");
+				usb_epDescFID_bEndpointAddress = env->GetFieldID(usb_epDescClazz, "bEndpointAddress", "B");
+				usb_epDescFID_bmAttributes = env->GetFieldID(usb_epDescClazz, "bmAttributes", "B");
+				usb_epDescFID_wMaxPacketSize = env->GetFieldID(usb_epDescClazz, "wMaxPacketSize", "S");
+				usb_epDescFID_bInterval = env->GetFieldID(usb_epDescClazz, "bInterval", "B");
+				usb_epDescFID_bRefresh = env->GetFieldID(usb_epDescClazz, "bRefresh", "B");
+				usb_epDescFID_bSynchAddress = env->GetFieldID(usb_epDescClazz, "bSynchAddress", "B");
+				usb_epDescFID_extra = env->GetFieldID(usb_epDescClazz, "extra", "[B");
+				usb_epDescFID_extralen = env->GetFieldID(usb_epDescClazz, "extralen", "I");
+		#ifdef DEBUGON
+				printf("usb_endpoint_descriptor references loaded\n");
+		#endif
+				/*libusb_event*/
+				jobject cb_clazz = env->FindClass("ch/ntb/inf/libusbJava/Libusb_event");//returns a local reference
+				usb_cb_clazz = (jclass)env->NewGlobalRef(cb_clazz);//make it global
+				if (usb_cb_clazz == NULL) {
+					printf("load Clazz failed\n");
+					return -1; /*exception thrown*/
+				}
+				usb_transfer_cb_Mid = env->GetMethodID(usb_cb_clazz, "transferCallback", "()V");
+				if (usb_transfer_cb_Mid == NULL) {
+					printf("load method transferCallback failed\n");
+					return -1; /* exception thrown */
+				}
+				usb_fd_added_cb_Mid = env->GetMethodID(usb_cb_clazz, "fdAddedCallback", "(I)V");
+				if (usb_fd_added_cb_Mid == NULL) {
+					printf("load method fdAddedCallback failed\n");
+					return -1;/* exception thrown */
+				}
+				usb_fd_removed_cb_Mid = env->GetMethodID(usb_cb_clazz, "fdRemovedCallback", "(I)V");
+				if (usb_fd_removed_cb_Mid == NULL) {
+					printf("load method fdRemovedCallback failed\n");
+					return -1;/* exception thrown */
+				}
+		#ifdef DEBUGON
+				printf("usb_event_descriptor references loaded\n");
+		#endif
+				/*Libusb_pollfd*/
+				jobject pollfd_clazz = env->FindClass("ch/ntb/inf/libusbJava/Libusb_pollfd");//returns a local reference
+				usb_pollfd_clazz = (jclass)env->NewGlobalRef(pollfd_clazz);//make it global
+				if (usb_pollfd_clazz == NULL) {
+					return -1; /*exception thrown*/
+				}
+				usb_pollfd_Mid = env->GetMethodID(usb_pollfd_clazz, "<init>", "()V");
+				// Bugfix: 	if (usb_devMid == NULL) @ Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1get_1device_1list - Copy-paste error
+				if (usb_pollfd_Mid == NULL) {
+					return -1; /*exception thrown*/
+				}
+				usb_pollfdFID_fd = env->GetFieldID(usb_pollfd_clazz, "fd", "I");
+				usb_pollfdFID_events = env->GetFieldID(usb_pollfd_clazz, "events", "B");
+		#ifdef DEBUGON
+				printf("Libusb_pollfd_descriptor references loaded\n");
+		#endif
+
+		#ifdef DEBUGON
+				printf("libusb_init: Field initialization done \n");
+		#endif
+			}
+#endif
+
+			instance->jni.objects = objects;
+			instance->jni.refs_loaded = -1;
+		}
 	}
 	else
 	{
@@ -2140,25 +2261,261 @@ static __inline int ReferencesLoad(JNIEnv *env)
 	}
 
 	return result;
-
-	return result;
 }
 
-static __inline void ReferencesUnload(JNIEnv *env)
+/*!	\brief	Unloads all cached references
+ *
+ * 	\param	instance	Pointer to an instance of a status data struct containing necessary information.
+ * 	\param	env			Pointer to the JVM-Environment, where actions can be performed with */
+static __inline void ReferencesUnload(tLUJ_Instance *instance, JNIEnv *env)
 {
-	if (info.jni.refs_loaded == 0)
+	if (instance->jni.refs_loaded == 0)
 		return;
+
+	int i = 0;
+	const JNIObject *objects = instance->jni.objects;
+
+	/* Walk through all registered objects and try to
+	 * disconnect them. */
+	while (objects[i].disconnect != NULL) {
+		objects[i].disconnect(env);
+		++i;
+	}
+
+	instance->jni.refs_loaded = 0;
 }
 
+/* Unit-Tests for References*-Functions */
 #ifdef DO_UNIT_TEST
-	TEST_CASE(JVMTest)
-	{
+	enum {
+		TEST_RESULT_TEST1 = 0,
+		TEST_RESULT_TEST2,
+		TEST_RESULT_TEST3,
+		TEST_RESULT_TEST_FAILS,
+		TEST_RESULT_PARAM_FORWARDING,
+
+		TEST_RESULT_COUNT
+	};
+
+	enum {
+		TEST_OBJECTS_NORMAL = 0,
+		TEST_OBJECTS_FAILING,
+		TEST_OBJECTS_EMPTY,
+		TEST_OBJECTS_PARAM_FORWARDING,
+	};
+
+	static struct ReferencesXTestsData {
+		tLUJ_Instance instance;
+
+		struct {
+			int connect;
+			int disconnect;
+		}executed[TEST_RESULT_COUNT];
+	}ReferencesXTestsData;
+
+	static int	Test1_connect(JNIEnv *env);
+	static void	Test1_disconnect(JNIEnv *env);
+	static int	Test2_connect(JNIEnv *env);
+	static void	Test2_disconnect(JNIEnv *env);
+	static int	Test3_connect(JNIEnv *env);
+	static void	Test3_disconnect(JNIEnv *env);
+	static int	TestFails_connect(JNIEnv *env);
+	static void	TestFails_disconnect(JNIEnv *env);
+	static int 	TestParamForwarding_connect(JNIEnv *env);
+	static void TestParamForwarding_disconnect(JNIEnv *env);
+
+	static const tJNIObject ReferencesXTestsObjects[][5] = {
+		{	/* TEST_OBJECTS_NORMAL */
+			OBJ(Test1),
+			OBJ(Test2),
+			{ NULL, NULL},
+			OBJ(Test3),
+			{ NULL, NULL},
+		},
+		{	/* TEST_OBJECTS_FAILING */
+			OBJ(Test1),
+			OBJ(Test2),
+			OBJ(TestFails),
+			{ NULL, NULL},
+			{ NULL, NULL},
+		},
+		{	/* TEST_OBJECTS_EMPTY */
+			{ NULL, NULL},
+			{ NULL, NULL},
+			{ NULL, NULL},
+			{ NULL, NULL},
+			{ NULL, NULL},
+		},
+		{	/* TEST_OBJECTS_PARAM_FORWARDING */
+			OBJ(TestParamForwarding),
+			{ NULL, NULL },
+			{ NULL, NULL },
+			{ NULL, NULL },
+			{ NULL, NULL },
+		}
+	};
+
+	TEST_CASE(ReferencesCheckTest) {
+		TEST_CONTEXT();
+		memset(&ReferencesXTestsData, 0, sizeof(struct ReferencesXTestsData));
+		CuAssert(tc, "Return value", ReferencesCheck(&ReferencesXTestsData.instance, env) < 0);
+		CuAssert(tc, "Exception Thrown", env->ExceptionCheck() == JNI_TRUE);
+
+		ThrowLibusbErrorTestEvaluate(tc, env, ERROR_JAVA_REFERENCES_NOT_LOADED);
+
+		ReferencesLoad(&ReferencesXTestsData.instance, env, ReferencesXTestsObjects[2]);
+		CuAssert(tc, "Return value", ReferencesCheck(&ReferencesXTestsData.instance, env) == 0);
+		CuAssert(tc, "No exception Thrown", env->ExceptionCheck() == JNI_FALSE);
+	}
+
+	TEST_CASE(ReferencesLoadTest) {
 		TEST_CONTEXT();
 
-		ThrowLibusbError(env, -1);
-		jthrowable e = env->ExceptionOccurred();
-		CuAssert(tc, "LibusbError-Exception occured", e != NULL);
-		env->ExceptionClear();
+		/* Check initial loading of modules */
+		memset(&ReferencesXTestsData, 0, sizeof(struct ReferencesXTestsData));
+		CuAssert(tc, "References loaded return value", ReferencesLoad(&ReferencesXTestsData.instance, env, ReferencesXTestsObjects[TEST_OBJECTS_NORMAL]) >= 0);
+		CuAssert(tc, "1st module loaded", ReferencesXTestsData.executed[TEST_RESULT_TEST1].connect != 0);
+		CuAssert(tc, "1st module NOT unloaded", ReferencesXTestsData.executed[TEST_RESULT_TEST1].disconnect == 0);
+		CuAssert(tc, "2nd module loaded", ReferencesXTestsData.executed[TEST_RESULT_TEST2].connect != 0);
+		CuAssert(tc, "2nd module NOT unloaded", ReferencesXTestsData.executed[TEST_RESULT_TEST2].disconnect == 0);
+		CuAssert(tc, "3rd module NOT loaded", ReferencesXTestsData.executed[TEST_RESULT_TEST3].connect == 0);
+		CuAssert(tc, "3rd module NOT unloaded", ReferencesXTestsData.executed[TEST_RESULT_TEST3].disconnect == 0);
+
+		/* Check repeated load call */
+		memset(ReferencesXTestsData.executed, 0, sizeof(ReferencesXTestsData.executed));
+		CuAssert(tc, "References loaded return value", ReferencesLoad(&ReferencesXTestsData.instance, env, ReferencesXTestsObjects[TEST_OBJECTS_NORMAL]) >= 0);
+		CuAssert(tc, "1st module NOT loaded again", ReferencesXTestsData.executed[TEST_RESULT_TEST1].connect == 0);
+		CuAssert(tc, "1st module NOT unloaded", ReferencesXTestsData.executed[TEST_RESULT_TEST1].disconnect == 0);
+		CuAssert(tc, "2nd module NOT loaded again", ReferencesXTestsData.executed[TEST_RESULT_TEST2].connect == 0);
+		CuAssert(tc, "2nd module NOT unloaded", ReferencesXTestsData.executed[TEST_RESULT_TEST2].disconnect == 0);
+		CuAssert(tc, "3rd module NOT loaded", ReferencesXTestsData.executed[TEST_RESULT_TEST3].connect == 0);
+		CuAssert(tc, "3rd module NOT unloaded", ReferencesXTestsData.executed[TEST_RESULT_TEST3].disconnect == 0);
+
+		memset(ReferencesXTestsData.executed, 0, sizeof(ReferencesXTestsData.executed));
+		CuAssert(tc, "References loaded empty list", ReferencesLoad(&ReferencesXTestsData.instance, env, ReferencesXTestsObjects[TEST_OBJECTS_EMPTY]) >= 0);
+		CuAssert(tc, "1st module NOT loaded", ReferencesXTestsData.executed[TEST_RESULT_TEST1].connect == 0);
+		CuAssert(tc, "1st module NOT unloaded again", ReferencesXTestsData.executed[TEST_RESULT_TEST1].disconnect == 0);
+		CuAssert(tc, "2nd module NOT loaded", ReferencesXTestsData.executed[TEST_RESULT_TEST2].connect == 0);
+		CuAssert(tc, "2nd module NOT unloaded again", ReferencesXTestsData.executed[TEST_RESULT_TEST2].disconnect == 0);
+		CuAssert(tc, "3rd module NOT loaded", ReferencesXTestsData.executed[TEST_RESULT_TEST3].connect == 0);
+		CuAssert(tc, "3rd module NOT unloaded", ReferencesXTestsData.executed[TEST_RESULT_TEST3].disconnect == 0);
+	}
+
+	TEST_CASE(ReferencesUnloadTest) {
+		TEST_CONTEXT();
+
+		memset(&ReferencesXTestsData, 0, sizeof(struct ReferencesXTestsData));
+		CuAssert(tc, "References loaded", ReferencesLoad(&ReferencesXTestsData.instance, env, ReferencesXTestsObjects[TEST_OBJECTS_NORMAL]) >= 0);
+
+		/* Check initial unloading of modules */
+		memset(ReferencesXTestsData.executed, 0, sizeof(ReferencesXTestsData.executed));
+		ReferencesUnload(&ReferencesXTestsData.instance, env);
+		CuAssert(tc, "1st module NOT loaded", ReferencesXTestsData.executed[TEST_RESULT_TEST1].connect == 0);
+		CuAssert(tc, "1st module unloaded", ReferencesXTestsData.executed[TEST_RESULT_TEST1].disconnect != 0);
+		CuAssert(tc, "2nd module NOT loaded", ReferencesXTestsData.executed[TEST_RESULT_TEST2].connect == 0);
+		CuAssert(tc, "2nd module unloaded", ReferencesXTestsData.executed[TEST_RESULT_TEST2].disconnect != 0);
+		CuAssert(tc, "3rd module NOT loaded", ReferencesXTestsData.executed[TEST_RESULT_TEST3].connect == 0);
+		CuAssert(tc, "3rd module NOT unloaded", ReferencesXTestsData.executed[TEST_RESULT_TEST3].disconnect == 0);
+
+		/* Check repeated unload call */
+		memset(ReferencesXTestsData.executed, 0, sizeof(ReferencesXTestsData.executed));
+		ReferencesUnload(&ReferencesXTestsData.instance, env);
+		CuAssert(tc, "1st module NOT loaded", ReferencesXTestsData.executed[TEST_RESULT_TEST1].connect == 0);
+		CuAssert(tc, "1st module NOT unloaded again", ReferencesXTestsData.executed[TEST_RESULT_TEST1].disconnect == 0);
+		CuAssert(tc, "2nd module NOT loaded", ReferencesXTestsData.executed[TEST_RESULT_TEST2].connect == 0);
+		CuAssert(tc, "2nd module NOT unloaded again", ReferencesXTestsData.executed[TEST_RESULT_TEST2].disconnect == 0);
+		CuAssert(tc, "3rd module NOT loaded", ReferencesXTestsData.executed[TEST_RESULT_TEST3].connect == 0);
+		CuAssert(tc, "3rd module NOT unloaded", ReferencesXTestsData.executed[TEST_RESULT_TEST3].disconnect == 0);
+
+		memset(&ReferencesXTestsData, 0, sizeof(struct ReferencesXTestsData));
+		CuAssert(tc, "References loaded", ReferencesLoad(&ReferencesXTestsData.instance, env, ReferencesXTestsObjects[TEST_OBJECTS_NORMAL]) >= 0);
+
+		memset(ReferencesXTestsData.executed, 0, sizeof(ReferencesXTestsData.executed));
+		CuAssert(tc, "References loaded empty list", ReferencesLoad(&ReferencesXTestsData.instance, env, ReferencesXTestsObjects[TEST_OBJECTS_EMPTY]) >= 0);
+		CuAssert(tc, "1st module NOT loaded", ReferencesXTestsData.executed[TEST_RESULT_TEST1].connect == 0);
+		CuAssert(tc, "1st module NOT unloaded again", ReferencesXTestsData.executed[TEST_RESULT_TEST1].disconnect == 0);
+		CuAssert(tc, "2nd module NOT loaded", ReferencesXTestsData.executed[TEST_RESULT_TEST2].connect == 0);
+		CuAssert(tc, "2nd module NOT unloaded again", ReferencesXTestsData.executed[TEST_RESULT_TEST2].disconnect == 0);
+		CuAssert(tc, "3rd module NOT loaded", ReferencesXTestsData.executed[TEST_RESULT_TEST3].connect == 0);
+		CuAssert(tc, "3rd module NOT unloaded", ReferencesXTestsData.executed[TEST_RESULT_TEST3].disconnect == 0);
+	}
+
+	TEST_CASE(ReferencesLoadRollbackTest) {
+		TEST_CONTEXT();
+
+		memset(&ReferencesXTestsData, 0, sizeof(struct ReferencesXTestsData));
+		CuAssert(tc, "References load rollback", ReferencesLoad(&ReferencesXTestsData.instance, env, ReferencesXTestsObjects[TEST_OBJECTS_FAILING]) < 0);
+		CuAssert(tc, "1st module loaded", ReferencesXTestsData.executed[TEST_RESULT_TEST1].connect != 0);
+		CuAssert(tc, "1st module unloaded", ReferencesXTestsData.executed[TEST_RESULT_TEST1].disconnect != 0);
+		CuAssert(tc, "2nd module loaded", ReferencesXTestsData.executed[TEST_RESULT_TEST2].connect != 0);
+		CuAssert(tc, "2nd module unloaded", ReferencesXTestsData.executed[TEST_RESULT_TEST2].disconnect != 0);
+		CuAssert(tc, "3rd module loaded", ReferencesXTestsData.executed[TEST_RESULT_TEST_FAILS].connect != 0);
+		CuAssert(tc, "3rd module NOT unloaded", ReferencesXTestsData.executed[TEST_RESULT_TEST_FAILS].disconnect == 0);
+	}
+
+	TEST_CASE(ReferencesParameterForwardTest) {
+		memset(&ReferencesXTestsData, 0, sizeof(struct ReferencesXTestsData));
+		CuAssert(tc, "References load", ReferencesLoad(&ReferencesXTestsData.instance, (JNIEnv *)0x06051982, ReferencesXTestsObjects[TEST_OBJECTS_PARAM_FORWARDING]) >= 0);
+		ReferencesUnload(&ReferencesXTestsData.instance, (JNIEnv *)0x06051982);
+		CuAssert(tc, "Connect parameter arrived.", ReferencesXTestsData.executed[TEST_RESULT_PARAM_FORWARDING].connect != 0);
+		CuAssert(tc, "Disconnect parameter arrived.", ReferencesXTestsData.executed[TEST_RESULT_PARAM_FORWARDING].disconnect != 0);
+	}
+
+	static int Test1_connect(JNIEnv *env) {
+		ReferencesXTestsData.executed[TEST_RESULT_TEST1].connect = -1;
+		return 0;
+	}
+
+	static void Test1_disconnect(JNIEnv *env) {
+		ReferencesXTestsData.executed[TEST_RESULT_TEST1].disconnect = -1;
+	}
+
+	static int Test2_connect(JNIEnv *env) {
+		ReferencesXTestsData.executed[TEST_RESULT_TEST2].connect = -1;
+		return 0;
+	}
+
+	static void Test2_disconnect(JNIEnv *env) {
+		ReferencesXTestsData.executed[TEST_RESULT_TEST2].disconnect = -1;
+	}
+
+	static int Test3_connect(JNIEnv *env) {
+		ReferencesXTestsData.executed[TEST_RESULT_TEST3].connect = -1;
+		return 0;
+	}
+
+	static void Test3_disconnect(JNIEnv *env) {
+		ReferencesXTestsData.executed[TEST_RESULT_TEST3].disconnect = -1;
+	}
+
+	static int TestFails_connect(JNIEnv *env) {
+		ReferencesXTestsData.executed[TEST_RESULT_TEST_FAILS].connect = -1;
+		return -1;
+	}
+
+	static void TestFails_disconnect(JNIEnv *env) {
+		ReferencesXTestsData.executed[TEST_RESULT_TEST_FAILS].disconnect = -1;
+	}
+
+	static int TestParamForwarding_connect(JNIEnv *env) {
+		if (env != ((JNIEnv *)0x06051982))
+		{
+			ReferencesXTestsData.executed[TEST_RESULT_PARAM_FORWARDING].connect = 0;
+			return -1;
+		}
+
+		ReferencesXTestsData.executed[TEST_RESULT_PARAM_FORWARDING].connect = -1;
+		return 0;
+	}
+
+	static void TestParamForwarding_disconnect(JNIEnv *env) {
+		if (env != ((JNIEnv *)0x06051982))
+		{
+			ReferencesXTestsData.executed[TEST_RESULT_PARAM_FORWARDING].disconnect = 0;
+			return;
+		}
+
+		ReferencesXTestsData.executed[TEST_RESULT_PARAM_FORWARDING].disconnect = -1;
 	}
 #endif
 
@@ -2166,6 +2523,12 @@ static __inline void ReferencesUnload(JNIEnv *env)
 	typedef CuSuite* (*tSuiteNew)(void);
 
 	extern "C" JNIEXPORT CuSuite* GetLibusbJavaSuite(tSuiteNew SuiteNew, JNIEnv *env);
+
+	TEST_CASE(Usb_Device_Tests) {
+//		TEST_CONTEXT();
+
+		CuAssert(tc, "TODO", 0);
+	}
 
 /*!	\brief Exports the test suite for the libraries helper functions
  *
@@ -2178,7 +2541,18 @@ JNIEXPORT CuSuite* GetLibusbJavaSuite(tSuiteNew SuiteNew, JNIEnv *env)
 	CuSuite* suite = SuiteNew();
 
 	SUITE_ADD_TEST(suite, JNI_OnLoad_test);
-	SUITE_ADD_TEST(suite, JVMTest);
+
+	SUITE_ADD_TEST(suite, ReferencesLoadTest);
+	SUITE_ADD_TEST(suite, ReferencesUnloadTest);
+	SUITE_ADD_TEST(suite, ReferencesLoadRollbackTest);
+	SUITE_ADD_TEST(suite, ReferencesCheckTest);
+	SUITE_ADD_TEST(suite, ReferencesParameterForwardTest);
+
+
+	SUITE_ADD_TEST(suite, ThrowLibusbErrorTest);
+	SUITE_ADD_TEST(suite, ThrowIfUnsuccessfulTest);
+
+	SUITE_ADD_TEST(suite, Usb_Device_Tests);
 
 	test_context.env = env;
 	return suite;

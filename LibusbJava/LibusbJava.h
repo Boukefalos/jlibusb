@@ -481,11 +481,19 @@ JNIEXPORT jstring JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1strerro
 
 /*
  * Class:     ch_ntb_inf_libusbJava_LibusbJava1
- * Method:    libusb_exceptionTest
- * Signature: (I)V
+ * Method:    setup
+ * Signature: ()I
  */
-JNIEXPORT void JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_libusb_1exceptionTest
-  (JNIEnv *, jclass, jint);
+JNIEXPORT jint JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_setup
+  (JNIEnv *, jclass);
+
+/*
+ * Class:     ch_ntb_inf_libusbJava_LibusbJava1
+ * Method:    teardown
+ * Signature: ()V
+ */
+JNIEXPORT void JNICALL Java_ch_ntb_inf_libusbJava_LibusbJava1_teardown
+  (JNIEnv *, jclass);
 
 /*
  * Class:     ch_ntb_inf_libusbJava_LibusbJava1
