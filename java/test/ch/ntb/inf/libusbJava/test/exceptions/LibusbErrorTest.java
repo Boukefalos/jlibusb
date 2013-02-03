@@ -31,7 +31,10 @@ public class LibusbErrorTest {
 												{"ERROR_NOT_SUPPORTED", -12},
 												{"ERROR_UNKNWON (-13)", -13},
 												{"ERROR_UNKNWON (-98)", -98},
-												{"ERROR_UNKNWON (-100)", -100},
+												{"ERROR_JAVA_REFERENCES_NOT_LOADED", -100},
+												{"ERROR_JAVA_WRONG_ENVIRONMENT", -101},
+												{"ERROR_JAVA_ILEGAL_DEVICE_HANDLE", -102},
+												{"ERROR_UNKNWON (-103)", -103},
 												{"ERROR_OTHER", -99} });
 	}
 	

@@ -20,6 +20,9 @@ public class LibusbError extends Exception {
 	public static final int ERROR_NO_MEM = -11;
 	public static final int ERROR_NOT_SUPPORTED = -12;
 	public static final int ERROR_OTHER = -99;
+	public static final int ERROR_JAVA_REFERENCES_NOT_LOADED = -100;
+	public static final int ERROR_JAVA_WRONG_ENVIRONMENT = -101;
+	public static final int ERROR_JAVA_ILEGAL_DEVICE_HANDLE = -102;
 	
 	private int code = ERROR_NONE;
 
@@ -110,6 +113,24 @@ public class LibusbError extends Exception {
 			case ERROR_OTHER:
 			{
 				result = "ERROR_OTHER";
+				break;
+			}
+			
+			case ERROR_JAVA_REFERENCES_NOT_LOADED:
+			{
+				result = "ERROR_JAVA_REFERENCES_NOT_LOADED";
+				break;
+			}
+			
+			case ERROR_JAVA_WRONG_ENVIRONMENT:
+			{
+				result = "ERROR_JAVA_WRONG_ENVIRONMENT";
+				break;
+			}
+			
+			case ERROR_JAVA_ILEGAL_DEVICE_HANDLE:
+			{
+				result = "ERROR_JAVA_ILEGAL_DEVICE_HANDLE";
 				break;
 			}
 			
