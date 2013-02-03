@@ -39,6 +39,7 @@
 											-static
 											-shared 
 											${Source Files}
+											${ver_info}
 											-o ${out_dir}/LibusbJava-1_0.dll
 											-L${basedir}/libusb/MinGW64/static
 											-L${basedir}/libusb/MinGW32/static
@@ -68,6 +69,8 @@
 											-Wl,-soname,libusbJava-1.0.so
 											-I/usr/lib
 											-I/usr/lib/jvm/java-6-openjdk/include/
+											-I${basedir}
+											-I${basedir}/libusb/include
 											${Source Files}
 											-o${out_dir}/libusbJava-1.0.so.${version}
 											/usr/lib/libusb-1.0.so" />
