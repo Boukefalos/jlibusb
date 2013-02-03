@@ -15,12 +15,14 @@ import ch.ntb.inf.libusbJava.Utils;
  * Initalises Libusb and prints the bus(ses) with attached devices to the
  * standard out.<br>
  * 
- * 
+ * @deprecated This class will be removed with the legacy {@link LibusbJava}
+ *             class
  */
 public class LogBus {
 
 	private static void logBus() {
-		// if you don't use the ch.ntb.inf.libusbJava.Device class you must initialise
+		// if you don't use the ch.ntb.inf.libusbJava.Device class you must
+		// initialise
 		// Libusb before use
 		LibusbJava.usb_init();
 		LibusbJava.usb_find_busses();

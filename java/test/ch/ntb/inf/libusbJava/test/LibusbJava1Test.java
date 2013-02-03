@@ -1,9 +1,7 @@
 package ch.ntb.inf.libusbJava.test;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import org.junit.Test;
@@ -19,68 +17,6 @@ public class LibusbJava1Test {
 	 */
 	@Test
 	public void testLibusb_set_debug() {
-	}
-
-	/**
-	 * This test is used to check if the library constructs and throws the
-	 * correct exceptions if requested to do so.
-	 */
-	@SuppressWarnings("deprecation")
-	@Test
-	public void testLibusb_exception() {
-		/*
-		 * We go through every currently possible error just to check a several
-		 * different error codes.
-		 */
-		for (int i = -1; i > LibusbError.ERROR_OTHER; i--) {
-			boolean exception_occured = false;
-
-			try {
-				LibusbJava1.libusb_exceptionTest(i);
-			} catch (LibusbError e) {
-				assertEquals("Exception code correct", e.getErrorCode(), i);
-				exception_occured = true;
-			}
-
-			assertTrue("Exception occured", exception_occured);
-		}
-	}
-	
-	/**
-	 * Tests a helper function in the DLL that creates a byte array object from
-	 * a piece of memory given.
-	 */
-	@SuppressWarnings("deprecation")
-	@Test
-	public void testLibusb_to_byteArrayWithContent() {
-		final String str = "SimpleTest";
-		final int testLen = 5;
-		final byte[] reference = str.substring(0, testLen).getBytes();
-		
-		byte[] result = LibusbJava1.to_byteArrayTest(str, testLen);
-		
-		assertNotNull("Got a byte array", result);
-		assertEquals("Byte array has correct length", testLen, result.length);
-		
-		for (int i = 0;i < result.length;i++)
-		{
-			assertEquals("Array content is correct", reference[i], result[i]);
-		}
-	}
-
-	/**
-	 * Tests a helper function in the DLL that creates a byte array object from
-	 * a piece of memory given.
-	 */
-	@SuppressWarnings("deprecation")
-	@Test
-	public void testLibusb_to_byteArrayLength0() {
-		final String str = "SimpleTest";
-		
-		byte[] result = LibusbJava1.to_byteArrayTest(str, 0);
-		
-		assertNotNull("Got a byte array", result);
-		assertEquals("Byte array has correct length", 0, result.length);
 	}
 
 	@Test

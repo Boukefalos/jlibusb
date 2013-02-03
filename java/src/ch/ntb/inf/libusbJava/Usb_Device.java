@@ -107,6 +107,36 @@ public class Usb_Device {
 		next = dev;
 	}
 
+	public static void freeDeviceList(Usb_Device device)
+	{
+		Usb_Device curr = device.getPrev();
+		
+		/* Detach the left part of the list */
+		device.setPrev(null);
+		
+		/* First walk to the left of the list and free all 
+		   devices on our way */
+		while (curr != null)
+		{
+			freeDevice(curr);
+			curr = curr.getPrev();
+		}
+		
+		curr = device;
+		/* Then walk to the right of the list and free all */
+		while (curr != null)
+		{
+			freeDevice(curr);
+			curr = curr.getNext();
+		}
+	}
+	
+	public static void freeDevice(Usb_Device device)
+	{
+		freeDeviceList(device.getChildren());
+		LibusbJava1.libusb_unref_device(device);		
+	}
+	
 	/**
 	 * Returns the number of children of this device.<br>
 	 * 

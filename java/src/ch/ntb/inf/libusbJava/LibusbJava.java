@@ -299,7 +299,7 @@ public class LibusbJava {
 			handle = LibusbJava1.libusb_open(dev);
 		}
 		catch (LibusbError e) {
-			System.err.println("LibusbJava-1.0 init failed with errorcode: "
+			System.err.println("LibusbJava-1.0 failed with errorcode: "
 					+ e.getMessage());
 			e.printStackTrace();
 			handle = 0;
@@ -581,6 +581,7 @@ public class LibusbJava {
 		try {
 			result = LibusbJava1.libusb_get_descriptor(dev_handle, type, index, size);
 		} catch (LibusbError e) {
+			e.printStackTrace();
 		}
 		
 		return result;
