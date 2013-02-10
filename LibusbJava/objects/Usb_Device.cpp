@@ -5,6 +5,7 @@
  *	\author Ueli Niederer <ueli.niederer @ ntb.ch>
  */
 #include "Usb_Device.h"
+#include <string.h>
 
 #ifdef DO_UNIT_TEST
 #	include <test/CuTest.h>
