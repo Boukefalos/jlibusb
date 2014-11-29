@@ -8,7 +8,7 @@
 #include <string.h>
 
 #ifdef DO_UNIT_TEST
-#	include <test/CuTest.h>
+#	include <CuTest.h>
 
 #	define TEST_CASE(name)			static void name(CuTest *tc)
 #endif
@@ -50,7 +50,7 @@ static tUsb_Device *me = &instance;
 
 int Usb_Device_connect(JNIEnv *env)
 {
-	jobject theClass = env->FindClass("ch/ntb/inf/libusbJava/Usb_Device");
+	jobject theClass = env->FindClass("ch/ntb/usb/Usb_Device");
 	if (theClass == NULL) goto no_class;
 
 	me->clazz = (jclass) env->NewGlobalRef(theClass); 	// make it global to avoid class unloading and therefore
@@ -60,15 +60,15 @@ int Usb_Device_connect(JNIEnv *env)
 	me->constructor = env->GetMethodID(me->clazz, "<init>", "()V");
 	if (me->constructor == NULL) goto no_constructor;
 
-	LOAD_FIELD(env, me, "Lch/ntb/inf/libusbJava/Usb_Device;", next);
-	LOAD_FIELD(env, me, "Lch/ntb/inf/libusbJava/Usb_Device;", prev);
+	LOAD_FIELD(env, me, "Lch/ntb/usb/Usb_Device;", next);
+	LOAD_FIELD(env, me, "Lch/ntb/usb/Usb_Device;", prev);
 	LOAD_FIELD(env, me, "Ljava/lang/String;", filename);
-	LOAD_FIELD(env, me, "Lch/ntb/inf/libusbJava/Usb_Bus;", bus);
-	LOAD_FIELD(env, me, "Lch/ntb/inf/libusbJava/Usb_Device_Descriptor;", descriptor);
-	LOAD_FIELD(env, me, "[Lch/ntb/inf/libusbJava/Usb_Config_Descriptor;", config);
+	LOAD_FIELD(env, me, "Lch/ntb/usb/Usb_Bus;", bus);
+	LOAD_FIELD(env, me, "Lch/ntb/usb/Usb_Device_Descriptor;", descriptor);
+	LOAD_FIELD(env, me, "[Lch/ntb/usb/Usb_Config_Descriptor;", config);
 	LOAD_FIELD(env, me, "B", devnum);
 	LOAD_FIELD(env, me, "B", num_children);
-	LOAD_FIELD(env, me, "Lch/ntb/inf/libusbJava/Usb_Device;", children);
+	LOAD_FIELD(env, me, "Lch/ntb/usb/Usb_Device;", children);
 	LOAD_FIELD(env, me, "J", devStructAddr);
 
 	me->loaded = 1;

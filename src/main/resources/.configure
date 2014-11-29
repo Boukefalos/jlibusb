@@ -1,0 +1,6 @@
+# enable or disable logging
+ch.ntb.inf.libusbJava/debug = true
+# set and configure individual loggers here
+# the format is: projectName/debug/<loggerX> = <logger name>/<log level>
+ch.ntb.inf.libusbJava/debug/logger0 = ch.ntb.inf.libusbJava/OFF
+ch.ntb.inf.libusbJava/debug/logger1 = ch.ntb.inf.libusbJava.test/INFO
