@@ -1,0 +1,22 @@
+apply plugin: 'java'
+apply plugin: 'cpp'
+apply plugin: 'maven'
+apply plugin: 'eclipse'
+
+group = 'com.github.boukefalos'
+archivesBaseName = 'jlibusb'
+version = '0.5.7'
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	testCompile 'junit:junit:4.11'
+}
+
+uploadArchives {
+	repositories.mavenDeployer {
+		repository(url: uri('.maven'))
+	}
+}

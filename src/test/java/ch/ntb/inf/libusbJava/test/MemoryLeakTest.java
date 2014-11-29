@@ -1,0 +1,199 @@
+/* 
+ * Java libusb wrapper
+ * Copyright (c) 2005-2008 Andreas Schläpfer <spandi at users.sourceforge.net>
+ *
+ * http://libusbjava.sourceforge.net
+ * This library is covered by the LGPL, read LGPL.txt for details.
+ */
+package ch.ntb.inf.libusbJava.test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
+import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.PrintStream;
+import java.util.Properties;
+import java.util.logging.Logger;
+
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import ch.ntb.inf.libusbJava.Device;
+import ch.ntb.inf.libusbJava.LibusbJava;
+import ch.ntb.inf.libusbJava.USB;
+import ch.ntb.inf.libusbJava.USBException;
+import ch.ntb.inf.libusbJava.Usb_Bus;
+import ch.ntb.inf.libusbJava.Utils;
+import ch.ntb.inf.libusbJava.testApp.AbstractDeviceInfo;
+import ch.ntb.inf.libusbJava.testApp.AbstractDeviceInfo.TransferMode;
+
+@SuppressWarnings("deprecation")
+public class MemoryLeakTest {
+
+	private static final String testdevicePropertiesFile = "testdevice.properties";
+	private static final String deviceInfoKey = "testdeviceInfo";
+
+	private static AbstractDeviceInfo devinfo;
+
+	private static byte[] testData;
+
+	private static byte[] readData;
+
+	private static Device dev;
+
+	private static Logger log = Logger
+			.getLogger(MemoryLeakTest.class.getName());
+
+	@BeforeClass
+	public static void setUp() throws Exception {
+		// load the device info class with the key
+		// from 'testdevice.properties'
+		InputStream propInputStream = new FileInputStream(
+				testdevicePropertiesFile);
+		Properties devInfoProp = new Properties();
+		devInfoProp.load(propInputStream);
+		String devInfoClazzName = devInfoProp.getProperty(deviceInfoKey);
+		if (devInfoClazzName == null) {
+			throw new Exception("property " + deviceInfoKey
+					+ " not found in file " + testdevicePropertiesFile);
+		}
+		Class<?> devInfoClazz = Class.forName(devInfoClazzName);
+		devinfo = (AbstractDeviceInfo) devInfoClazz.newInstance();
+		// setup test data
+		testData = new byte[devinfo.getMaxDataSize()];
+		readData = new byte[testData.length];
+		// initialise the device
+		dev = USB.getDevice(devinfo.getIdVendor(), devinfo.getIdProduct());
+		assertNotNull(dev);
+
+		// print the devices
+		LibusbJava.usb_init();
+//		LibusbJava.usb_find_busses();
+		LibusbJava.usb_find_devices();
+		Usb_Bus bus = LibusbJava.usb_get_busses();
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		PrintStream ps = new PrintStream(baos);
+		Utils.logBus(bus, ps);
+		log.info(baos.toString());
+	}
+
+	@Test
+	public void initalReset() throws Exception {
+		doOpen();
+		dev.reset();
+		timeout();
+	}
+
+	@Test
+	public void bulkWriteReadMultiple() throws Exception {
+		final int NumberOfIterations = 3000;
+
+		devinfo.setMode(TransferMode.Bulk);
+		doOpen();
+		for (int i = 0; i < NumberOfIterations; i++) {
+			doWriteRead();
+			if (i % 1000 == 0) {
+				System.out.print(".");
+			}
+		}
+		doClose();
+	}
+
+	@Test
+	public void interruptWriteReadMultiple() throws Exception {
+		final int NumberOfIterations = 3000;
+
+		devinfo.setMode(TransferMode.Interrupt);
+		doOpen();
+		for (int i = 0; i < NumberOfIterations; i++) {
+			doWriteRead();
+			if (i % 1000 == 0) {
+				System.out.print(".");
+			}
+		}
+		doClose();
+	}
+
+	private void closeOnException() {
+		try {
+			dev.close();
+		} catch (USBException e1) {
+			// ignore exceptions
+		}
+	}
+
+	@AfterClass
+	public static void tearDown() throws Exception {
+		if (dev != null && dev.isOpen()) {
+			dev.close();
+		}
+	}
+
+	private void doOpen() throws USBException {
+		dev.open(devinfo.getConfiguration(), devinfo.getInterface(), devinfo
+				.getAltinterface());
+	}
+
+	private void doClose() throws USBException {
+		dev.close();
+	}
+
+	private void doWriteRead() throws Exception {
+		initTestData();
+		try {
+			if (devinfo.getMode().equals(TransferMode.Bulk)) {
+				if (devinfo.getOutEPBulk() != -1) {
+					dev.writeBulk(devinfo.getOutEPBulk(), testData,
+							testData.length, devinfo.getTimeout(), false);
+				}
+				if (devinfo.getInEPBulk() != -1) {
+					dev.readBulk(devinfo.getInEPBulk(), readData,
+							readData.length, devinfo.getTimeout(), false);
+				}
+			} else if (devinfo.getMode().equals(TransferMode.Interrupt)) {
+				if (devinfo.getOutEPInt() != -1) {
+					dev.writeInterrupt(devinfo.getOutEPInt(), testData,
+							testData.length, devinfo.getTimeout(), false);
+				}
+				if (devinfo.getInEPInt() != -1) {
+					dev.readInterrupt(devinfo.getInEPInt(), readData,
+							readData.length, devinfo.getTimeout(), false);
+				}
+			}
+			if (devinfo.doCompareData()) {
+				compare(testData, readData);
+			}
+		} catch (AssertionError e) {
+			closeOnException();
+			throw e;
+		} catch (Exception e) {
+			closeOnException();
+			throw e;
+		}
+	}
+
+	private static void compare(byte[] d1, byte[] d2) {
+		final int minLength = Math.min(d1.length, d2.length);
+		for (int i = 0; i < minLength; i++) {
+			assertEquals(d1[i], d2[i]);
+		}
+	}
+
+	private static void timeout() {
+		try {
+			Thread.sleep(devinfo.getSleepTimeout());
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private static void initTestData() {
+		for (int i = 0; i < testData.length; i++) {
+			testData[i] = (byte) (Math.random() * 0xff);
+			readData[i] = 0;
+		}
+	}
+}
