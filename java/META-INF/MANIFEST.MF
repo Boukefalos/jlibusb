@@ -1,9 +1,0 @@
-Manifest-Version: 1.0
-Bundle-ManifestVersion: 2
-Bundle-Name: Java libusb wrapper
-Bundle-SymbolicName: ch.ntb.usb
-Bundle-Version: 1.0.2
-Bundle-Vendor: libusbjava.sourceforge.net
-Require-Bundle: org.junit4
-Export-Package: ch.ntb.usb
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
