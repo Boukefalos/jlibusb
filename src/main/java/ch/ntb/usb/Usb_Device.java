@@ -45,9 +45,6 @@ public class Usb_Device {
 	public Usb_Bus getBus() {
 		return bus;
 	}
-	protected void setBus(Usb_Bus bus){
-		this.bus = bus;
-	}
 
 	/**
 	 * Returns a reference to the first child.<br>
@@ -102,41 +99,7 @@ public class Usb_Device {
 	public Usb_Device getNext() {
 		return next;
 	}
-	
-	protected void setNext(Usb_Device dev){
-		next = dev;
-	}
 
-	public static void freeDeviceList(Usb_Device device)
-	{
-		Usb_Device curr = device.getPrev();
-		
-		/* Detach the left part of the list */
-		device.setPrev(null);
-		
-		/* First walk to the left of the list and free all 
-		   devices on our way */
-		while (curr != null)
-		{
-			freeDevice(curr);
-			curr = curr.getPrev();
-		}
-		
-		curr = device;
-		/* Then walk to the right of the list and free all */
-		while (curr != null)
-		{
-			freeDevice(curr);
-			curr = curr.getNext();
-		}
-	}
-	
-	public static void freeDevice(Usb_Device device)
-	{
-		freeDeviceList(device.getChildren());
-		LibusbJava1.libusb_unref_device(device);		
-	}
-	
 	/**
 	 * Returns the number of children of this device.<br>
 	 * 
@@ -153,9 +116,6 @@ public class Usb_Device {
 	 */
 	public Usb_Device getPrev() {
 		return prev;
-	}
-	protected void setPrev(Usb_Device dev){
-		prev = dev;
 	}
 
 	@Override

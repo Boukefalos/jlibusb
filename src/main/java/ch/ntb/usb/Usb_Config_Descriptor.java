@@ -12,8 +12,8 @@ package ch.ntb.usb;
  * A USB device can have several different configuration.<br>
  * <br>
  * The length of the configuration descriptor is
- * {@link ch.ntb.inf.libusbJava.Usb_Descriptor#USB_DT_CONFIG_SIZE} and the type is
- * {@link ch.ntb.inf.libusbJava.Usb_Descriptor#USB_DT_CONFIG}.
+ * {@link ch.ntb.usb.Usb_Descriptor#USB_DT_CONFIG_SIZE} and the type is
+ * {@link ch.ntb.usb.Usb_Descriptor#USB_DT_CONFIG}.
  * 
  */
 public class Usb_Config_Descriptor extends Usb_Descriptor {

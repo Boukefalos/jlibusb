@@ -20,7 +20,7 @@ public class LogUtil {
 	// debug this class
 	private static final boolean debugLogUtil = false;
 
-	private static final String PLUGIN_ID = "ch.ntb.inf.libusbJava";
+	private static final String PLUGIN_ID = "ch.ntb.usb";
 	private static final String PROPERTIES_FILE = ".configure";
 	private static final String LOGGER_WARNING = "Warning in class "
 			+ LogUtil.class.getName()

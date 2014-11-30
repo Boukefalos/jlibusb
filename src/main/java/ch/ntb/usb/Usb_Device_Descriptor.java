@@ -13,8 +13,8 @@ package ch.ntb.usb;
  * yet important information about the device.<br>
  * <br>
  * The length of the device descriptor is
- * {@link ch.ntb.inf.libusbJava.Usb_Descriptor#USB_DT_DEVICE_SIZE} and the type is
- * {@link ch.ntb.inf.libusbJava.Usb_Descriptor#USB_DT_DEVICE}.
+ * {@link ch.ntb.usb.Usb_Descriptor#USB_DT_DEVICE_SIZE} and the type is
+ * {@link ch.ntb.usb.Usb_Descriptor#USB_DT_DEVICE}.
  * 
  */
 public class Usb_Device_Descriptor extends Usb_Descriptor {
@@ -22,9 +22,8 @@ public class Usb_Device_Descriptor extends Usb_Descriptor {
 	 * Device and/or interface class codes.
 	 */
 	public static final int USB_CLASS_PER_INTERFACE = 0, USB_CLASS_AUDIO = 1,
-			USB_CLASS_COMM = 2, USB_CLASS_HID = 3, LIBUSB_CLASS_PTP = 6,
-			USB_CLASS_PRINTER = 7, USB_CLASS_MASS_STORAGE = 8,
-			USB_CLASS_HUB = 9, USB_CLASS_DATA = 10,
+			USB_CLASS_COMM = 2, USB_CLASS_HID = 3, USB_CLASS_PRINTER = 7,
+			USB_CLASS_MASS_STORAGE = 8, USB_CLASS_HUB = 9, USB_CLASS_DATA = 10,
 			USB_CLASS_VENDOR_SPEC = 0xff;
 
 	private short bcdUSB;

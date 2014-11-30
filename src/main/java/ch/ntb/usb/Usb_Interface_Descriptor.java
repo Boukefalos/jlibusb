@@ -13,8 +13,8 @@ package ch.ntb.usb;
  * endpoints into a functional group performing a single feature of the device.<br>
  * <br>
  * The length of the interface descriptor is
- * {@link ch.ntb.inf.libusbJava.Usb_Descriptor#USB_DT_INTERFACE_SIZE} and the
- * type is {@link ch.ntb.inf.libusbJava.Usb_Descriptor#USB_DT_INTERFACE}.
+ * {@link ch.ntb.usb.Usb_Descriptor#USB_DT_INTERFACE_SIZE} and the type is
+ * {@link ch.ntb.usb.Usb_Descriptor#USB_DT_INTERFACE}.
  * 
  */
 public class Usb_Interface_Descriptor extends Usb_Descriptor {
@@ -51,8 +51,7 @@ public class Usb_Interface_Descriptor extends Usb_Descriptor {
 	}
 
 	/**
-	 * Returns the value used to select the alternate setting (
-	 * {@link LibusbJava#usb_set_altinterface(long, int)}).<br>
+	 * Returns the value used to select the alternate setting ({@link LibusbJava#usb_set_altinterface(long, int)}).<br>
 	 * 
 	 * @return the alternate setting
 	 */

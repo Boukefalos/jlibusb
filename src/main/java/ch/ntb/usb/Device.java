@@ -19,7 +19,7 @@ import ch.ntb.usb.logger.LogUtil;
  */
 public class Device {
 
-	private static final Logger logger = LogUtil.getLogger("ch.ntb.inf.libusbJava");
+	private static final Logger logger = LogUtil.getLogger("ch.ntb.usb");
 
 	private int maxPacketSize;
 
@@ -545,11 +545,11 @@ public class Device {
 	 * 
 	 * @param requestType
 	 *            USB device request type (USB specification 9.3,
-	 *            bmRequestType). Use constants from {@link ch.ntb.inf.libusbJava.USB}
+	 *            bmRequestType). Use constants from {@link ch.ntb.usb.USB}
 	 *            (REQ_TYPE_xxx).
 	 * @param request
 	 *            specific request (USB specification 9.4, bRequest). Use
-	 *            constants from {@link ch.ntb.inf.libusbJava.USB} (REQ_xxx).
+	 *            constants from {@link ch.ntb.usb.USB} (REQ_xxx).
 	 * @param value
 	 *            field that varies according to request (USB specification 9.4,
 	 *            wValue)
@@ -743,20 +743,14 @@ public class Device {
 	}
 
 	/**
-	 * Check if the device is open, attached and work.<br>
+	 * Check if the device is open.<br>
+	 * This checks only for a valid device handle. It doesn't check if the
+	 * device is still attached or working.
 	 * 
-	 * @return true if the device is open and work.
+	 * @return true if the device is open
 	 */
 	public boolean isOpen() {
-		if(usbDevHandle != 0){
-			try {
-				updateDescriptors();
-			} catch (USBException e) {
-				return false;
-			}
-			return dev != null;
-		}
-		return false;
+		return usbDevHandle != 0;
 	}
 
 	/**
