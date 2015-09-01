@@ -19,127 +19,127 @@ package ch.ntb.usb;
  */
 public class Usb_Interface_Descriptor extends Usb_Descriptor {
 
-	/**
-	 * Maximum number of interfaces
-	 */
-	public static final int USB_MAXINTERFACES = 32;
+    /**
+     * Maximum number of interfaces
+     */
+    public static final int USB_MAXINTERFACES = 32;
 
-	private byte bInterfaceNumber;
+    private byte bInterfaceNumber;
 
-	private byte bAlternateSetting;
+    private byte bAlternateSetting;
 
-	private byte bNumEndpoints;
+    private byte bNumEndpoints;
 
-	private byte bInterfaceClass;
+    private byte bInterfaceClass;
 
-	private byte bInterfaceSubClass;
+    private byte bInterfaceSubClass;
 
-	private byte bInterfaceProtocol;
+    private byte bInterfaceProtocol;
 
-	private byte iInterface;
+    private byte iInterface;
 
-	private Usb_Endpoint_Descriptor[] endpoint;
+    private Usb_Endpoint_Descriptor[] endpoint;
 
-	private byte[] extra; /* Extra descriptors */
+    private byte[] extra; /* Extra descriptors */
 
-	private int extralen;
+    private int extralen;
 
-	@Override
-	public String toString() {
-		return "Usb_Interface_Descriptor bNumEndpoints: 0x"
-				+ Integer.toHexString(bNumEndpoints);
-	}
+    @Override
+    public String toString() {
+        return "Usb_Interface_Descriptor bNumEndpoints: 0x"
+                + Integer.toHexString(bNumEndpoints);
+    }
 
-	/**
-	 * Returns the value used to select the alternate setting ({@link LibusbJava#usb_set_altinterface(long, int)}).<br>
-	 * 
-	 * @return the alternate setting
-	 */
-	public byte getBAlternateSetting() {
-		return bAlternateSetting;
-	}
+    /**
+     * Returns the value used to select the alternate setting ({@link LibusbJava#usb_set_altinterface(long, int)}).<br>
+     * 
+     * @return the alternate setting
+     */
+    public byte getBAlternateSetting() {
+        return bAlternateSetting;
+    }
 
-	/**
-	 * Returns the class code (Assigned by <a
-	 * href="http://www.usb.org">www.usb.org</a>).<br>
-	 * 
-	 * @return the class code
-	 */
-	public byte getBInterfaceClass() {
-		return bInterfaceClass;
-	}
+    /**
+     * Returns the class code (Assigned by <a
+     * href="http://www.usb.org">www.usb.org</a>).<br>
+     * 
+     * @return the class code
+     */
+    public byte getBInterfaceClass() {
+        return bInterfaceClass;
+    }
 
-	/**
-	 * Returns the number (identifier) of this interface.<br>
-	 * 
-	 * @return the number (identifier) of this interface
-	 */
-	public byte getBInterfaceNumber() {
-		return bInterfaceNumber;
-	}
+    /**
+     * Returns the number (identifier) of this interface.<br>
+     * 
+     * @return the number (identifier) of this interface
+     */
+    public byte getBInterfaceNumber() {
+        return bInterfaceNumber;
+    }
 
-	/**
-	 * Returns the protocol code (Assigned by <a
-	 * href="http://www.usb.org">www.usb.org</a>).<br>
-	 * 
-	 * @return the protocol code
-	 */
-	public byte getBInterfaceProtocol() {
-		return bInterfaceProtocol;
-	}
+    /**
+     * Returns the protocol code (Assigned by <a
+     * href="http://www.usb.org">www.usb.org</a>).<br>
+     * 
+     * @return the protocol code
+     */
+    public byte getBInterfaceProtocol() {
+        return bInterfaceProtocol;
+    }
 
-	/**
-	 * Returns the subclass code (Assigned by <a
-	 * href="http://www.usb.org">www.usb.org</a>).<br>
-	 * 
-	 * @return the subclass code
-	 */
-	public byte getBInterfaceSubClass() {
-		return bInterfaceSubClass;
-	}
+    /**
+     * Returns the subclass code (Assigned by <a
+     * href="http://www.usb.org">www.usb.org</a>).<br>
+     * 
+     * @return the subclass code
+     */
+    public byte getBInterfaceSubClass() {
+        return bInterfaceSubClass;
+    }
 
-	/**
-	 * Returns the number of endpoints used for this interface.<br>
-	 * 
-	 * @return the number of endpoints used for this interface
-	 */
-	public byte getBNumEndpoints() {
-		return bNumEndpoints;
-	}
+    /**
+     * Returns the number of endpoints used for this interface.<br>
+     * 
+     * @return the number of endpoints used for this interface
+     */
+    public byte getBNumEndpoints() {
+        return bNumEndpoints;
+    }
 
-	/**
-	 * Returns an array of endpoint descriptors.<br>
-	 * 
-	 * @return an array of endpoint descriptors
-	 */
-	public Usb_Endpoint_Descriptor[] getEndpoint() {
-		return endpoint;
-	}
+    /**
+     * Returns an array of endpoint descriptors.<br>
+     * 
+     * @return an array of endpoint descriptors
+     */
+    public Usb_Endpoint_Descriptor[] getEndpoint() {
+        return endpoint;
+    }
 
-	/**
-	 * Returns the data of extra descriptor(s) if available.<br>
-	 * 
-	 * @return null or a byte array with the extra descriptor data
-	 */
-	public byte[] getExtra() {
-		return extra;
-	}
+    /**
+     * Returns the data of extra descriptor(s) if available.<br>
+     * 
+     * @return null or a byte array with the extra descriptor data
+     */
+    public byte[] getExtra() {
+        return extra;
+    }
 
-	/**
-	 * Returns the number of bytes of the extra descriptor.<br>
-	 * 
-	 * @return the number of bytes of the extra descriptor
-	 */
-	public int getExtralen() {
-		return extralen;
-	}
+    /**
+     * Returns the number of bytes of the extra descriptor.<br>
+     * 
+     * @return the number of bytes of the extra descriptor
+     */
+    public int getExtralen() {
+        return extralen;
+    }
 
-	/**
-	 * Returns the index of the String descriptor describing this interface.<br>
-	 * 
-	 * @return the index of the String descriptor
-	 */
-	public byte getIInterface() {
-		return iInterface;
-	}
+    /**
+     * Returns the index of the String descriptor describing this interface.<br>
+     * 
+     * @return the index of the String descriptor
+     */
+    public byte getIInterface() {
+        return iInterface;
+    }
 }

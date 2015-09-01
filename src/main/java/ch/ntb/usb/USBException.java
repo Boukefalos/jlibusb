@@ -11,13 +11,13 @@ import java.io.IOException;
 
 public class USBException extends IOException {
 
-	public USBException(String string) {
-		super(string);
-	}
+    public USBException(String string) {
+        super(string);
+    }
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1690857437804284710L;
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1690857437804284710L;
 
 }

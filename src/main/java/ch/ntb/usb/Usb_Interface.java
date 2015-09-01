@@ -14,37 +14,37 @@ package ch.ntb.usb;
  */
 public class Usb_Interface {
 
-	/**
-	 * Maximal number of alternate settings
-	 */
-	public static final int USB_MAXALTSETTING = 128; /* Hard limit */
+    /**
+     * Maximal number of alternate settings
+     */
+    public static final int USB_MAXALTSETTING = 128; /* Hard limit */
 
-	private Usb_Interface_Descriptor[] altsetting;
+    private Usb_Interface_Descriptor[] altsetting;
 
-	private int num_altsetting;
+    private int num_altsetting;
 
-	@Override
-	public String toString() {
-		return "Usb_Interface num_altsetting: 0x"
-				+ Integer.toHexString(num_altsetting);
-	}
+    @Override
+    public String toString() {
+        return "Usb_Interface num_altsetting: 0x"
+                + Integer.toHexString(num_altsetting);
+    }
 
-	/**
-	 * Retuns an array of interface descriptors.<br>
-	 * 
-	 * @return an array of interface descriptors
-	 */
-	public Usb_Interface_Descriptor[] getAltsetting() {
-		return altsetting;
-	}
+    /**
+     * Retuns an array of interface descriptors.<br>
+     * 
+     * @return an array of interface descriptors
+     */
+    public Usb_Interface_Descriptor[] getAltsetting() {
+        return altsetting;
+    }
 
-	/**
-	 * Returns the number of alternate settings.<br>
-	 * 
-	 * @return the number of alternate settings
-	 */
-	public int getNumAltsetting() {
-		return num_altsetting;
-	}
+    /**
+     * Returns the number of alternate settings.<br>
+     * 
+     * @return the number of alternate settings
+     */
+    public int getNumAltsetting() {
+        return num_altsetting;
+    }
 
 }

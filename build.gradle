@@ -89,7 +89,7 @@ libraries {
 			cppCompiler.args "-I${org.gradle.internal.jvm.Jvm.current().javaHome}/include/win32"
 			linker.args '-Wl,--kill-at', '-static-libgcc', '-static-libstdc++'
 			tasks.withType(CppCompile) { task ->
-				//task.dependsOn jniHeaders
+				task.dependsOn jniHeaders
 			}
 			
 			lib library: 'usb', linkage: 'static'

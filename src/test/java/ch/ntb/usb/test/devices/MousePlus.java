@@ -11,24 +11,24 @@ import ch.ntb.usb.testApp.AbstractDeviceInfo;
 
 public class MousePlus extends AbstractDeviceInfo {
 
-	@Override
-	public void initValues() {
-		setIdVendor((short) 0x046d);
-		setIdProduct((short) 0xc016);
-		setBusName("bus-0");
-		setFilename("\\\\.\\libusb0-0001--0x046d-0xc016");
-		setTimeout(2000);
-		setConfiguration(1);
-		setInterface(0);
-		setAltinterface(0);
-		setOutEPInt(-1);
-		setInEPInt(0x81);
-		setOutEPBulk(-1);
-		setInEPBulk(-1);
-		setSleepTimeout(5000);
-		setMaxDataSize(4);
-		setMode(TransferMode.Interrupt);
-		// we only read data -> don't compare
-		setDoCompareData(false);
-	}
+    @Override
+    public void initValues() {
+        setIdVendor((short) 0x046d);
+        setIdProduct((short) 0xc016);
+        setBusName("bus-0");
+        setFilename("\\\\.\\libusb0-0001--0x046d-0xc016");
+        setTimeout(2000);
+        setConfiguration(1);
+        setInterface(0);
+        setAltinterface(0);
+        setOutEPInt(-1);
+        setInEPInt(0x81);
+        setOutEPBulk(-1);
+        setInEPBulk(-1);
+        setSleepTimeout(5000);
+        setMaxDataSize(4);
+        setMode(TransferMode.Interrupt);
+        // we only read data -> don't compare
+        setDoCompareData(false);
+    }
 }

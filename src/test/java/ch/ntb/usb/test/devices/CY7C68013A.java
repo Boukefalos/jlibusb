@@ -12,20 +12,20 @@ import ch.ntb.usb.testApp.AbstractDeviceInfo;
 
 public class CY7C68013A extends AbstractDeviceInfo {
 
-	@Override
-	public void initValues() {
-		setIdVendor((short) 0x8235);
-		setIdProduct((short) 0x0222);
-		setTimeout(2000);
-		setConfiguration(1);
-		setInterface(0);
-		setAltinterface(-1);
-		setOutEPInt(0x02);
-		setInEPInt(0x86);
-		setOutEPBulk(0x04);
-		setInEPBulk(0x88);
-		setSleepTimeout(2000);
-		setMaxDataSize(USB.HIGHSPEED_MAX_BULK_PACKET_SIZE);
-		setMode(TransferMode.Bulk);
-	}
+    @Override
+    public void initValues() {
+        setIdVendor((short) 0x8235);
+        setIdProduct((short) 0x0222);
+        setTimeout(2000);
+        setConfiguration(1);
+        setInterface(0);
+        setAltinterface(-1);
+        setOutEPInt(0x02);
+        setInEPInt(0x86);
+        setOutEPBulk(0x04);
+        setInEPBulk(0x88);
+        setSleepTimeout(2000);
+        setMaxDataSize(USB.HIGHSPEED_MAX_BULK_PACKET_SIZE);
+        setMode(TransferMode.Bulk);
+    }
 }

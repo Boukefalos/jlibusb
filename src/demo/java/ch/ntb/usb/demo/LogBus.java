@@ -20,23 +20,23 @@ import ch.ntb.usb.Utils;
  */
 public class LogBus {
 
-	private static void logBus() {
-		// if you don't use the ch.ntb.inf.libusbJava.Device class you must
-		// initialise
-		// Libusb before use
-		LibusbJava.usb_init();
-		LibusbJava.usb_find_busses();
-		LibusbJava.usb_find_devices();
+    private static void logBus() {
+        // if you don't use the ch.ntb.inf.libusbJava.Device class you must
+        // initialise
+        // Libusb before use
+        LibusbJava.usb_init();
+        LibusbJava.usb_find_busses();
+        LibusbJava.usb_find_devices();
 
-		// retrieve a object tree representing the bus with its devices and
-		// descriptors
-		Usb_Bus bus = LibusbJava.usb_get_busses();
+        // retrieve a object tree representing the bus with its devices and
+        // descriptors
+        Usb_Bus bus = LibusbJava.usb_get_busses();
 
-		// log the bus structure to standard out
-		Utils.logBus(bus);
-	}
+        // log the bus structure to standard out
+        Utils.logBus(bus);
+    }
 
-	public static void main(String[] args) {
-		logBus();
-	}
+    public static void main(String[] args) {
+        logBus();
+    }
 }
