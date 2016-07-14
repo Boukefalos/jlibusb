@@ -4,15 +4,15 @@ apply plugin: 'maven'
 apply plugin: 'eclipse'
 
 repositories {
-	maven {
-		url 'https://github.com/Boukefalos/jlibloader/raw/mvn-repo/'
-	}
-	mavenCentral()
+    maven {
+        url 'https://github.com/Boukefalos/jlibloader/raw/mvn-repo/'
+    }
+    mavenCentral()
 }
 
 dependencies {
-	compile 'com.github.boukefalos:jlibloader:0.2'
-	testCompile 'junit:junit:4.11'
+    compile 'com.github.boukefalos:jlibloader:0.2'
+    testCompile 'junit:junit:4.11'
 }
 
 group = 'com.github.boukefalos'
@@ -21,7 +21,7 @@ version = '0.5.7'
 def jniVersion = '0.2.3.0'
 
 task wrapper(type: Wrapper) {
-	gradleVersion = '1.12'
+    gradleVersion = '1.12'
 }
 
 model {
@@ -30,83 +30,83 @@ model {
             architecture 'i386'
             operatingSystem 'windows'
         }
-		windows_amd64 {
-			architecture 'amd64'
-			operatingSystem 'windows'
-		}
+        windows_amd64 {
+            architecture 'amd64'
+            operatingSystem 'windows'
+        }
     }
     toolChains {
         gcc(Gcc) {
-			addPlatformConfiguration(new TargetPlatformConfiguration() {
-				boolean supportsPlatform(Platform platform) {
-					platform.operatingSystem.current && platform.operatingSystem.name == 'windows' &&
-							platform.architecture.name == 'amd64'
-				}
-				List<String> getCppCompilerArgs() { ['-m64', '-fpermissive'] }
-				List<String> getCCompilerArgs() { ['-m64'] }
-				List<String> getObjectiveCCompilerArgs() { ['-m64'] }
-				List<String> getObjectiveCppCompilerArgs() { ['-m64'] }
-				List<String> getAssemblerArgs() { ['--64'] }
-				List<String> getLinkerArgs() { ['-m64'] }
-				List<String> getStaticLibraryArchiverArgs() { [] }
-			})
-		}
-    }	
-	repositories {
-		libs(PrebuiltLibraries) {
-			usb { lib ->
-				binaries.withType(StaticLibraryBinary) {
-					staticLibraryFile = file("lib/${targetPlatform.name}/libusb-1.0.dll.a")
-				}
-			}
-		}
-	}	
+            addPlatformConfiguration(new TargetPlatformConfiguration() {
+                boolean supportsPlatform(Platform platform) {
+                    platform.operatingSystem.current && platform.operatingSystem.name == 'windows' &&
+                            platform.architecture.name == 'amd64'
+                }
+                List<String> getCppCompilerArgs() { ['-m64', '-fpermissive'] }
+                List<String> getCCompilerArgs() { ['-m64'] }
+                List<String> getObjectiveCCompilerArgs() { ['-m64'] }
+                List<String> getObjectiveCppCompilerArgs() { ['-m64'] }
+                List<String> getAssemblerArgs() { ['--64'] }
+                List<String> getLinkerArgs() { ['-m64'] }
+                List<String> getStaticLibraryArchiverArgs() { [] }
+            })
+        }
+    }    
+    repositories {
+        libs(PrebuiltLibraries) {
+            usb { lib ->
+                binaries.withType(StaticLibraryBinary) {
+                    staticLibraryFile = file("lib/${targetPlatform.name}/libusb-1.0.dll.a")
+                }
+            }
+        }
+    }    
 }
 
 def jniHeadersDir = file("$buildDir/headers")
 
 task jniHeaders(dependsOn: compileJava) {
-	def outputFile = file("$jniHeadersDir/LibusbJava.h")
-	inputs.files sourceSets.main.output
-	outputs.file outputFile
-	exec {
-		executable org.gradle.internal.jvm.Jvm.current().getExecutable('javah')
-		args '-o', outputFile
-		args '-classpath', sourceSets.main.output.classesDir
-		args '-classpath', file("$buildDir/../bin")
-		args 'ch.ntb.usb.LibusbJava1'
-	}
+    def outputFile = file("$jniHeadersDir/LibusbJava.h")
+    inputs.files sourceSets.main.output
+    outputs.file outputFile
+    exec {
+        executable org.gradle.internal.jvm.Jvm.current().getExecutable('javah')
+        args '-o', outputFile
+        args '-classpath', sourceSets.main.output.classesDir
+        args '-classpath', file("$buildDir/../bin")
+        args 'ch.ntb.usb.LibusbJava1'
+    }
 }
 
 libraries {
     main {
         baseName project.archivesBaseName
     }
-	all {
-		binaries.all {
-			cppCompiler.args '-I' + jniHeadersDir
-			cppCompiler.args "-I${org.gradle.internal.jvm.Jvm.current().javaHome}/include"
-			cppCompiler.args "-I${org.gradle.internal.jvm.Jvm.current().javaHome}/include/win32"
-			linker.args '-Wl,--kill-at', '-static-libgcc', '-static-libstdc++'
-			tasks.withType(CppCompile) { task ->
-				task.dependsOn jniHeaders
-			}
-			
-			lib library: 'usb', linkage: 'static'
-		}
-	}
+    all {
+        binaries.all {
+            cppCompiler.args '-I' + jniHeadersDir
+            cppCompiler.args "-I${org.gradle.internal.jvm.Jvm.current().javaHome}/include"
+            cppCompiler.args "-I${org.gradle.internal.jvm.Jvm.current().javaHome}/include/win32"
+            linker.args '-Wl,--kill-at', '-static-libgcc', '-static-libstdc++'
+            tasks.withType(CppCompile) { task ->
+                task.dependsOn jniHeaders
+            }
+            
+            lib library: 'usb', linkage: 'static'
+        }
+    }
 }
 
 tasks.withType(Upload) {
-	repositories {
-		mavenDeployer {
-			repository(url: uri('.maven'))
-		}
-	}
+    repositories {
+        mavenDeployer {
+            repository(url: uri('.maven'))
+        }
+    }
 }
 
 configurations {
-	jni
+    jni
 }
 
 def deployer = uploadJni.repositories.mavenDeployer
@@ -134,8 +134,8 @@ binaries.withType(SharedLibraryBinary) { binary ->
         jniPom.scopeMappings.mappings.clear()
     }
     def builderTask = binary.tasks.builder
-	def libraryDirectory = project.group.replace('.', '/') + "/${project.archivesBaseName}/${variantName}" 
-	nativeJar.into(libraryDirectory) { from builderTask.outputFile }
+    def libraryDirectory = project.group.replace('.', '/') + "/${project.archivesBaseName}/${variantName}" 
+    nativeJar.into(libraryDirectory) { from builderTask.outputFile }
     nativeJar.dependsOn builderTask
 }
 
@@ -145,20 +145,20 @@ mainPom.artifactId = jar.baseName
 mainPom.version = project.version
 mainPom.scopeMappings.mappings.clear()
 mainPom.withXml { provider ->
-	def node = provider.asNode()
-	def deps = node.appendNode('dependencies')
-	['windows-amd64', 'windows-i386'].each { platform ->
-		def dep = deps.appendNode('dependency')
-		dep.appendNode('groupId', project.group)
-		dep.appendNode('artifactId', "${project.archivesBaseName}-${platform}")
-		dep.appendNode('version', jniVersion)
-	}
-	def dep = deps.appendNode('dependency')
-	dep.appendNode('groupId', 'com.github.boukefalos')
-	dep.appendNode('artifactId', 'jlibloader')
-	dep.appendNode('version', '0.2')
+    def node = provider.asNode()
+    def deps = node.appendNode('dependencies')
+    ['windows-amd64', 'windows-i386'].each { platform ->
+        def dep = deps.appendNode('dependency')
+        dep.appendNode('groupId', project.group)
+        dep.appendNode('artifactId', "${project.archivesBaseName}-${platform}")
+        dep.appendNode('version', jniVersion)
+    }
+    def dep = deps.appendNode('dependency')
+    dep.appendNode('groupId', 'com.github.boukefalos')
+    dep.appendNode('artifactId', 'jlibloader')
+    dep.appendNode('version', '0.2')
 }
 
 jar {
-	from sourceSets.main.allSource
+    from sourceSets.main.allSource
 }
