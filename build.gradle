@@ -17,8 +17,8 @@ dependencies {
 
 group = 'com.github.boukefalos'
 project.archivesBaseName = 'jlibusb'
-version = '0.5.7'
-def jniVersion = '0.2.3.0'
+version = '0.5.8'
+def jniVersion = '0.2.3.1'
 
 task wrapper(type: Wrapper) {
     gradleVersion = '1.12'
@@ -56,7 +56,7 @@ model {
         libs(PrebuiltLibraries) {
             usb { lib ->
                 binaries.withType(StaticLibraryBinary) {
-                    staticLibraryFile = file("lib/${targetPlatform.name}/libusb-1.0.dll.a")
+                    staticLibraryFile = file("lib/${targetPlatform.name}/libusb-1.0.dll")
                 }
             }
         }
@@ -74,7 +74,7 @@ task jniHeaders(dependsOn: compileJava) {
         args '-o', outputFile
         args '-classpath', sourceSets.main.output.classesDir
         args '-classpath', file("$buildDir/../bin")
-        args 'ch.ntb.usb.LibusbJava1'
+        args 'ch.ntb.usb.LibusbJava'
     }
 }
 
@@ -91,7 +91,6 @@ libraries {
             tasks.withType(CppCompile) { task ->
                 task.dependsOn jniHeaders
             }
-            
             lib library: 'usb', linkage: 'static'
         }
     }
@@ -135,8 +134,11 @@ binaries.withType(SharedLibraryBinary) { binary ->
     }
     def builderTask = binary.tasks.builder
     def libraryDirectory = project.group.replace('.', '/') + "/${project.archivesBaseName}/${variantName}" 
-    nativeJar.into(libraryDirectory) { from builderTask.outputFile }
-    nativeJar.dependsOn builderTask
+    nativeJar.into(libraryDirectory) {
+        from builderTask.outputFile
+        from file("lib/${targetPlatform.name}/libusb0.dll")
+    }
+    // nativeJar.dependsOn builderTask
 }
 
 def mainPom = uploadArchives.repositories.mavenDeployer.pom

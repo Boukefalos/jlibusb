@@ -361,7 +361,8 @@ public class LibusbJava {
     private static native int usb_error_no(int value);
 
     static {
-        Native.load("com.github.boukefalos", "jlibusb");
+    	Native.load("com.github.boukefalos", "jlibusb", "libusb0");
+    	Native.load("com.github.boukefalos", "jlibusb");
 
         // define the error codes
         ERROR_SUCCESS = 0;
